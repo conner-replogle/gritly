@@ -5,6 +5,39 @@ import { Realm, RealmProvider, useRealm, useQuery } from '@realm/react'
 import { ObjectSchema } from "realm";
 import { differenceInDays } from "date-fns";
 
+const UNITS = [
+  {
+    "name": "Custom",
+    "value": "custom",
+    "type": "count"
+  },
+  {
+    "name": "Minutes",
+    "value": "minutes",
+    "type": "time"
+  },
+  {
+    "name": "Hours",
+    "value": "hours",
+    "type": "time"
+  },
+  {
+    "name": "Yards",
+    "value": "yards",
+    "type": "length"
+  },
+  {
+    "name": "Miles",
+    "value": "miles",
+    "type": "length"
+  },
+  {
+    "name": "Count",
+    "value": "count",
+    "type": "count"
+  },
+  
+]
 
 class Repeat extends Realm.Object {
     period!: string;
@@ -25,12 +58,22 @@ class Repeat extends Realm.Object {
     };
   }
 class Completed extends Realm.Object {
+    id!: string;
     completedAt!: Date;
+    amount: number = 0;
+    goal!: Goal;
+    isCompleted(): boolean{
+      return this.amount >= this.goal.amount;
+    } 
+
     static schema: Realm.ObjectSchema = {
       name: 'Completed',
       embedded: true,
       properties: {
-        completedAt: 'date'
+        id: 'string',
+        completedAt: 'date',
+        amount: 'int',
+        goal: 'Goal'
       },
     };
 }
@@ -39,6 +82,7 @@ class Goal extends Realm.Object {
   amount!: number;
   unit!: string;
   steps!: number;
+  customName?: string;
 
   static schema: Realm.ObjectSchema = {
     name: 'Goal',
@@ -46,6 +90,7 @@ class Goal extends Realm.Object {
     properties: {
       amount: "int",
       unit: "string",
+      customName: "string?",
       steps: "int"
     },
   };
@@ -58,9 +103,9 @@ class Task extends Realm.Object {
     completed!:Completed[]
     createdAt!: Date;
     startsOn!: Date;
-    goal:Goal | undefined;
+    goal!:Goal;
 
-    static generate(title: string,description: string,repeats: Repeat) {
+    static generate(title: string,description: string,repeats: Repeat,goal?:Goal) {
       let startsOn = new Date(Date.now());
       startsOn.setHours(0,0,0,0);
         return {
@@ -69,6 +114,11 @@ class Task extends Realm.Object {
         description,
         completed:[],
         repeats,
+        goal: goal ?? {
+          amount: 1,
+          unit: "count",
+          steps: 1
+        },
         createdAt: new Date(Date.now()),
         startsOn:startsOn
         };
@@ -83,12 +133,14 @@ class Task extends Realm.Object {
           return true;
         if (this.repeats.specfic_weekday && this.repeats.specfic_weekday.includes(date.getDay()))
           return true;
+      }else if (this.repeats.period == "Weekly"){
+        return true;
       }
       return false;                      
     }
     
 
-    isCompleted(date: Date): boolean{
+    getCompleted(date: Date): Completed | undefined{
       const beginning = new Date(date);
       const end = new Date(date);
       const MorningStart = 8;
@@ -110,9 +162,9 @@ class Task extends Realm.Object {
       for (let i = this.completed.length - 1; i >= 0; i--){
 
         if (this.completed[i].completedAt >= beginning && this.completed[i].completedAt <= end)
-          return true;
+          return this.completed[i];
       } 
-      return false;
+      return undefined;
     }
 
     static schema = {
@@ -130,4 +182,4 @@ class Task extends Realm.Object {
         },
     } as ObjectSchema;
 }
-export {Task,Repeat,Completed,Goal}
+export {Task,Repeat,Completed,Goal,UNITS}

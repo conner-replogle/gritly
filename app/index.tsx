@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { FlatList, Pressable, View } from 'react-native';
 import Animated, { useAnimatedProps, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import uuid from 'react-native-uuid';
 
 import {
   Card,
@@ -14,7 +15,7 @@ import { Progress } from '~/components/ui/progress';
 import { Text } from '~/components/ui/text';
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, ArrowRight, ArrowUp, Check, CheckCheck, CheckCircle, CheckCircle2, CheckIcon } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, ArrowUp, Check, CheckCheck, CheckCircle, CheckCircle2, CheckIcon, PlusIcon } from 'lucide-react-native';
 import { AddTasks } from '~/components/AddTask/AddTasks';
 import { useQuery, useRealm } from '@realm/react';
 import { Completed, Task } from '~/lib/states/task';
@@ -33,16 +34,14 @@ export default function Screen() {
   const tasks = useQuery(Task).filtered('startsOn <= $0',date);
   console.log(`User Realm User file location: ${realm.path}`)
   console.log(`Current Date ${date}`)
-  const todayTasks = tasks.filtered('repeats.period == $0 || repeats.period == $1',"Daily","one-time").filter((a) => a.showToday(date));
-  const weekTasks = tasks.filtered('repeats.period == $0',"Weekly").filter((a) => a.showToday(date));
+  const todayTasks = tasks.filter(a => a.showToday(date));
   return (
     <SafeAreaView>
     <View className='h-[100vh] bg-secondary/50'>
-      {HeaderCard(date,todayTasks,weekTasks,setDate)}
+      {HeaderCard(date,todayTasks,setDate)}
   
       <View className='p-6 flex flex-col gap-4'>
-          <Section title="Today" tasks={todayTasks} date={date} realm={realm}/>
-          <Section title="Week" tasks={weekTasks} date={date} realm={realm}/>
+          <FlatList data={todayTasks} renderItem={(item) => <TaskContent date={date} item={item.item}  />} />
           {tasks.length == 0 &&
             <AddTasks />}
           {/* <Section title="Upcoming" tasks={upComing} date={date} realm={realm}/> */}
@@ -51,9 +50,10 @@ export default function Screen() {
     </SafeAreaView>
   );
 }
-function HeaderCard(date: Date,daily: Task[],weekly: Task[],setDate: React.Dispatch<React.SetStateAction<Date>>) {
+function HeaderCard(date: Date,tasks: Task[],setDate: React.Dispatch<React.SetStateAction<Date>>) {
 
-  
+  const daily = tasks.filter(a => a.repeats.period == "daily");
+  const weekly = tasks.filter(a => a.repeats.period == "weekly");
   return <View className="bg-background">
     <CardHeader className='flex flex-row justify-between items-center'>
       <View>
@@ -76,11 +76,11 @@ function HeaderCard(date: Date,daily: Task[],weekly: Task[],setDate: React.Dispa
       <View className='flex-row justify-around gap-3'>
         <View className='items-center'>
           <Text className='text-sm text-muted-foreground'>Daily</Text>
-          <Text className='text-xl font-semibold'>{daily.filter(a => a.isCompleted(date)).length} / {daily.length}</Text>
+          <Text className='text-xl font-semibold'>{daily.filter(a => a.getCompleted(date)?.isCompleted()).length} / {daily.length}</Text>
         </View>
         <View className='items-center'>
           <Text className='text-sm text-muted-foreground'>Weekly</Text>
-          <Text className='text-xl font-semibold'>{weekly.filter(a => a.isCompleted(date)).length} / {weekly.length}</Text>
+          <Text className='text-xl font-semibold'>{daily.filter(a => a.getCompleted(date)?.isCompleted()).length} / {weekly.length}</Text>
         </View>
         <View className='items-center'>
           <Text className='text-sm text-muted-foreground'>Up Next</Text>
@@ -94,46 +94,17 @@ function HeaderCard(date: Date,daily: Task[],weekly: Task[],setDate: React.Dispa
   </View>;
 }
 
-function Section(props:{title:String,tasks: Task[],date: Date,realm: Realm}){
-  const {title,tasks,date,realm} = props;
-  const [open, setOpen] = React.useState(tasks.length != 0);
- 
-  const finished = tasks.filter(a => a.isCompleted(date));
-  const unfinished = tasks.filter(a => !a.isCompleted(date)); 
-  if (tasks.length == 0)
-    return null;
-  return  <Collapsible open={open && tasks.length != 0} > 
-    <CollapsibleTrigger onPress={()=> {setOpen(!open)}} >
-    <CardTitle>{title}</CardTitle>
-    </CollapsibleTrigger>
-    <CollapsibleContent className='pt-3'>
-    {unfinished.length != 0 && <FlatList data={unfinished}
-  renderItem={({item}) => <TaskContent date={date} item={item} realm={realm}/>}/>}
-  {finished.length != 0 &&
-      <Collapsible  > 
-        <CollapsibleTrigger  asChild>
-        <Button size="sm" variant={"ghost"}>
-        <Text className='ml-2 text-muted-foreground'>Completed</Text>
-     
-        </Button>
-       
-        </CollapsibleTrigger>
-        <CollapsibleContent className='pt-3'>
-        <FlatList data={finished}
-      renderItem={({item}) => <TaskContent date={date} item={item} realm={realm}/>}/>
-        </CollapsibleContent>
-      </Collapsible>
-      }
-    </CollapsibleContent>
-  </Collapsible>
-}
 
 
 
-function TaskContent(props:{item: Task,realm: Realm,date: Date}) {
-  const {item,realm,date} = props;
+function TaskContent(props:{item: Task,date: Date}) {
+  const realm = useRealm();
+  const {item,date} = props;
   
   const completable = date <= new Date(Date.now());
+  const completed = item.getCompleted(date);
+  console.log(completed)
+  console.log(item)
 
   return <View className="min-w-full p-5 mb-2 flex flex-row justify-between bg-background rounded-lg">
       <View className='text-start flex flex-col justify-start items-start'>
@@ -152,23 +123,99 @@ function TaskContent(props:{item: Task,realm: Realm,date: Date}) {
       </View>
       
     {completable && <View className='flex flex-col items-center justify-center'>
-      <Pressable disabled={item.isCompleted(date) }  onPress={() => {
+      <Pressable disabled={completed?.isCompleted()}   onPress={() => {
         console.log("pressed")
         
         const today = new Date(date);
         date.setHours(today.getHours(),today.getMinutes(),today.getSeconds(),0);
+       
         realm.write(() => {
-          item.completed.push({completedAt: date} as Completed);
-        });
+          if (completed){
+            let index = item.completed.findIndex(a =>  a.id== completed?.id);
+            if (index == -1){
+              console.log("Error")
+              console.log(completed.completedAt)
+              return;
+            }
+            item.completed[index].amount += item.goal?.steps;
+          }else{
+            item.completed.push({id:uuid.v4(),completedAt: date,amount:item.goal.steps,goal:{
+              ...item.goal
+            }} as Completed);
+          }
+          
+        });//completed={item.completed[item.completed.length].goal} 
       }}>
-        {
-          item.isCompleted(date) && <CheckCircle2 size={24} color={"#10B981"} />
-        }
-        {
-          !item.isCompleted(date) && <CheckCircle2 size={24} color={"#D1D5DB"} />
-        }
+        <CompleteIcon completed={completed} />
       </Pressable>
     </View>}
   </View>;
 }
 
+
+function CompleteIcon({completed}:{completed:Completed | undefined}) {
+ 
+  const isCompleted = completed?.isCompleted();
+  const color = isCompleted ? "green" : "#3498db";
+  return (
+    <View>
+      <Svg className='absolute' width={36} height={36}  viewBox="0 0 24 24" fill="none">
+        { !isCompleted && <CirclePath radius={10} color={color} strokeWidth={3} percentage={completed? (completed!.amount / completed!.goal.amount)*100 : 0} />}
+      </Svg>
+      <View className='absolute flex-row items-center justify-center w-full h-full'>
+        { isCompleted && 
+          <CheckIcon size={24} strokeWidth={3} color={color} />}
+        { !isCompleted && 
+        <PlusIcon size={24} strokeWidth={3} color={color} />}
+      </View>
+    </View>
+  );
+}
+const CirclePath = ({ radius, strokeWidth,color, percentage }:{radius:number,color:string, strokeWidth:number, percentage:number}) => {
+  if (percentage == 0) {
+    return null;
+  }
+  const circumference = 2 * Math.PI * radius;
+  const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
+  const strokeDasharray2 = `${((percentage-50) / 100) * circumference} ${circumference}`;
+  // Calculate start and end points of the circle
+  const startX = radius + strokeWidth / 2;
+  const startY = strokeWidth / 2;
+  const endX = radius + strokeWidth / 2;
+  const endY = radius * 2 + strokeWidth / 2;
+
+  // Calculate path to create an arc that can extend to full circle
+  const largeArcFlag = percentage > 50 ? 1 : 0;
+  const sweepFlag = 1; // Always sweep in the same direction
+
+  const path = `
+    M ${startX}, ${startY}
+    A ${radius},${radius} 0 ${largeArcFlag},${sweepFlag} ${endX},${endY}
+
+  `;
+  const path2 = `
+    M ${endX}, ${endY}
+    A ${radius},${radius} 0 ${largeArcFlag},${sweepFlag} ${startX},${startY}
+  `
+
+  return (
+    <Svg height={radius * 2 + strokeWidth} width={radius * 2 + strokeWidth}>
+      <Path
+        d={path}
+        stroke={color}
+        strokeWidth={strokeWidth}
+        fill="none"
+        strokeLinecap='round'
+        strokeDasharray={strokeDasharray}
+      />
+      {percentage> 50 && <Path
+        d={path2}
+        stroke={color}
+        strokeWidth={strokeWidth}
+        fill="none"
+        strokeLinecap='round'
+        strokeDasharray={strokeDasharray2}
+      />}
+    </Svg>
+  );
+};

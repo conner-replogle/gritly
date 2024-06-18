@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Plus } from 'lucide-react-native';
-import { LayoutAnimation, Modal, NativeSyntheticEvent, Pressable, SafeAreaView, TextInput, TextInputFocusEventData, TextInputProps, View } from 'react-native';
+import { LayoutAnimation, Modal, NativeSyntheticEvent, Pressable, SafeAreaView, ScrollView, TextInput, TextInputFocusEventData, TextInputProps, View } from 'react-native';
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar';
 import { MoonStar } from '~/lib/icons/MoonStar';
 import { Sun } from '~/lib/icons/Sun';
@@ -17,7 +17,7 @@ import {
   } from '@gorhom/bottom-sheet';
 import { Button } from '../ui/button';
 import { useRealm } from '@realm/react';
-import { Repeat, Task } from '~/lib/states/task';
+import { Goal, Repeat, Task, UNITS } from '~/lib/states/task';
 import { Input } from '~/components/ui/input';
 
 import { forwardRef, Ref, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -29,6 +29,7 @@ import { useTheme } from '@react-navigation/native';
 import { BottomSheetTextInputProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetTextInput';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Handle } from './customhandle';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 //import Handle from './customhandle';
 export function AddTasks(props:{dense?: boolean}) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -138,6 +139,7 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
     const [description, setDescription] = useState<string>("");
     const [tasktype, setTaskType] = useState<"Daily" | "Weekly"|string>('Daily');
     const [days, setDays] = useState<number[]>([0,1,2,3,4,5,6]);
+    const [goal, setGoal] = useState<Goal | null>({amount: 1, unit: "count", steps: 1} as Goal);
     function ValidateForm(){
         return title.length > 0;
     }
@@ -187,7 +189,8 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
             </View>
         )
     }
-    return <View className='bg-background h-screen  p-5 pt-0 flex flex-col gap-4'>
+    return <ScrollView >
+        <View className='bg-background   p-5 pt-0 flex flex-col gap-4'>
     <Text className='text-xl'>Add a Task</Text>
     <Label nativeID='title'>Title</Label>
     <BottomSheetInput
@@ -207,7 +210,7 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
         aria-labelledbyledBy='inputLabel'
         aria-errormessage='inputError'
     />
-    <Label nativeID='type'>Type</Label>
+    <Text className='text-xl font-semibold'>Type</Text>
     <RadioGroup value={tasktype} onValueChange={(a) => setTaskType(a)} className='gap-3'>
         <RadioGroupItemWithLabel onLabelPress={onLabelPress("Daily")} value='Daily' />
         <RadioGroupItemWithLabel onLabelPress={onLabelPress("Weekly")} value='Weekly' />
@@ -222,6 +225,49 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
             ))}
         </ToggleGroup>
     }
+    <Text className='text-xl font-semibold'>Goal</Text>
+    <View className='flex flex-col gap-3'>
+        <Label nativeID='Units'>Units</Label>
+        <Input className='w-[80px]' placeholder='Amount' keyboardType='numeric' onChange={(a) => {
+            setGoal({...goal,amount: parseInt(a.nativeEvent.text)} as Goal);
+        }} />
+        <Label nativeID='Units'>Units</Label>
+        <Select nativeID='Units' defaultValue={{ value: 'minutes', label: 'Minutes' }} 
+        value={goal!= null? {value: goal!.unit,label:UNITS.find((a) => a.value == goal!.unit)?.name ?? goal.unit!} : undefined}
+        onValueChange={(a)=> setGoal({...goal,unit:  a?.value} as Goal)} >
+            <SelectTrigger className='w-[250px]'>
+                <SelectValue
+                className='text-foreground text-sm native:text-lg'
+                placeholder='Select a unit'
+                />
+            </SelectTrigger>
+            <SelectContent  className='w-[250px]'>
+                <SelectGroup>
+            
+                {Array.from(UNITS,(a)=>{
+                    return <SelectItem label={a.name} value={a.value}>
+                        {a.name}
+                    </SelectItem>
+                })}
+                </SelectGroup>
+                
+            </SelectContent>
+        </Select>
+        {goal?.unit == "custom"&& <Input placeholder='Custom Unit' onChange={(a) => {
+            setGoal({...goal,customName: a.nativeEvent.text} as Goal);
+        }} />}
+        <Label nativeID='steps'>Steps</Label>
+        <Input nativeID='steps' placeholder='Steps' keyboardType='numeric' onChange={(a) => {
+            let n = parseInt(a.nativeEvent.text);
+            if (!Number.isNaN(n)){
+                setGoal({...goal,steps: n} as Goal);
+            }
+         
+        }} />
+    </View>
+
+
+
 
     <Button onPress={()=> {
         if (!ValidateForm() ){
@@ -231,16 +277,17 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
             realm.create("Task", Task.generate(title, description,{
                 period: tasktype,
                 specfic_weekday: days
-            } as Repeat));
+            } as Repeat,goal ?? undefined));
         });
         setTitle("");
         setDescription("");
 
         
     }}>
-        <Text>OK</Text>
+        <Text>Create</Text>
     </Button>
     </View>
+    </ScrollView>
 }
 
 const BottomSheetInput = forwardRef<

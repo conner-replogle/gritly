@@ -1,4 +1,4 @@
-package com.habittracker
+package com.connerreplogle.habittracker
 
 import android.app.Application
 import android.content.res.Configuration

@@ -1,4 +1,4 @@
-package com.habittracker
+package com.connerreplogle.habittracker
 
 import android.os.Build
 import android.os.Bundle

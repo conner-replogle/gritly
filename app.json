@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Habit Tracker",
+    "name": "Gritly",
     "slug": "habit-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/images/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -36,6 +36,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "fb179d63-0ba5-42f6-91ab-ab0f1ba42840"
+      }
     }
   }
 }
