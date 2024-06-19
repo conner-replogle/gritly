@@ -189,7 +189,7 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
             </View>
         )
     }
-    return <ScrollView >
+    return <ScrollView contentInset={{bottom:300}} >
         <View className='bg-background   p-5 pt-0 flex flex-col gap-4'>
     <Text className='text-xl'>Add a Task</Text>
     <Label nativeID='title'>Title</Label>

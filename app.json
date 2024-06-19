@@ -17,7 +17,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.connerreplogle.habittracker"
+      "bundleIdentifier": "com.connerreplogle.habittracker",
+      "buildNumber": "2"
     },
     "android": {
       "adaptiveIcon": {

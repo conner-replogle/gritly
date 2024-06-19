@@ -41,7 +41,7 @@ export default function Screen() {
       {HeaderCard(date,todayTasks,setDate)}
   
       <View className='p-6 flex flex-col gap-4'>
-          <FlatList data={todayTasks} renderItem={(item) => <TaskContent date={date} item={item.item}  />} />
+          <FlatList className='h-full' data={todayTasks} renderItem={(item) => <TaskContent date={date} item={item.item}  />} />
           {tasks.length == 0 &&
             <AddTasks />}
           {/* <Section title="Upcoming" tasks={upComing} date={date} realm={realm}/> */}
@@ -52,8 +52,8 @@ export default function Screen() {
 }
 function HeaderCard(date: Date,tasks: Task[],setDate: React.Dispatch<React.SetStateAction<Date>>) {
 
-  const daily = tasks.filter(a => a.repeats.period == "daily");
-  const weekly = tasks.filter(a => a.repeats.period == "weekly");
+  const daily = tasks.filter(a => a.repeats.period == "Daily");
+  const weekly = tasks.filter(a => a.repeats.period == "Weekly");
   return <View className="bg-background">
     <CardHeader className='flex flex-row justify-between items-center'>
       <View>
@@ -80,7 +80,7 @@ function HeaderCard(date: Date,tasks: Task[],setDate: React.Dispatch<React.SetSt
         </View>
         <View className='items-center'>
           <Text className='text-sm text-muted-foreground'>Weekly</Text>
-          <Text className='text-xl font-semibold'>{daily.filter(a => a.getCompleted(date)?.isCompleted()).length} / {weekly.length}</Text>
+          <Text className='text-xl font-semibold'>{weekly.filter(a => a.getCompleted(date)?.isCompleted()).length} / {weekly.length}</Text>
         </View>
         <View className='items-center'>
           <Text className='text-sm text-muted-foreground'>Up Next</Text>
@@ -103,8 +103,7 @@ function TaskContent(props:{item: Task,date: Date}) {
   
   const completable = date <= new Date(Date.now());
   const completed = item.getCompleted(date);
-  console.log(completed)
-  console.log(item)
+
 
   return <View className="min-w-full p-5 mb-2 flex flex-row justify-between bg-background rounded-lg">
       <View className='text-start flex flex-col justify-start items-start'>
@@ -113,7 +112,6 @@ function TaskContent(props:{item: Task,date: Date}) {
         <CardDescription className='ml-1'>{
           item.repeats.period == "one-time" && 
           `Created on the ${item.createdAt.getDate()}th`
-          
         }{
           item.repeats.period != "one-time" && 
           item.description

@@ -14,4 +14,8 @@ Task to be completed every day for X days.
 ## Todo
 - [X] Setup Project and get RNR added.
 - [X] Get basic layout done.
-- [ ] Setup Daily Tasks
+- [X] Setup Daily Tasks
+- [X] Weekly Tasks
+- [X] Goals and Day of week Selector
+- [X] Slidable Week Calendar
+- [ ] Task Editing
