@@ -31,6 +31,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Handle } from './customhandle';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 //import Handle from './customhandle';
+
+
+export const CALENDAR = ["S","M","T","W","Th","F","Sa"];
+
 export function AddTasks(props:{dense?: boolean}) {
   const [modalVisible, setModalVisible] = useState(false);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -110,6 +114,10 @@ function AddTaskSheet(props:{bottomSheetModalRef:React.RefObject<BottomSheetModa
             handleIndicatorStyle={{
                 backgroundColor: colors.border,
             }}
+                    
+            backgroundStyle={{
+                backgroundColor: colors.background
+            }}
             onAnimate={(_, index) => {
                 console.log(index)
                 if (index != -1)
@@ -118,10 +126,6 @@ function AddTaskSheet(props:{bottomSheetModalRef:React.RefObject<BottomSheetModa
                 if (index == 0){
                     setIsSimple(true);
                 }
-            }}
-        
-            backgroundStyle={{
-                backgroundColor: colors.background
             }}
             >
             <BottomSheetView >
@@ -193,7 +197,7 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
         <View className='bg-background   p-5 pt-0 flex flex-col gap-4'>
     <Text className='text-xl'>Add a Task</Text>
     <Label nativeID='title'>Title</Label>
-    <BottomSheetInput
+    <Input
         placeholder='Name your task'
         nativeID='title'
         value={title}
@@ -218,7 +222,7 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
     {
         tasktype === "Daily" &&
         <ToggleGroup value={days.map((a) => a.toString())} onValueChange={onDayPress} type='multiple'>
-            {Array.from(["S","M","T","W","Th","F","Sa"], (a, i) => (
+            {Array.from(CALENDAR, (a, i) => (
                 <ToggleGroupItem key={a} value={i.toString()}>
                     <Text  className='w-[20px] text-center'>{a}</Text>
                 </ToggleGroupItem>
@@ -235,13 +239,13 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
         <Select nativeID='Units' defaultValue={{ value: 'minutes', label: 'Minutes' }} 
         value={goal!= null? {value: goal!.unit,label:UNITS.find((a) => a.value == goal!.unit)?.name ?? goal.unit!} : undefined}
         onValueChange={(a)=> setGoal({...goal,unit:  a?.value} as Goal)} >
-            <SelectTrigger className='w-[250px]'>
+            <SelectTrigger className='w-24'>
                 <SelectValue
                 className='text-foreground text-sm native:text-lg'
                 placeholder='Select a unit'
                 />
             </SelectTrigger>
-            <SelectContent  className='w-[250px]'>
+            <SelectContent  className='w-24'>
                 <SelectGroup>
             
                 {Array.from(UNITS,(a)=>{
@@ -257,7 +261,7 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
             setGoal({...goal,customName: a.nativeEvent.text} as Goal);
         }} />}
         <Label nativeID='steps'>Steps</Label>
-        <Input nativeID='steps' placeholder='Steps' keyboardType='numeric' onChange={(a) => {
+        <Input className='w-24' nativeID='steps' placeholder='Steps' keyboardType='numeric' onChange={(a) => {
             let n = parseInt(a.nativeEvent.text);
             if (!Number.isNaN(n)){
                 setGoal({...goal,steps: n} as Goal);

@@ -1,4 +1,4 @@
-rootProject.name = 'Habit Tracker'
+rootProject.name = 'Gritly'
 
 dependencyResolutionManagement {
   versionCatalogs {
