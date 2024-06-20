@@ -121,12 +121,31 @@ function TaskContent(props:{item: Task,date: Date}) {
       </View>
       
     {completable && <View className='flex flex-col items-center justify-center'>
-      <Pressable disabled={completed?.isCompleted()}   onPress={() => {
+      <Pressable  onLongPress={()=>{
+        console.log("long press")
+        realm.write(() => {
+          if (completed){
+            let index = item.completed.findIndex(a =>  a.id== completed?.id);
+            if (index == -1){
+              console.log("Error")
+              console.log(completed.completedAt)
+              return;
+            }
+            item.completed[index].amount -= item.goal?.steps;
+          }else{
+            item.completed.push({id:uuid.v4(),completedAt: date,amount:item.goal.amount,goal:{
+              ...item.goal
+            }} as Completed);
+          }
+        });
+      }}   onPress={() => {
         console.log("pressed")
         
         const today = new Date(date);
         date.setHours(today.getHours(),today.getMinutes(),today.getSeconds(),0);
-       
+        if (completed && completed.isCompleted()){
+          return;
+        }
         realm.write(() => {
           if (completed){
             let index = item.completed.findIndex(a =>  a.id== completed?.id);

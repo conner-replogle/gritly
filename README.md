@@ -18,4 +18,5 @@ Task to be completed every day for X days.
 - [X] Weekly Tasks
 - [X] Goals and Day of week Selector
 - [X] Slidable Week Calendar
+- [ ] On long hold complete entirely
 - [ ] Task Editing
