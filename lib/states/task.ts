@@ -100,12 +100,13 @@ class Task extends Realm.Object {
     title!: string;
     repeats!: Repeat;
     description!: string;
+    color!: string;
     completed!:Completed[]
     createdAt!: Date;
     startsOn!: Date;
     goal!:Goal;
 
-    static generate(title: string,description: string,repeats: Repeat,goal?:Goal) {
+    static generate(title: string,description: string,color:string,repeats: Repeat,goal?:Goal) {
       let startsOn = new Date(Date.now());
       startsOn.setHours(0,0,0,0);
         return {
@@ -114,6 +115,7 @@ class Task extends Realm.Object {
         description,
         completed:[],
         repeats,
+        color,
         goal: goal ?? {
           amount: 1,
           unit: "count",
@@ -139,6 +141,19 @@ class Task extends Realm.Object {
       return false;                      
     }
     
+    getStreak(startDate: Date){
+      let streak = this.getCompleted(startDate)?.isCompleted() ?1: 0;
+      let date = new Date(startDate);
+      date.setHours(0,0,0,0);
+      date.setDate(date.getDate() - 1)
+      while (!this.showToday(date)){date.setDate(date.getDate() - 1)};
+      while (this.getCompleted(date)?.isCompleted() ){
+        streak++;
+        date.setDate(date.getDate() - 1)
+        while (!this.showToday(date)){date.setDate(date.getDate() - 1)};
+      }
+      return streak;
+    }
 
     getCompleted(date: Date): Completed | undefined{
       const beginning = new Date(date);
@@ -177,6 +192,7 @@ class Task extends Realm.Object {
             completed:"Completed[]",
             repeats: "Repeat",
             goal: "Goal",
+            color: 'string',
             createdAt: 'date',
             startsOn: 'date'
         },

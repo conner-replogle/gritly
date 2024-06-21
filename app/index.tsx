@@ -39,7 +39,7 @@ export default function Screen() {
   return (
     <SafeAreaView>
     <View className='h-[100vh] bg-secondary/50'>
-      {HeaderCard(date,todayTasks,setDate)}
+      {HeaderCard(date,tasks.map((a)=>a),setDate)}
   
       <View className='p-6 flex flex-col gap-4 h-full'>
         
@@ -50,9 +50,10 @@ export default function Screen() {
   );
 }
 function HeaderCard(date: Date,tasks: Task[],setDate: React.Dispatch<React.SetStateAction<Date>>) {
+  const todayTasks = tasks.filter(a => a.showToday(date));
 
-  const daily = tasks.filter(a => a.repeats.period == "Daily");
-  const weekly = tasks.filter(a => a.repeats.period == "Weekly");
+  const daily = todayTasks.filter(a => a.repeats.period == "Daily");
+  const weekly = todayTasks.filter(a => a.repeats.period == "Weekly");
   return <View className="bg-background">
     <CardHeader className='flex flex-row justify-between items-center'>
       <View>
@@ -85,7 +86,7 @@ function HeaderCard(date: Date,tasks: Task[],setDate: React.Dispatch<React.SetSt
       </View>
     </CardContent>
     <CardFooter>
-      <CalendarSection date={date} setDate={setDate} />
+      <CalendarSection tasks={tasks} date={date} setDate={setDate} />
     </CardFooter>
   </View>
 }

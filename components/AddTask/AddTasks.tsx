@@ -30,6 +30,8 @@ import { BottomSheetTextInputProps } from '@gorhom/bottom-sheet/lib/typescript/c
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Handle } from './customhandle';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
+import ColorPicker, { HueSlider, OpacitySlider, Panel1, Preview, Swatches } from 'reanimated-color-picker';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 //import Handle from './customhandle';
 
 
@@ -138,10 +140,13 @@ function AddTaskSheet(props:{bottomSheetModalRef:React.RefObject<BottomSheetModa
 
 function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<React.SetStateAction<boolean>>}){
     const {isSimple, setIsSimple} = props;
+    const [showColorPicker, setColorPicker] = useState(false);
+
     const realm = useRealm();
     const [title, setTitle] = useState<string>("");
     const [description, setDescription] = useState<string>("");
     const [tasktype, setTaskType] = useState<"Daily" | "Weekly"|string>('Daily');
+    const [color,setColor] = useState<string>("#3498db");
     const [days, setDays] = useState<number[]>([0,1,2,3,4,5,6]);
     const [goal, setGoal] = useState<Goal | null>({amount: 1, unit: "count", steps: 1} as Goal);
     function ValidateForm(){
@@ -178,7 +183,7 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
                         return;
                     }
                     realm.write(() => {
-                        realm.create("Task", Task.generate(title, "",{
+                        realm.create("Task", Task.generate(title, "",color,{
                             period: "one-time",
                         } as Repeat));
                     });
@@ -223,12 +228,42 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
         tasktype === "Daily" &&
         <ToggleGroup value={days.map((a) => a.toString())} onValueChange={onDayPress} type='multiple'>
             {Array.from(CALENDAR, (a, i) => (
-                <ToggleGroupItem key={a} value={i.toString()}>
+                <ToggleGroupItem key={i} value={i.toString()}>
                     <Text  className='w-[20px] text-center'>{a}</Text>
                 </ToggleGroupItem>
             ))}
         </ToggleGroup>
     }
+    <Button onPress={()=>setColorPicker(true)} style={
+    {
+        backgroundColor:color
+    }
+    } >
+        <Text>Select Color</Text>
+    </Button>
+    <Modal transparent={true} visible={showColorPicker} animationType='slide'>
+        <SafeAreaView className='m-10'>
+        <Card>
+            <CardHeader>
+                <CardTitle>Select this tasks's color</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center">
+                <ColorPicker  style={{ width: '70%' }} value='red' onComplete={(colors) => {
+                    setColor(colors.hex)
+                }}>
+                    <Preview />
+                    <Panel1 />
+                    <HueSlider />
+
+                </ColorPicker>
+            </CardContent>
+            <CardFooter>
+                <Button  onPress={() => setColorPicker(false)} ><Text>Ok</Text></Button>
+            </CardFooter>
+        </Card>
+        </SafeAreaView>
+    </Modal>
+
     <Text className='text-xl font-semibold'>Goal</Text>
     <View className='flex flex-col gap-3'>
         <Label nativeID='Units'>Units</Label>
@@ -278,7 +313,7 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
             return;
         }
         realm.write(() => {
-            realm.create("Task", Task.generate(title, description,{
+            realm.create("Task", Task.generate(title, description,color,{
                 period: tasktype,
                 specfic_weekday: days
             } as Repeat,goal ?? undefined));

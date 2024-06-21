@@ -28,21 +28,14 @@ export default function TaskContent(props:{item: Task,date: Date}) {
     
     const completable = date <= new Date(Date.now());
     const completed = item.getCompleted(date);
-    
+    const streak = item.getStreak(date);
     return <Pressable onPress={()=> {
         bottomSheetModalRef.current?.present();
-    }} ><View className="min-w-full p-5 mb-2 flex flex-row justify-between bg-background rounded-lg">
+    }} ><View style={{borderColor:item.color,borderWidth:2}} className="min-w-full p-5 mb-2 flex flex-row justify-between bg-background rounded-lg">
         <View className='text-start flex flex-col justify-start items-start'>
-            <CardTitle >{item.title }</CardTitle>
+            <CardTitle >{item.title } {streak > 1 ? ` 🔥${streak}` : ""} </CardTitle>
             
-            <CardDescription className='ml-1'>{
-                item.repeats.period == "one-time" && 
-                `Created on the ${item.createdAt.getDate()}th`
-            }{
-                item.repeats.period != "one-time" && 
-                item.description
-                
-            } </CardDescription>
+            <CardDescription className='ml-1'>{} </CardDescription>
         </View>
         
         {completable && <View className='flex flex-col items-center justify-center'>
@@ -57,7 +50,7 @@ export default function TaskContent(props:{item: Task,date: Date}) {
                     return;
                 }
                 if (item.completed[index].amount <= item.goal?.steps){
-                    item.completed = item.completed.splice(index,1);
+                    item.completed.splice(index,1);
                     return;
                 }
                 item.completed[index].amount -= item.goal?.steps;
