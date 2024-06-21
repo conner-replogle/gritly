@@ -18,5 +18,10 @@ Task to be completed every day for X days.
 - [X] Weekly Tasks
 - [X] Goals and Day of week Selector
 - [X] Slidable Week Calendar
-- [ ] On long hold complete entirely
+- [X] On long hold complete entirely
 - [ ] Task Editing
+- [X] Added colors for each task
+- [X] added task streak symbol
+- [X] added completion bar for tasks on calendar
+- [X] added color bordor on tasks
+- [X] Added color picker on Add Task

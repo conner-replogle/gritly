@@ -41,9 +41,9 @@ export function CalendarSection(props: { date: Date,setDate: (date: Date) => voi
     }, [date]);
     return (
         <View ref={ref} className=" w-full flex flex-col items-end">
-            <View className="flex flex-row justify-between w-full">
-            <Text>{format(addWeeks(date,index-HALF),"MMMM")}</Text>
-            {HALF-index != 0 && <Text>{Math.abs(HALF-index)} weeks {HALF-index > 0 ? "ago":"ahead"}</Text>}
+            <View className="flex flex-row justify-end w-full h-6">
+            {HALF-index != 0 && <Text>{format(addWeeks(date,index-HALF),"MMMM")}, </Text>}
+            {HALF-index != 0 && <Text>{Math.abs(HALF-index)} week{Math.abs(HALF-index) == 1 ? "":"s"} {HALF-index > 0 ? "ago":"ahead"}</Text>}
             </View>
             <VirtualizedList<Date[]> 
                 ref={flatlistRef}
@@ -76,7 +76,7 @@ export function CalendarSection(props: { date: Date,setDate: (date: Date) => voi
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={(item) => item[0].toISOString()}
                 renderItem={({ item}) => {
-                    return <Week tasks={tasks} width={width} dates={item} currentDate={date} setDate={setDate} />;
+                    return <Week  tasks={tasks} width={width} dates={item} currentDate={date} setDate={setDate} />;
                 }}
             />
           
@@ -93,14 +93,14 @@ function Week(props:{tasks:Task[],width:number,dates: Date[],currentDate: Date,s
         width:width
     }}>
     {Array.from(dates, (date, i) => (
-        <View className="flex flex-col justify-start">
+        <View key={i}   className="flex flex-col justify-start">
         <Pressable 
             className={(
                 date.getDate() == currentDate.getDate() && 
                 date.getMonth() == currentDate.getMonth()) ? 
                 "w-[30px] border-2 border-primary rounded-lg" : 
                 "w-[30px] p-[2px]"} 
-                key={i} onPress={()=> setDate(date)} >
+                onPress={()=> setDate(date)} >
         <View >
             <Text  className=' text-center text-lg font-bold'>{format(date,"EEEEE")}</Text>
             <Text  className='text-muted-foreground text-center text-xs font-semibold'>{date.getDate()}</Text>
