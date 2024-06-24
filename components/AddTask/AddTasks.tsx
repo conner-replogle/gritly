@@ -192,7 +192,7 @@ function AddTaskSheet(props:{bottomSheetModalRef:React.RefObject<BottomSheetModa
 //     );
 // });
 
-export function EditTaskScreen({submitLabel, task, onSubmit}:{submitLabel:string,task:Task,onSubmit:(task:Task)=> void}){
+export function EditTaskScreen({onDelete,submitLabel, task, onSubmit}:{onDelete?:()=> void,submitLabel:string,task:Task,onSubmit:(task:Task)=> void}){
     const [ntask, setTask] = useState(task);
     function ValidateForm(){
         return ntask.title.length > 0;
@@ -411,6 +411,11 @@ export function EditTaskScreen({submitLabel, task, onSubmit}:{submitLabel:string
 }}>
     <Text>{submitLabel}</Text>
 </Button>
+{
+    onDelete && <Button variant={'destructive'} onPress={onDelete}>
+        <Text>Delete</Text>
+    </Button>
+}
 </View>
 </ScrollView>
 

@@ -96,7 +96,12 @@ export default function TaskContent(props:{item: Task,date: Date}) {
             backgroundColor: colors.background
         }}>
         <BottomSheetView >
-                <EditTaskScreen submitLabel="Save" onSubmit={(task)=>{
+                <EditTaskScreen onDelete={()=>{
+                    realm.write(() => {
+                        realm.delete(item);
+                    });
+                    bottomSheetModalRef.current?.dismiss();
+                }} submitLabel="Save" onSubmit={(task)=>{
                 realm.write(() => {
                     realm.create(Task,task,UpdateMode.Modified);
                 });
