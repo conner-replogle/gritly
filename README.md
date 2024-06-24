@@ -25,3 +25,4 @@ Task to be completed every day for X days.
 - [X] added completion bar for tasks on calendar
 - [X] added color bordor on tasks
 - [X] Added color picker on Add Task
+- [ ] Don't lose all progress on update

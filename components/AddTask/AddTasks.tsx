@@ -95,7 +95,7 @@ function AddTaskSheet(props:{bottomSheetModalRef:React.RefObject<BottomSheetModa
 
     const {bottomSheetModalRef} = props;
     const [index, setIndex] = useState<number>(0);
-
+    const realm = useRealm();
     const [isSimple,setIsSimple] = useState(false);
     // variables
     const snapPoints = useMemo<string[]>(()=> {
@@ -132,22 +132,19 @@ function AddTaskSheet(props:{bottomSheetModalRef:React.RefObject<BottomSheetModa
             }}
             >
             <BottomSheetView >
-                <AddTasksScreen  />
+            <EditTaskScreen submitLabel="Create" task={Task.generate("","","blue")} onSubmit={(task)=>{
+                realm.write(()=>{
+                    realm.create("Task",task);
+                });
+                bottomSheetModalRef.current?.dismiss();
+            }} />
             </BottomSheetView>
         </BottomSheetModal>
    
     );
 }
 
-function AddTasksScreen (){
-    const realm = useRealm();
-    
-    return <EditTaskScreen submitLabel="Create" task={Task.generate("","","blue")} onSubmit={(task)=>{
-        realm.write(()=>{
-            realm.create("Task",task);
-        });
-    }} />
-}
+
 
 // const BottomSheetInput = forwardRef<
 //     TextInput,
@@ -307,7 +304,7 @@ export function EditTaskScreen({submitLabel, task, onSubmit}:{submitLabel:string
 <View className='flex flex-row gap-3 justify-evenly'>
     <View className='flex flex-col gap-2'>
         <Label nativeID='Units'>Amount</Label>
-        <Input defaultValue='1' className='w-[80px]' placeholder='Amount' keyboardType='numeric' onChange={(b) => {
+        <Input defaultValue={ntask.goal.amount.toString()} className='w-[80px]' placeholder='Amount' keyboardType='numeric' onChange={(b) => {
             setTask((a)=> ({
                 ...a,
                 goal: {
@@ -320,7 +317,10 @@ export function EditTaskScreen({submitLabel, task, onSubmit}:{submitLabel:string
     </View>
     <View className='flex flex-col gap-2'>
         <Label nativeID='Units'>Units</Label>
-        <Select nativeID='Units' defaultValue={{ value: 'minutes', label: 'Minutes' }} 
+        <Select nativeID='Units' defaultValue={{
+            value: ntask.goal.unit,
+            label: UNITS.find((a) => a.value == ntask.goal.unit)?.name ?? ntask.goal.unit!
+        }} 
         value={ntask.goal!= null? {value: ntask.goal!.unit,label:UNITS.find((a) => a.value == ntask.goal!.unit)?.name ?? ntask.goal.unit!} : undefined}
         onValueChange={(b)=> setTask(
             (a)=> ({
@@ -364,7 +364,7 @@ export function EditTaskScreen({submitLabel, task, onSubmit}:{submitLabel:string
     </View>
     <View className='flex flex-col gap-2'>
         <Label nativeID='steps'>Steps</Label>
-        <Input defaultValue='1' className='w-24' nativeID='steps' placeholder='Steps' keyboardType='numeric' onChange={(a) => {
+        <Input defaultValue={ntask.goal.steps.toString()} className='w-24' nativeID='steps' placeholder='Steps' keyboardType='numeric' onChange={(a) => {
             let n = parseInt(a.nativeEvent.text);
             if (!Number.isNaN(n)){
                 setTask((b)=> ({

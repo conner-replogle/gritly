@@ -15,7 +15,8 @@ import { useRealm } from '@realm/react';
 import { CheckIcon, PlusIcon } from 'lucide-react-native';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useTheme } from '@react-navigation/native';
-import EditTask from './editTask';
+import { EditTaskScreen } from '../AddTask/AddTasks';
+import { UpdateMode } from 'realm';
 
 
 
@@ -95,7 +96,12 @@ export default function TaskContent(props:{item: Task,date: Date}) {
             backgroundColor: colors.background
         }}>
         <BottomSheetView >
-            <EditTask  task={item} />
+                <EditTaskScreen submitLabel="Save" onSubmit={(task)=>{
+                realm.write(() => {
+                    realm.create(Task,task,UpdateMode.Modified);
+                });
+                bottomSheetModalRef.current?.dismiss();
+            }} task={item} />
         </BottomSheetView>
     </BottomSheetModal>
     </>;
@@ -115,6 +121,7 @@ export function TaskCard({onCardPress,task,streak,onCompletePress,onCompleteLong
             <Pressable  onLongPress={onCompleteLongPress}   onPress={onCompletePress}>
             <CompleteIcon completed={completed} />
             </Pressable>
+            <Text className='text-xs font-semibold'>{completed?.amount ?? 0} / {completed?.goal.amount ?? task.goal.amount }</Text>
         </View>}
     </View>
     </Pressable>

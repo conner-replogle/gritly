@@ -2,7 +2,7 @@
 import { FlatList, Pressable, ScrollView, useWindowDimensions, View, VirtualizedList } from "react-native";
 import { Text } from "../ui/text";
 
-import { startOfWeek, addDays, format, add, addWeeks,  } from "date-fns";
+import { startOfWeek, addDays, format, add, addWeeks, set, getWeekYear, differenceInCalendarWeeks,  } from "date-fns";
 import { Gesture, GestureDetector, HandlerStateChangeEvent, Swipeable } from "react-native-gesture-handler";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Task } from "~/lib/states/task";
@@ -33,17 +33,25 @@ export function CalendarSection(props: { date: Date,setDate: (date: Date) => voi
         );
         return weekDates;
     }
+    const refrenceText = () => {
+        let diff = differenceInCalendarWeeks(Date.now(),getWeek(index)[3]);
+        if (diff == 0){
+            return null
+        }
+        return <Text>
+                {format(getWeek(index)[3],"MMMM")}, {Math.abs(diff)} week
+                {Math.abs(diff) == 1 ? "":"s"} {diff > 0 ? "ago":"ahead"}</Text>
 
-
-    const currentWeek = getWeek(index);
+    }
     useEffect(() => {
         flatlistRef.current?.scrollToIndex({index: HALF, animated: false});
+        
+
     }, [date]);
     return (
         <View ref={ref} className=" w-full flex flex-col items-end">
             <View className="flex flex-row justify-end w-full h-6">
-            {HALF-index != 0 && <Text>{format(addWeeks(date,index-HALF),"MMMM")}, </Text>}
-            {HALF-index != 0 && <Text>{Math.abs(HALF-index)} week{Math.abs(HALF-index) == 1 ? "":"s"} {HALF-index > 0 ? "ago":"ahead"}</Text>}
+                {refrenceText()}
             </View>
             <VirtualizedList<Date[]> 
                 ref={flatlistRef}
@@ -78,7 +86,10 @@ export function CalendarSection(props: { date: Date,setDate: (date: Date) => voi
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={(item) => item[0].toISOString()}
                 renderItem={({ item}) => {
-                    return <Week  tasks={tasks} width={width} dates={item} currentDate={date} setDate={setDate} />;
+                    return <Week  tasks={tasks} width={width} dates={item} currentDate={date} setDate={(a) =>{
+                        setIndex(HALF)
+                        setDate(a)
+                    }} />;
                 }}
             />
           
