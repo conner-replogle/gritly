@@ -28,10 +28,13 @@ import TaskContent from '~/components/Task/task';
 
 const DateContext = React.createContext(new Date(Date.now()));
 export default function Screen() {
-  const [date, setDate] = React.useState(new Date(Date.now()))
-  
+  const [date, setInnerDate] = React.useState(new Date(Date.now()))
+  const setDate = (date: Date) => {
+    date.setHours(6,0,0,0);
+    setInnerDate(date);
+  }
   const realm = useRealm();
-  const tasks = useQuery(Task).filtered('startsOn <= $0',date);
+  const tasks = useQuery(Task);
   console.log(`User Realm User file location: ${realm.path}`)
   console.log(`Current Date ${date}`)
   const todayTasks = tasks.filter(a => a.showToday(date));
@@ -49,7 +52,7 @@ export default function Screen() {
     </SafeAreaView>
   );
 }
-function HeaderCard(date: Date,tasks: Task[],setDate: React.Dispatch<React.SetStateAction<Date>>) {
+function HeaderCard(date: Date,tasks: Task[],setDate: (date: Date) => void) {
   const todayTasks = tasks.filter(a => a.showToday(date));
 
   const daily = todayTasks.filter(a => a.repeats.period == "Daily");

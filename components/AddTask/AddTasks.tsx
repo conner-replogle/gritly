@@ -17,7 +17,7 @@ import {
   } from '@gorhom/bottom-sheet';
 import { Button } from '../ui/button';
 import { useRealm } from '@realm/react';
-import { Goal, Repeat, Task, UNITS } from '~/lib/states/task';
+import { CALENDAR, Goal, Repeat, Task, UNITS } from '~/lib/states/task';
 import { Input } from '~/components/ui/input';
 
 import { forwardRef, Ref, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -32,10 +32,11 @@ import { Handle } from './customhandle';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 import ColorPicker, { HueSlider, OpacitySlider, Panel1, Preview, Swatches } from 'reanimated-color-picker';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import TaskContent, { TaskCard } from '../Task/task';
 //import Handle from './customhandle';
 
 
-export const CALENDAR = ["S","M","T","W","Th","F","Sa"];
 
 export function AddTasks(props:{dense?: boolean}) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -95,7 +96,7 @@ function AddTaskSheet(props:{bottomSheetModalRef:React.RefObject<BottomSheetModa
     const {bottomSheetModalRef} = props;
     const [index, setIndex] = useState<number>(0);
 
-    const [isSimple,setIsSimple] = useState(true);
+    const [isSimple,setIsSimple] = useState(false);
     // variables
     const snapPoints = useMemo<string[]>(()=> {
         if (isSimple){
@@ -125,36 +126,91 @@ function AddTaskSheet(props:{bottomSheetModalRef:React.RefObject<BottomSheetModa
                 if (index != -1)
                     setIndex(index);
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                if (index == 0){
-                    setIsSimple(true);
-                }
+                // if (index == 0){
+                //     setIsSimple(true);
+                // }
             }}
             >
             <BottomSheetView >
-                <AddTasksScreen isSimple={isSimple} setIsSimple={setIsSimple} />
+                <AddTasksScreen  />
             </BottomSheetView>
         </BottomSheetModal>
    
     );
 }
 
-function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<React.SetStateAction<boolean>>}){
-    const {isSimple, setIsSimple} = props;
-    const [showColorPicker, setColorPicker] = useState(false);
-
+function AddTasksScreen (){
     const realm = useRealm();
-    const [title, setTitle] = useState<string>("");
-    const [description, setDescription] = useState<string>("");
-    const [tasktype, setTaskType] = useState<"Daily" | "Weekly"|string>('Daily');
-    const [color,setColor] = useState<string>("#3498db");
-    const [days, setDays] = useState<number[]>([0,1,2,3,4,5,6]);
-    const [goal, setGoal] = useState<Goal | null>({amount: 1, unit: "count", steps: 1} as Goal);
+    
+    return <EditTaskScreen submitLabel="Create" task={Task.generate("","","blue")} onSubmit={(task)=>{
+        realm.write(()=>{
+            realm.create("Task",task);
+        });
+    }} />
+}
+
+// const BottomSheetInput = forwardRef<
+//     TextInput,
+//     BottomSheetTextInputProps
+// >(({ onFocus, onBlur, ...rest }, ref) => {
+//   //#region hooks
+//     const { shouldHandleKeyboardEvents } = useBottomSheetInternal();
+
+//     useEffect(() => {
+//         return () => {
+//         // Reset the flag on unmount
+//         shouldHandleKeyboardEvents.value = false;
+//         };
+//     }, [shouldHandleKeyboardEvents]);
+//     //#endregion
+
+//     //#region callbacks
+//     const handleOnFocus = useCallback(
+//         (args: NativeSyntheticEvent<TextInputFocusEventData>) => {
+//             shouldHandleKeyboardEvents.value = true;
+//             if (onFocus) {
+//                 onFocus(args);
+//             }
+//         },
+//         [onFocus, shouldHandleKeyboardEvents]
+//     );
+//     const handleOnBlur = useCallback(
+//         (args: NativeSyntheticEvent<TextInputFocusEventData>) => {
+//             shouldHandleKeyboardEvents.value = false;
+//             if (onBlur) {
+//                 onBlur(args);
+//             }
+//         },
+//         [onBlur, shouldHandleKeyboardEvents]
+//     );
+//     //#endregion
+
+//     return (
+//         <Input
+//         ref={ref}
+//         onFocus={handleOnFocus}
+//         onBlur={handleOnBlur}
+//         {...rest}
+//         />
+//     );
+// });
+
+export function EditTaskScreen({submitLabel, task, onSubmit}:{submitLabel:string,task:Task,onSubmit:(task:Task)=> void}){
+    const [ntask, setTask] = useState(task);
     function ValidateForm(){
-        return title.length > 0;
+        return ntask.title.length > 0;
     }
     function onLabelPress(label: string) {
         return () => {
-            setTaskType(label);
+            setTask((a)=>{
+                return {
+                    ...a,
+                    repeats: {
+                        ...a.repeats,
+                        period: label
+                    }
+                } as Task
+            })
         };
     }
     function onDayPress(nDays: string[]) {
@@ -162,118 +218,117 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
         console.log(nDays);
         const parsedDays = nDays.map((a) => parseInt(a));
         console.log(parsedDays);
-        setDays(parsedDays);
-    }
-    if (isSimple){
-        return (
-            <View className='bg-background  p-5 pt-0 flex flex-col gap-4'>
-                <Text className='text-xl'>Create a quick one time task.</Text>
-                <Label className='text-xl' nativeID='title'>Title</Label>
-                <BottomSheetInput
-                    placeholder='Name your task'
-                    nativeID='title'
-                    value={title}
-                    onChangeText={setTitle}
-                    aria-labelledbyledBy='inputLabel'
-                    aria-errormessage='inputError'
-                    
-                />
-                <Button onPress={()=> {
-                    if (!ValidateForm() ){
-                        return;
-                    }
-                    realm.write(() => {
-                        realm.create("Task", Task.generate(title, "",color,{
-                            period: "one-time",
-                        } as Repeat));
-                    });
-                    setTitle("");
-                    setDescription("");
-        
-                    
-                }}>
-                    <Text>Create</Text>
-                </Button>
-                    
-            </View>
-        )
+        setTask((a)=>{
+            return {
+                ...a,
+                repeats: {
+                    ...a.repeats,
+                    specfic_weekday: parsedDays
+                }
+            } as Task
+        })
     }
     return <ScrollView contentInset={{bottom:300}} >
-        <View className='bg-background   p-5 pt-0 flex flex-col gap-4'>
-    <Text className='text-xl'>Add a Task</Text>
-    <Label nativeID='title'>Title</Label>
-    <Input
-        placeholder='Name your task'
-        nativeID='title'
-        value={title}
-        onChangeText={setTitle}
-        aria-labelledbyledBy='inputLabel'
-        aria-errormessage='inputError'
-    />
-    <Label nativeID='description'>Description</Label>
-    <Input
-        placeholder='What exactly is this task?'
-        nativeID='description'
-        value={description}
-        onChangeText={setDescription}
-        aria-labelledbyledBy='inputLabel'
-        aria-errormessage='inputError'
-    />
-    <Text className='text-xl font-semibold'>Type</Text>
-    <RadioGroup value={tasktype} onValueChange={(a) => setTaskType(a)} className='gap-3'>
-        <RadioGroupItemWithLabel onLabelPress={onLabelPress("Daily")} value='Daily' />
-        <RadioGroupItemWithLabel onLabelPress={onLabelPress("Weekly")} value='Weekly' />
-    </RadioGroup>
-    {
-        tasktype === "Daily" &&
-        <ToggleGroup value={days.map((a) => a.toString())} onValueChange={onDayPress} type='multiple'>
-            {Array.from(CALENDAR, (a, i) => (
-                <ToggleGroupItem key={i} value={i.toString()}>
-                    <Text  className='w-[20px] text-center'>{a}</Text>
-                </ToggleGroupItem>
-            ))}
-        </ToggleGroup>
-    }
-    <Button onPress={()=>setColorPicker(true)} style={
-    {
-        backgroundColor:color
-    }
-    } >
-        <Text>Select Color</Text>
-    </Button>
-    <Modal transparent={true} visible={showColorPicker} animationType='slide'>
-        <SafeAreaView className='m-10'>
-        <Card>
-            <CardHeader>
-                <CardTitle>Select this tasks's color</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center">
-                <ColorPicker  style={{ width: '70%' }} value='red' onComplete={(colors) => {
-                    setColor(colors.hex)
-                }}>
-                    <Preview />
-                    <Panel1 />
-                    <HueSlider />
+    <View className='bg-background   p-5 pt-0 flex flex-col gap-4'>
+<Label nativeID='title'>Title</Label>
+<Input
+    placeholder='Name your task'
+    nativeID='title'
+    value={ntask.title}
+    onChangeText={(b) => {
+        setTask((a)=>{
+            return {
+                ...a,
+                title: b
+            } as Task
+        })
+    }}
+    aria-labelledbyledBy='inputLabel'
+    aria-errormessage='inputError'
+/>
+<Label nativeID='description'>Description</Label>
+<Input
+    placeholder='What exactly is this task?'
+    nativeID='description'
+    value={ntask.description}
+    onChangeText={(b) => {
+        setTask((a)=>{
+            return {
+                ...a,
+                description: b
+            } as Task
+        })
+    }}
+    aria-labelledbyledBy='inputLabel'
+    aria-errormessage='inputError'
+/>
+<Text className='text-xl font-semibold'>Type</Text>
+<RadioGroup value={ntask.repeats.period} onValueChange={(a) => {}} className='gap-3'>
+    <RadioGroupItemWithLabel onLabelPress={onLabelPress("Daily")} value='Daily' />
+    <RadioGroupItemWithLabel onLabelPress={onLabelPress("Weekly")} value='Weekly' />
+</RadioGroup>
+{
+    ntask.repeats.period === "Daily" &&
+    <ToggleGroup value={ntask.repeats.specfic_weekday?.map((a) => a.toString())??[]} onValueChange={onDayPress} type='multiple'>
+        {Array.from(CALENDAR, (a, i) => (
+            <ToggleGroupItem key={i} value={i.toString()}>
+                <Text  className='w-[20px] text-center'>{a}</Text>
+            </ToggleGroupItem>
+        ))}
+    </ToggleGroup>
+}
 
-                </ColorPicker>
-            </CardContent>
-            <CardFooter>
-                <Button  onPress={() => setColorPicker(false)} ><Text>Ok</Text></Button>
-            </CardFooter>
-        </Card>
-        </SafeAreaView>
-    </Modal>
+<Collapsible >
+    <CollapsibleTrigger asChild>
+        <Text className='text-xl font-semibold'>Select Color </Text>
+    </CollapsibleTrigger>
+    <CollapsibleContent className='p-5'>
+        <ColorPicker  style={{ width: '100%' }} value={ntask.color}  onChange={(colors) => {
+                setTask((a)=> ({
+                        ...a,
+                        color: colors.hex
+                    } as Task)
+                );
+            }
+            }>
+            <Preview />
+            <Panel1 />
+            <HueSlider />
 
-    <Text className='text-xl font-semibold'>Goal</Text>
-    <View className='flex flex-col gap-3'>
-        <Label nativeID='Units'>Units</Label>
-        <Input className='w-[80px]' placeholder='Amount' keyboardType='numeric' onChange={(a) => {
-            setGoal({...goal,amount: parseInt(a.nativeEvent.text)} as Goal);
+        </ColorPicker>
+    </CollapsibleContent>
+</Collapsible>
+
+
+<Text className='text-xl font-semibold'>Goal</Text>
+<View className='flex flex-row gap-3 justify-evenly'>
+    <View className='flex flex-col gap-2'>
+        <Label nativeID='Units'>Amount</Label>
+        <Input defaultValue='1' className='w-[80px]' placeholder='Amount' keyboardType='numeric' onChange={(b) => {
+            setTask((a)=> ({
+                ...a,
+                goal: {
+                    ...a.goal,
+                    amount: parseInt(b.nativeEvent.text)
+                }
+            } as Task)
+            );
         }} />
+    </View>
+    <View className='flex flex-col gap-2'>
         <Label nativeID='Units'>Units</Label>
         <Select nativeID='Units' defaultValue={{ value: 'minutes', label: 'Minutes' }} 
-        value={goal!= null? {value: goal!.unit,label:UNITS.find((a) => a.value == goal!.unit)?.name ?? goal.unit!} : undefined}
-        onValueChange={(a)=> setGoal({...goal,unit:  a?.value} as Goal)} >
+        value={ntask.goal!= null? {value: ntask.goal!.unit,label:UNITS.find((a) => a.value == ntask.goal!.unit)?.name ?? ntask.goal.unit!} : undefined}
+        onValueChange={(b)=> setTask(
+            (a)=> ({
+                ...a,
+                goal: {
+                    ...a.goal,
+                    unit: b?.value ?? "count"
+                }
+            } as Task)
+        
+        )} >
             <SelectTrigger className='w-24'>
                 <SelectValue
                 className='text-foreground text-sm native:text-lg'
@@ -292,85 +347,68 @@ function AddTasksScreen (props:{isSimple:boolean, setIsSimple:React.Dispatch<Rea
                 
             </SelectContent>
         </Select>
-        {goal?.unit == "custom"&& <Input placeholder='Custom Unit' onChange={(a) => {
-            setGoal({...goal,customName: a.nativeEvent.text} as Goal);
+
+        {ntask.goal?.unit == "custom"&& <Input placeholder='Custom Unit' onChange={(a) => {
+           setTask((b)=> ({
+                ...b,
+                goal: {
+                ...b.goal,
+                customName: a.nativeEvent.text
+        }
+        } as Task)
+        );
         }} />}
+    </View>
+    <View className='flex flex-col gap-2'>
         <Label nativeID='steps'>Steps</Label>
-        <Input className='w-24' nativeID='steps' placeholder='Steps' keyboardType='numeric' onChange={(a) => {
+        <Input defaultValue='1' className='w-24' nativeID='steps' placeholder='Steps' keyboardType='numeric' onChange={(a) => {
             let n = parseInt(a.nativeEvent.text);
             if (!Number.isNaN(n)){
-                setGoal({...goal,steps: n} as Goal);
+                setTask((b)=> ({
+                    ...b,
+                    goal: {
+                        ...b.goal,
+                        steps: n
+                    }
+                } as Task));
             }
-         
         }} />
     </View>
+</View>
 
-
-
-
-    <Button onPress={()=> {
-        if (!ValidateForm() ){
-            return;
+<Collapsible defaultOpen>
+    <CollapsibleTrigger asChild>
+        <Text className='text-xl font-semibold'>Preview</Text>
+    </CollapsibleTrigger>
+    <CollapsibleContent>
+    <TaskCard 
+        task={
+            ntask
         }
-        realm.write(() => {
-            realm.create("Task", Task.generate(title, description,color,{
-                period: tasktype,
-                specfic_weekday: days
-            } as Repeat,goal ?? undefined));
-        });
-        setTitle("");
-        setDescription("");
+        completed={undefined}
+        completable={true}
+        streak={0}
+        onCardPress={()=>{}}
+        onCompletePress={()=>{}}
+        onCompleteLongPress={()=>{}}
+    
+    />
+    </CollapsibleContent>
+</Collapsible>
 
-        
-    }}>
-        <Text>Create</Text>
-    </Button>
-    </View>
-    </ScrollView>
+
+
+
+<Button onPress={()=> {
+    if (!ValidateForm() ){
+        return;
+    }
+    onSubmit(ntask);
+    
+}}>
+    <Text>{submitLabel}</Text>
+</Button>
+</View>
+</ScrollView>
+
 }
-
-const BottomSheetInput = forwardRef<
-    TextInput,
-    BottomSheetTextInputProps
->(({ onFocus, onBlur, ...rest }, ref) => {
-  //#region hooks
-    const { shouldHandleKeyboardEvents } = useBottomSheetInternal();
-
-    useEffect(() => {
-        return () => {
-        // Reset the flag on unmount
-        shouldHandleKeyboardEvents.value = false;
-        };
-    }, [shouldHandleKeyboardEvents]);
-    //#endregion
-
-    //#region callbacks
-    const handleOnFocus = useCallback(
-        (args: NativeSyntheticEvent<TextInputFocusEventData>) => {
-            shouldHandleKeyboardEvents.value = true;
-            if (onFocus) {
-                onFocus(args);
-            }
-        },
-        [onFocus, shouldHandleKeyboardEvents]
-    );
-    const handleOnBlur = useCallback(
-        (args: NativeSyntheticEvent<TextInputFocusEventData>) => {
-            shouldHandleKeyboardEvents.value = false;
-            if (onBlur) {
-                onBlur(args);
-            }
-        },
-        [onBlur, shouldHandleKeyboardEvents]
-    );
-    //#endregion
-
-    return (
-        <Input
-        ref={ref}
-        onFocus={handleOnFocus}
-        onBlur={handleOnBlur}
-        {...rest}
-        />
-    );
-});

@@ -18,92 +18,107 @@ import { useTheme } from '@react-navigation/native';
 import EditTask from './editTask';
 
 
+
 export default function TaskContent(props:{item: Task,date: Date}) {
     const { colors} = useTheme();
 
     const realm = useRealm();
     const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
-    const snapPoints = React.useMemo(() => ['50%'], []);
+    const snapPoints = React.useMemo(() => ['90%'], []);
     const {item,date} = props;
     
     const completable = date <= new Date(Date.now());
     const completed = item.getCompleted(date);
     const streak = item.getStreak(date);
-    return <Pressable onPress={()=> {
-        bottomSheetModalRef.current?.present();
-    }} ><View style={{borderColor:item.color,borderWidth:2}} className="min-w-full p-5 mb-2 flex flex-row justify-between bg-background rounded-lg">
-        <View className='text-start flex flex-col justify-start items-start'>
-            <CardTitle >{item.title } {streak > 1 ? ` 🔥${streak}` : ""} </CardTitle>
-            
-            <CardDescription className='ml-1'>{} </CardDescription>
-        </View>
-        
-        {completable && <View className='flex flex-col items-center justify-center'>
-            <Pressable  onLongPress={()=>{
-            console.log("long press")
-            realm.write(() => {
-                if (completed){
-                let index = item.completed.findIndex(a =>  a.id== completed?.id);
-                if (index == -1){
-                    console.log("Error")
-                    console.log(completed.completedAt)
-                    return;
-                }
-                if (item.completed[index].amount <= item.goal?.steps){
-                    item.completed.splice(index,1);
-                    return;
-                }
-                item.completed[index].amount -= item.goal?.steps;
-                
-                }else{
-                item.completed.push({id:uuid.v4(),completedAt: date,amount:item.goal.amount,goal:{
-                    ...item.goal
-                }} as Completed);
-                }
-            });
-            }}   onPress={() => {
-            console.log("pressed")
-            
-            const today = new Date(date);
-            date.setHours(today.getHours(),today.getMinutes(),today.getSeconds(),0);
-            if (completed && completed.isCompleted()){
+    return <>
+    <TaskCard 
+    task={item} 
+    streak={streak} 
+    completable={completable}
+    completed={completed}
+    onCardPress={()=>{bottomSheetModalRef.current?.present()}}
+    onCompletePress={() => {
+        const today = new Date(date);
+        date.setHours(today.getHours(),today.getMinutes(),today.getSeconds(),0);
+        if (completed && completed.isCompleted()){
+            return;
+        }
+        realm.write(() => {
+            if (completed){
+            let index = item.completed.findIndex(a =>  a.id== completed?.id);
+            if (index == -1){
+                console.log("Error")
+                console.log(completed.completedAt)
                 return;
             }
-            realm.write(() => {
-                if (completed){
-                let index = item.completed.findIndex(a =>  a.id== completed?.id);
-                if (index == -1){
-                    console.log("Error")
-                    console.log(completed.completedAt)
-                    return;
-                }
-                item.completed[index].amount += item.goal?.steps;
-                }else{
-                item.completed.push({id:uuid.v4(),completedAt: date,amount:item.goal.steps,goal:{
-                    ...item.goal
-                }} as Completed);
-                }
-                
-            });//completed={item.completed[item.completed.length].goal} 
-            }}>
-            <CompleteIcon completed={completed} />
-            </Pressable>
-        </View>}
-    </View>
-    <BottomSheetModal ref={bottomSheetModalRef} snapPoints={snapPoints}    handleIndicatorStyle={{
-                backgroundColor: colors.border,
-            }}
-                    
-            backgroundStyle={{
-                backgroundColor: colors.background
-            }}>
+            item.completed[index].amount += item.goal?.steps;
+            }else{
+            item.completed.push({id:uuid.v4(),completedAt: date,amount:item.goal.steps,goal:{
+                ...item.goal
+            }} as Completed);
+            }
+            
+        });//completed={item.completed[item.completed.length].goal} 
+    }}
+    onCompleteLongPress={()=>{
+        console.log("long press")
+        realm.write(() => {
+            if (completed){
+            let index = item.completed.findIndex(a =>  a.id== completed?.id);
+            if (index == -1){
+                console.log("Error")
+                console.log(completed.completedAt)
+                return;
+            }
+            if (item.completed[index].amount <= item.goal?.steps){
+                item.completed.splice(index,1);
+                return;
+            }
+            item.completed[index].amount -= item.goal?.steps;
+            
+            }else{
+            item.completed.push({id:uuid.v4(),completedAt: date,amount:item.goal.amount,goal:{
+                ...item.goal
+            }} as Completed);
+            }
+        });
+        }
+    }
+    />
+    <BottomSheetModal 
+        ref={bottomSheetModalRef} 
+        snapPoints={snapPoints}    
+        handleIndicatorStyle={{
+            backgroundColor: colors.border,
+        }}
+        backgroundStyle={{
+            backgroundColor: colors.background
+        }}>
         <BottomSheetView >
             <EditTask  task={item} />
         </BottomSheetView>
     </BottomSheetModal>
-    </Pressable>;
+    </>;
 }
 
+export function TaskCard({onCardPress,task,streak,onCompletePress,onCompleteLongPress,completable,completed}:{completable:boolean,onCompletePress:()=>void,onCompleteLongPress:()=>void,onCardPress:()=>void,task: Task,completed:Completed | undefined,streak:number}){
+    return <Pressable onPress={onCardPress} ><View style={{borderColor:task.color,borderWidth:2}} className="min-w-full p-5 mb-2 flex flex-row justify-between bg-background rounded-lg">
+        <View className='text-start flex flex-col justify-start items-start'>
+            <CardTitle >{task.title } {streak > 1 ? ` 🔥${streak}` : ""} </CardTitle>
+            
+            <CardDescription className='ml-1'>
+            
+            </CardDescription>
+        </View>
+        
+        {completable && <View className='flex flex-col items-center justify-center'>
+            <Pressable  onLongPress={onCompleteLongPress}   onPress={onCompletePress}>
+            <CompleteIcon completed={completed} />
+            </Pressable>
+        </View>}
+    </View>
+    </Pressable>
+}
 
 function CompleteIcon({completed}:{completed:Completed | undefined}) {
 

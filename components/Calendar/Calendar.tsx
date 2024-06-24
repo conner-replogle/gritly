@@ -67,7 +67,9 @@ export function CalendarSection(props: { date: Date,setDate: (date: Date) => voi
                     offset: width * index,
                     index
                 })}
-                initialNumToRender={3}
+                // WHY THE FUCK DOES IT RENDER EVERYTHING
+                initialNumToRender={1}
+                
                 getItemCount={(data) => LENGTH}
                 getItem={(_data, index) => 
                     getWeek(index)

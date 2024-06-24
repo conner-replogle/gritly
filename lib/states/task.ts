@@ -4,6 +4,7 @@ import { SafeAreaView, View, Text, TextInput, FlatList, Pressable } from "react-
 import { Realm, RealmProvider, useRealm, useQuery } from '@realm/react'
 import { ObjectSchema } from "realm";
 import { differenceInDays } from "date-fns";
+export const CALENDAR = ["S","M","T","W","Th","F","Sa"];
 
 const UNITS = [
   {
@@ -106,28 +107,35 @@ class Task extends Realm.Object {
     startsOn!: Date;
     goal!:Goal;
 
-    static generate(title: string,description: string,color:string,repeats: Repeat,goal?:Goal) {
+    static generate(title: string,description: string,color:string,repeats?: Repeat,goal?:Goal):Task {
       let startsOn = new Date(Date.now());
       startsOn.setHours(0,0,0,0);
         return {
-        _id: new Realm.BSON.ObjectId(),
-        title,
-        description,
-        completed:[],
-        repeats,
-        color,
-        goal: goal ?? {
-          amount: 1,
-          unit: "count",
-          steps: 1
-        },
-        createdAt: new Date(Date.now()),
-        startsOn:startsOn
-        };
+          _id: new Realm.BSON.ObjectId(),
+          title,
+          description,
+          completed: [],
+          repeats: repeats ?? {
+            period: "Daily",
+            specfic_weekday: [0,1,2,3,4,5,6]
+          } as Repeat
+          ,
+          color,
+          goal: goal ?? {
+            amount: 1,
+            unit: "count",
+            steps: 1
+          } as Goal,
+          createdAt: new Date(Date.now()),
+          startsOn: startsOn
+        } as unknown as Task;
     }
-    
+
 
     showToday(date:Date):boolean{
+      if (date < this.startsOn){
+        return false;
+      }
       if (this.repeats.period == "Daily"){
         if (this.repeats.specfic_days && this.repeats.specfic_days.includes(date.getDate()))
           return true;
@@ -146,11 +154,12 @@ class Task extends Realm.Object {
       let date = new Date(startDate);
       date.setHours(0,0,0,0);
       date.setDate(date.getDate() - 1)
-      while (!this.showToday(date)){date.setDate(date.getDate() - 1)};
+      
+      while (date > this.startsOn && !this.showToday(date)){date.setDate(date.getDate() - 1)};
       while (this.getCompleted(date)?.isCompleted() ){
         streak++;
         date.setDate(date.getDate() - 1)
-        while (!this.showToday(date)){date.setDate(date.getDate() - 1)};
+        while (date > this.startsOn && !this.showToday(date)){date.setDate(date.getDate() - 1)};
       }
       return streak;
     }
