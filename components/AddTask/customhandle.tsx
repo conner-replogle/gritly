@@ -12,7 +12,7 @@ interface HandleProps extends BottomSheetHandleProps {
 export const Handle: React.FC<HandleProps> = (props) => {
     const {title,onPress} = props;
     return <BottomSheetHandle     {...props} >
-        <Button className="h-min" size={"sm"} onPress={onPress} variant={"link"}><Text>{title}</Text></Button>
+        {/* <Button className="h-min" size={"sm"} onPress={onPress} variant={"link"}><Text>{title}</Text></Button> */}
 
         </BottomSheetHandle>
 

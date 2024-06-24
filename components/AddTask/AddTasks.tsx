@@ -201,17 +201,17 @@ export function EditTaskScreen({submitLabel, task, onSubmit}:{submitLabel:string
         return ntask.title.length > 0;
     }
     function onLabelPress(label: string) {
-        return () => {
-            setTask((a)=>{
-                return {
-                    ...a,
-                    repeats: {
-                        ...a.repeats,
-                        period: label
-                    }
-                } as Task
-            })
-        };
+        
+        setTask((a)=>{
+            return {
+                ...a,
+                repeats: {
+                    ...a.repeats,
+                    period: label
+                }
+            } as Task
+        })
+       
     }
     function onDayPress(nDays: string[]) {
     
@@ -263,9 +263,12 @@ export function EditTaskScreen({submitLabel, task, onSubmit}:{submitLabel:string
     aria-errormessage='inputError'
 />
 <Text className='text-xl font-semibold'>Type</Text>
-<RadioGroup value={ntask.repeats.period} onValueChange={(a) => {}} className='gap-3'>
-    <RadioGroupItemWithLabel onLabelPress={onLabelPress("Daily")} value='Daily' />
-    <RadioGroupItemWithLabel onLabelPress={onLabelPress("Weekly")} value='Weekly' />
+<RadioGroup value={ntask.repeats.period} onValueChange={(a) => {
+   
+    onLabelPress(a);
+}} className='gap-3'>
+    <RadioGroupItemWithLabel onLabelPress={()=>onLabelPress("Daily")} value='Daily' />
+    <RadioGroupItemWithLabel onLabelPress={()=>onLabelPress("Weekly")} value='Weekly' />
 </RadioGroup>
 {
     ntask.repeats.period === "Daily" &&
