@@ -45,11 +45,11 @@ export function CalendarSection(props: { date: Date,setDate: (date: Date) => voi
     }
     useEffect(() => {
         flatlistRef.current?.scrollToIndex({index: HALF, animated: false});
-        
+
 
     }, [date]);
     return (
-        <View ref={ref} className=" w-full flex flex-col items-end">
+        <View ref={ref} className="w-full flex flex-col items-end">
             <View className="flex flex-row justify-end w-full h-6">
                 {refrenceText()}
             </View>
