@@ -1,5 +1,5 @@
 import { CALENDAR, Task, UNITS } from "~/lib/states/task";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
@@ -15,6 +15,7 @@ import ColorPicker, {
   HueSlider,
   Panel1,
   Preview,
+  returnedResults,
 } from "reanimated-color-picker";
 import {
   Select,
@@ -26,6 +27,179 @@ import {
 } from "~/components/ui/select";
 import { Button } from "~/components/ui/button";
 import { TaskCard } from "~/components/Task/taskCard";
+import { formatDate } from "date-fns";
+import DateTimePicker from "react-native-ui-datepicker/src/DateTimePicker";
+
+function SelectColor(props: {
+  ntask: Task;
+  onChange: (colors: returnedResults) => void;
+}) {
+  return (
+    <Collapsible>
+      <CollapsibleTrigger asChild>
+        <Text className="text-xl font-semibold">Select Color </Text>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="p-5">
+        <ColorPicker
+          style={{ width: "100%" }}
+          value={props.ntask.color}
+          onChange={props.onChange}
+        >
+          <Preview />
+          <Panel1 />
+          <HueSlider />
+        </ColorPicker>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+function Goal({
+  ntask,
+  setTask,
+}: {
+  ntask: Task;
+  setTask: Dispatch<SetStateAction<Task>>;
+}) {
+  let value =
+    UNITS.find((a) => a.value == ntask.goal.unit)?.name ?? ntask.goal.unit!;
+  return (
+    <View className="flex flex-row gap-3 justify-evenly">
+      <View className="flex flex-col gap-2">
+        <Label nativeID="Units">Amount</Label>
+        <Input
+          defaultValue={ntask.goal.amount.toString()}
+          className="w-[80px]"
+          placeholder="Amount"
+          keyboardType="numeric"
+          onChange={(b) => {
+            setTask(
+              (a) =>
+                ({
+                  ...a,
+                  goal: {
+                    ...a.goal,
+                    amount: parseInt(b.nativeEvent.text),
+                  },
+                } as Task)
+            );
+          }}
+        />
+      </View>
+      <View className="flex flex-col gap-2">
+        <Label nativeID="Units">Units</Label>
+        <Select
+          nativeID="Units"
+          defaultValue={{
+            value: ntask.goal.unit,
+            label: value,
+          }}
+          value={{
+            value: ntask.goal!.unit,
+            label: value,
+          }}
+          onValueChange={(b) =>
+            setTask(
+              (a) =>
+                ({
+                  ...a,
+                  goal: {
+                    ...a.goal,
+                    unit: b?.value ?? "count",
+                  },
+                } as Task)
+            )
+          }
+        >
+          <SelectTrigger className="w-24">
+            <SelectValue
+              className="text-foreground text-sm native:text-lg"
+              placeholder="Select a unit"
+            />
+          </SelectTrigger>
+          <SelectContent className="w-24">
+            <SelectGroup>
+              {Array.from(UNITS, (a) => {
+                return (
+                  <SelectItem key={a.name} label={a.name} value={a.value}>
+                    {a.name}
+                  </SelectItem>
+                );
+              })}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        {ntask.goal?.unit == "custom" && (
+          <Input
+            placeholder="Custom Unit"
+            onChange={(a) => {
+              setTask(
+                (b) =>
+                  ({
+                    ...b,
+                    goal: {
+                      ...b.goal,
+                      customName: a.nativeEvent.text,
+                    },
+                  } as Task)
+              );
+            }}
+          />
+        )}
+      </View>
+      <View className="flex flex-col gap-2">
+        <Label nativeID="steps">Steps</Label>
+        <Input
+          defaultValue={ntask.goal.steps.toString()}
+          className="w-24"
+          nativeID="steps"
+          placeholder="Steps"
+          keyboardType="numeric"
+          onChange={(a) => {
+            let n = parseInt(a.nativeEvent.text);
+            if (!Number.isNaN(n)) {
+              setTask(
+                (b) =>
+                  ({
+                    ...b,
+                    goal: {
+                      ...b.goal,
+                      steps: n,
+                    },
+                  } as Task)
+              );
+            }
+          }}
+        />
+      </View>
+    </View>
+  );
+}
+
+function RepeatPeriod(props: {
+  ntask: Task;
+  onValueChange: (a: any) => void;
+  onLabelPress: () => void;
+  onLabelPress1: () => void;
+}) {
+  return (
+    <RadioGroup
+      value={props.ntask.repeats.period}
+      onValueChange={props.onValueChange}
+      className="gap-3"
+    >
+      <RadioGroupItemWithLabel
+        onLabelPress={props.onLabelPress}
+        value="Daily"
+      />
+      <RadioGroupItemWithLabel
+        onLabelPress={props.onLabelPress1}
+        value="Weekly"
+      />
+    </RadioGroup>
+  );
+}
 
 export function EditTaskScreen({
   onDelete,
@@ -103,22 +277,14 @@ export function EditTaskScreen({
           aria-errormessage="inputError"
         />
         <Text className="text-xl font-semibold">Type</Text>
-        <RadioGroup
-          value={ntask.repeats.period}
+        <RepeatPeriod
+          ntask={ntask}
           onValueChange={(a) => {
             onLabelPress(a);
           }}
-          className="gap-3"
-        >
-          <RadioGroupItemWithLabel
-            onLabelPress={() => onLabelPress("Daily")}
-            value="Daily"
-          />
-          <RadioGroupItemWithLabel
-            onLabelPress={() => onLabelPress("Weekly")}
-            value="Weekly"
-          />
-        </RadioGroup>
+          onLabelPress={() => onLabelPress("Daily")}
+          onLabelPress1={() => onLabelPress("Weekly")}
+        />
         {ntask.repeats.period === "Daily" && (
           <ToggleGroup
             value={
@@ -137,144 +303,41 @@ export function EditTaskScreen({
 
         <Collapsible>
           <CollapsibleTrigger asChild>
-            <Text className="text-xl font-semibold">Select Color </Text>
+            <Text className="text-xl font-semibold">
+              Starting Day - {formatDate(ntask.startsOn, "MMMM, dd, yyyy")}
+            </Text>
           </CollapsibleTrigger>
-          <CollapsibleContent className="p-5">
-            <ColorPicker
-              style={{ width: "100%" }}
-              value={ntask.color}
-              onChange={(colors) => {
-                setTask(
-                  (a) =>
-                    ({
-                      ...a,
-                      color: colors.hex,
-                    } as Task)
-                );
+          <CollapsibleContent>
+            <DateTimePicker
+              mode="single"
+              date={ntask.startsOn}
+              onChange={({ date }) => {
+                setTask((a) => {
+                  return {
+                    ...a,
+                    startsOn: new Date(date as string),
+                  } as Task;
+                });
               }}
-            >
-              <Preview />
-              <Panel1 />
-              <HueSlider />
-            </ColorPicker>
+            />
           </CollapsibleContent>
         </Collapsible>
 
-        <Text className="text-xl font-semibold">Goal</Text>
-        <View className="flex flex-row gap-3 justify-evenly">
-          <View className="flex flex-col gap-2">
-            <Label nativeID="Units">Amount</Label>
-            <Input
-              defaultValue={ntask.goal.amount.toString()}
-              className="w-[80px]"
-              placeholder="Amount"
-              keyboardType="numeric"
-              onChange={(b) => {
-                setTask(
-                  (a) =>
-                    ({
-                      ...a,
-                      goal: {
-                        ...a.goal,
-                        amount: parseInt(b.nativeEvent.text),
-                      },
-                    } as Task)
-                );
-              }}
-            />
-          </View>
-          <View className="flex flex-col gap-2">
-            <Label nativeID="Units">Units</Label>
-            <Select
-              nativeID="Units"
-              defaultValue={{
-                value: ntask.goal.unit,
-                label:
-                  UNITS.find((a) => a.value == ntask.goal.unit)?.name ??
-                  ntask.goal.unit!,
-              }}
-              value={{
-                value: ntask.goal!.unit,
-                label:
-                  UNITS.find((a) => a.value == ntask.goal!.unit)?.name ??
-                  ntask.goal.unit!,
-              }}
-              onValueChange={(b) =>
-                setTask(
-                  (a) =>
-                    ({
-                      ...a,
-                      goal: {
-                        ...a.goal,
-                        unit: b?.value ?? "count",
-                      },
-                    } as Task)
-                )
-              }
-            >
-              <SelectTrigger className="w-24">
-                <SelectValue
-                  className="text-foreground text-sm native:text-lg"
-                  placeholder="Select a unit"
-                />
-              </SelectTrigger>
-              <SelectContent className="w-24">
-                <SelectGroup>
-                  {Array.from(UNITS, (a) => {
-                    return (
-                      <SelectItem key={a.name} label={a.name} value={a.value}>
-                        {a.name}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+        <SelectColor
+          ntask={ntask}
+          onChange={(colors) => {
+            setTask(
+              (a) =>
+                ({
+                  ...a,
+                  color: colors.hex,
+                } as Task)
+            );
+          }}
+        />
 
-            {ntask.goal?.unit == "custom" && (
-              <Input
-                placeholder="Custom Unit"
-                onChange={(a) => {
-                  setTask(
-                    (b) =>
-                      ({
-                        ...b,
-                        goal: {
-                          ...b.goal,
-                          customName: a.nativeEvent.text,
-                        },
-                      } as Task)
-                  );
-                }}
-              />
-            )}
-          </View>
-          <View className="flex flex-col gap-2">
-            <Label nativeID="steps">Steps</Label>
-            <Input
-              defaultValue={ntask.goal.steps.toString()}
-              className="w-24"
-              nativeID="steps"
-              placeholder="Steps"
-              keyboardType="numeric"
-              onChange={(a) => {
-                let n = parseInt(a.nativeEvent.text);
-                if (!Number.isNaN(n)) {
-                  setTask(
-                    (b) =>
-                      ({
-                        ...b,
-                        goal: {
-                          ...b.goal,
-                          steps: n,
-                        },
-                      } as Task)
-                  );
-                }
-              }}
-            />
-          </View>
-        </View>
+        <Text className="text-xl font-semibold">Goal</Text>
+        <Goal ntask={ntask} setTask={setTask} />
 
         <Collapsible defaultOpen>
           <CollapsibleTrigger asChild>

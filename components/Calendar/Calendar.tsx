@@ -7,26 +7,28 @@ import {
   format,
   startOfWeek,
 } from "date-fns";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Task } from "~/lib/states/task";
+import { useQuery } from "@realm/react";
+import { Results } from "realm";
 
 export function CalendarSection(props: {
   date: Date;
   setDate: (date: Date) => void;
-  tasks: Task[];
 }) {
-  const { date, setDate, tasks } = props;
+  const { date, setDate } = props;
   const LENGTH = 100;
   const HALF = 50;
   const ref = useRef<View>(null);
+
+  const flatlistRef = useRef<VirtualizedList<Date[]>>(null);
   const [index, setIndex] = useState(HALF);
   const [width, setWidth] = useState(0);
+  const tasks = useQuery(Task);
+
   useEffect(() => {
-    ref.current?.measure((x, y, w, h) => {
-      setWidth(w);
-    });
-  }, [ref]);
-  const flatlistRef = useRef<VirtualizedList<Date[]>>(null);
+    flatlistRef.current?.scrollToIndex({ index: HALF, animated: false });
+  }, [date]);
   const getWeek = (index: number) => {
     const a = index - HALF;
     const weekStart = startOfWeek(addDays(date, a * 7));
@@ -36,7 +38,7 @@ export function CalendarSection(props: {
       return a;
     });
   };
-  const refrenceText = () => {
+  const referenceText = useCallback(() => {
     let diff = differenceInCalendarWeeks(Date.now(), getWeek(index)[3]);
     if (diff == 0) {
       return null;
@@ -47,14 +49,17 @@ export function CalendarSection(props: {
         {Math.abs(diff) == 1 ? "" : "s"} {diff > 0 ? "ago" : "ahead"}
       </Text>
     );
-  };
-  useEffect(() => {
-    flatlistRef.current?.scrollToIndex({ index: HALF, animated: false });
-  }, [date]);
+  }, []);
+
   return (
-    <View ref={ref} className="w-full flex flex-col items-end">
+    <View
+      onLayout={(a) => {
+        setWidth(a.nativeEvent.layout.width);
+      }}
+      className="w-full  flex flex-col items-end"
+    >
       <View className="flex flex-row justify-end w-full h-6">
-        {refrenceText()}
+        {referenceText()}
       </View>
       <VirtualizedList<Date[]>
         ref={flatlistRef}
@@ -101,7 +106,7 @@ export function CalendarSection(props: {
 }
 
 function Week(props: {
-  tasks: Task[];
+  tasks: Results<Task>;
   width: number;
   dates: Date[];
   currentDate: Date;
