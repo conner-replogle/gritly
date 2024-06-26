@@ -70,7 +70,7 @@ export default function Screen() {
   return (
     <SafeAreaView>
       <View className="h-[100vh] bg-secondary/50">
-        <HeaderCard date={date} setDate={setDate} tasks={tasks} />
+        <HeaderCard date={date} setDate={setDate} />
 
         <View className="p-6 flex flex-col gap-4 h-full">
           <FlatList
@@ -87,13 +87,12 @@ export default function Screen() {
 }
 function HeaderCard({
   date,
-  tasks,
   setDate,
 }: {
   date: Date;
-  tasks: Task[];
   setDate: (date: Date) => void;
 }) {
+  const tasks = useQuery(Task).filtered("startDate <= $0", date);
   const todayTasks = tasks.filter((a) => a.showToday(date));
 
   const daily = todayTasks.filter((a) => a.repeats.period == "Daily");
