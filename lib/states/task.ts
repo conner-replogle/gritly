@@ -43,8 +43,8 @@ const UNITS = [
 class Repeat extends Realm.Object {
     period!: string;
     
-    specfic_weekday?: Realm.Set<number> | number[];
-    specfic_days?: Realm.Set<number> | number[];
+    specific_weekday?: Realm.Set<number> | number[];
+    specific_days?: Realm.Set<number> | number[];
     every_n?: number;
 
     static schema: Realm.ObjectSchema = {
@@ -52,14 +52,14 @@ class Repeat extends Realm.Object {
       embedded: true,
       properties: {
         period: 'string',
-        specfic_weekday: 'int<>', // Set of integers
-        specfic_days: 'int<>',
+          specific_weekday: 'int<>', // Set of integers
+          specific_days: 'int<>',
         every_n: 'int?'
       },
     };
   }
 class Completed extends Realm.Object {
-    id!: string;
+    _id!: Realm.BSON.ObjectId;
     completedAt!: Date;
     amount: number = 0;
     goal!: Goal;
@@ -69,9 +69,8 @@ class Completed extends Realm.Object {
 
     static schema: Realm.ObjectSchema = {
       name: 'Completed',
-      embedded: true,
       properties: {
-        id: 'string',
+        _id: 'objectId',
         completedAt: 'date',
         amount: 'int',
         goal: 'Goal'
@@ -117,7 +116,7 @@ class Task extends Realm.Object {
           completed: [],
           repeats: repeats ?? {
             period: "Daily",
-            specfic_weekday: [0,1,2,3,4,5,6]
+            specific_weekday: [0,1,2,3,4,5,6]
           } as Repeat
           ,
           color,
@@ -137,11 +136,11 @@ class Task extends Realm.Object {
         return false;
       }
       if (this.repeats.period == "Daily"){
-        if (this.repeats.specfic_days && this.repeats.specfic_days.includes(date.getDate()))
+        if (this.repeats.specific_days && this.repeats.specific_days.includes(date.getDate()))
           return true;
         if (this.repeats.every_n && differenceInDays(this.startsOn,date) % this.repeats.every_n == 0)
           return true;
-        if (this.repeats.specfic_weekday && this.repeats.specfic_weekday.includes(date.getDay()))
+        if (this.repeats.specific_weekday && this.repeats.specific_weekday.includes(date.getDay()))
           return true;
       }else if (this.repeats.period == "Weekly"){
         return true;
