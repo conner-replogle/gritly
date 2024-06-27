@@ -44,7 +44,15 @@ export function AddTasks(props: { dense?: boolean }) {
     </View>
   );
 }
+function getRandomBrightColor() {
+  const getRandomValue = () => Math.floor(Math.random() * 128) + 128; // Values between 128 and 255
 
+  const red = getRandomValue().toString(16).padStart(2, "0");
+  const green = getRandomValue().toString(16).padStart(2, "0");
+  const blue = getRandomValue().toString(16).padStart(2, "0");
+
+  return `#${red}${green}${blue}`;
+}
 function AddTaskSheet({
   bottomSheetModalRef,
 }: {
@@ -53,7 +61,7 @@ function AddTaskSheet({
   const realm = useRealm();
   const { colors } = useTheme();
   const [newTask, setNewTask] = useState<Task>(
-    Task.generate("", "", Math.floor(Math.random() * 16777215).toString(16))
+    Task.generate("", "", getRandomBrightColor())
   );
 
   // variables
@@ -83,13 +91,7 @@ function AddTaskSheet({
             realm.write(() => {
               realm.create("Task", task);
             });
-            setNewTask(
-              Task.generate(
-                "",
-                "",
-                Math.floor(Math.random() * 16777215).toString(16)
-              )
-            );
+            setNewTask(Task.generate("", "", getRandomBrightColor()));
             bottomSheetModalRef.current?.dismiss();
             bottomSheetModalRef.current?.forceClose();
           }}
