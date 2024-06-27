@@ -92,7 +92,7 @@ function HeaderCard({
   date: Date;
   setDate: (date: Date) => void;
 }) {
-  const tasks = useQuery(Task).filtered("startDate <= $0", date);
+  const tasks = useQuery(Task).filtered("startsOn <= $0", date);
   const todayTasks = tasks.filter((a) => a.showToday(date));
 
   const daily = todayTasks.filter((a) => a.repeats.period == "Daily");

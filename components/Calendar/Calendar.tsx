@@ -142,7 +142,14 @@ function Week(props: {
           </Pressable>
           <View className="flex flex-col mt-4 gap-1">
             {Array.from(
-              tasks.filter((a) => a.showToday(date)),
+              tasks.filter(
+                (a) =>
+                  a.showToday(date) &&
+                  !(
+                    a.repeats.period == "Weekly" &&
+                    !a.getCompleted(date)?.isCompleted()
+                  )
+              ),
               (task, i) => (
                 <View
                   key={task._id.toString()}

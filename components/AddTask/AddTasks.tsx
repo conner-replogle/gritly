@@ -52,6 +52,9 @@ function AddTaskSheet({
 }) {
   const realm = useRealm();
   const { colors } = useTheme();
+  const [newTask, setNewTask] = useState<Task>(
+    Task.generate("", "", Math.floor(Math.random() * 16777215).toString(16))
+  );
 
   // variables
   const snapPoints = ["90%"];
@@ -75,11 +78,18 @@ function AddTaskSheet({
       <BottomSheetView>
         <EditTaskScreen
           submitLabel="Create"
-          task={Task.generate("", "", "blue")}
+          task={newTask}
           onSubmit={(task) => {
             realm.write(() => {
               realm.create("Task", task);
             });
+            setNewTask(
+              Task.generate(
+                "",
+                "",
+                Math.floor(Math.random() * 16777215).toString(16)
+              )
+            );
             bottomSheetModalRef.current?.dismiss();
             bottomSheetModalRef.current?.forceClose();
           }}

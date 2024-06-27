@@ -1,81 +1,87 @@
-
 import React, { useState } from "react";
-import { SafeAreaView, View, Text, TextInput, FlatList, Pressable } from "react-native";
-import { Realm, RealmProvider, useRealm, useQuery } from '@realm/react'
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  Pressable,
+} from "react-native";
+import { Realm, RealmProvider, useRealm, useQuery } from "@realm/react";
 import { ObjectSchema } from "realm";
 import { differenceInDays } from "date-fns";
-export const CALENDAR = ["S","M","T","W","Th","F","Sa"];
+export const CALENDAR = ["S", "M", "T", "W", "Th", "F", "Sa"];
 
 const UNITS = [
   {
-    "name": "Custom",
-    "value": "custom",
-    "type": "count"
+    name: "Custom",
+    value: "custom",
+    type: "count",
   },
   {
-    "name": "Minutes",
-    "value": "minutes",
-    "type": "time"
+    name: "Minutes",
+    value: "minutes",
+    type: "time",
   },
   {
-    "name": "Hours",
-    "value": "hours",
-    "type": "time"
+    name: "Hours",
+    value: "hours",
+    type: "time",
   },
   {
-    "name": "Yards",
-    "value": "yards",
-    "type": "length"
+    name: "Yards",
+    value: "yards",
+    type: "length",
   },
   {
-    "name": "Miles",
-    "value": "miles",
-    "type": "length"
+    name: "Miles",
+    value: "miles",
+    type: "length",
   },
   {
-    "name": "Count",
-    "value": "count",
-    "type": "count"
+    name: "Count",
+    value: "count",
+    type: "count",
   },
-  
-]
+];
 
 class Repeat extends Realm.Object {
-    period!: string;
-    
-    specific_weekday?: Realm.Set<number> | number[];
-    specific_days?: Realm.Set<number> | number[];
-    every_n?: number;
+  period!: string;
 
-    static schema: Realm.ObjectSchema = {
-      name: 'Repeat',
-      embedded: true,
-      properties: {
-        period: 'string',
-          specific_weekday: 'int<>', // Set of integers
-          specific_days: 'int<>',
-        every_n: 'int?'
-      },
-    };
-  }
+  specific_weekday?: Realm.Set<number> | number[];
+  specific_days?: Realm.Set<number> | number[];
+  every_n?: number;
+
+  static schema: Realm.ObjectSchema = {
+    name: "Repeat",
+    embedded: true,
+    properties: {
+      period: "string",
+      specific_weekday: "int<>", // Set of integers
+      specific_days: "int<>",
+      every_n: "int?",
+    },
+  };
+}
 class Completed extends Realm.Object {
-    _id!: Realm.BSON.ObjectId;
-    completedAt!: Date;
-    amount: number = 0;
-    goal!: Goal;
-    isCompleted(): boolean{
-      return this.amount >= this.goal.amount;
-    } 
+  _id!: Realm.BSON.ObjectId;
+  completedAt!: Date;
+  amount: number = 0;
 
-    static schema: Realm.ObjectSchema = {
-      name: 'Completed',
-      properties: {
-        _id: 'objectId',
-        completedAt: 'date',
-        amount: 'int',
-        goal: 'Goal'
-      },
-    };
+  goal!: Goal;
+  isCompleted(): boolean {
+    return this.amount >= this.goal.amount;
+  }
+
+  static schema: Realm.ObjectSchema = {
+    name: "Completed",
+    properties: {
+      _id: "objectId",
+      completedAt: "date",
+      amount: "int",
+      goal: "Goal",
+    },
+  };
 }
 
 class Goal extends Realm.Object {
@@ -85,125 +91,147 @@ class Goal extends Realm.Object {
   customName?: string;
 
   static schema: Realm.ObjectSchema = {
-    name: 'Goal',
+    name: "Goal",
     embedded: true,
     properties: {
       amount: "int",
       unit: "string",
       customName: "string?",
-      steps: "int"
+      steps: "int",
     },
   };
 }
 class Task extends Realm.Object {
-    _id!: Realm.BSON.ObjectId;
-    title!: string;
-    repeats!: Repeat;
-    description!: string;
-    color!: string;
-    completed!:Completed[]
-    createdAt!: Date;
-    startsOn!: Date;
-    goal!:Goal;
+  _id!: Realm.BSON.ObjectId;
+  title!: string;
+  repeats!: Repeat;
+  description!: string;
+  color!: string;
+  completed!: Completed[];
+  createdAt!: Date;
+  startsOn!: Date;
+  goal!: Goal;
 
-    static generate(title: string,description: string,color:string,repeats?: Repeat,goal?:Goal):Task {
-      let startsOn = new Date(Date.now());
-      startsOn.setHours(0,0,0,0);
-        return {
-          _id: new Realm.BSON.ObjectId(),
-          title,
-          description,
-          completed: [],
-          repeats: repeats ?? {
-            period: "Daily",
-            specific_weekday: [0,1,2,3,4,5,6]
-          } as Repeat
-          ,
-          color,
-          goal: goal ?? {
-            amount: 1,
-            unit: "count",
-            steps: 1
-          } as Goal,
-          createdAt: new Date(Date.now()),
-          startsOn: startsOn
-        } as unknown as Task;
+  static generate(
+    title: string,
+    description: string,
+    color: string,
+    repeats?: Repeat,
+    goal?: Goal
+  ): Task {
+    let startsOn = new Date(Date.now());
+    startsOn.setHours(0, 0, 0, 0);
+    return {
+      _id: new Realm.BSON.ObjectId(),
+      title,
+      description,
+      completed: [],
+      repeats:
+        repeats ??
+        ({
+          period: "Daily",
+          specific_weekday: [0, 1, 2, 3, 4, 5, 6],
+        } as Repeat),
+      color,
+      goal:
+        goal ??
+        ({
+          amount: 1,
+          unit: "count",
+          steps: 1,
+        } as Goal),
+      createdAt: new Date(Date.now()),
+      startsOn: startsOn,
+    } as unknown as Task;
+  }
+
+  showToday(date: Date): boolean {
+    if (date < this.startsOn) {
+      return false;
     }
-
-
-    showToday(date:Date):boolean{
-      if (date < this.startsOn){
-        return false;
-      }
-      if (this.repeats.period == "Daily"){
-        if (this.repeats.specific_days && this.repeats.specific_days.includes(date.getDate()))
-          return true;
-        if (this.repeats.every_n && differenceInDays(this.startsOn,date) % this.repeats.every_n == 0)
-          return true;
-        if (this.repeats.specific_weekday && this.repeats.specific_weekday.includes(date.getDay()))
-          return true;
-      }else if (this.repeats.period == "Weekly"){
+    if (this.repeats.period == "Daily") {
+      if (
+        this.repeats.specific_days &&
+        this.repeats.specific_days.includes(date.getDate())
+      )
         return true;
-      }
-      return false;                      
+      if (
+        this.repeats.every_n &&
+        differenceInDays(this.startsOn, date) % this.repeats.every_n == 0
+      )
+        return true;
+      if (
+        this.repeats.specific_weekday &&
+        this.repeats.specific_weekday.includes(date.getDay())
+      )
+        return true;
+    } else if (this.repeats.period == "Weekly") {
+      return true;
     }
-    
-    getStreak(startDate: Date){
-      let streak = this.getCompleted(startDate)?.isCompleted() ?1: 0;
-      let date = new Date(startDate);
-      date.setHours(0,0,0,0);
-      date.setDate(date.getDate() - 1)
-      
-      while (date > this.startsOn && !this.showToday(date)){date.setDate(date.getDate() - 1)};
-      while (this.getCompleted(date)?.isCompleted() ){
-        streak++;
-        date.setDate(date.getDate() - 1)
-        while (date > this.startsOn && !this.showToday(date)){date.setDate(date.getDate() - 1)};
-      }
-      return streak;
+    return false;
+  }
+
+  getStreak(startDate: Date) {
+    let streak = this.getCompleted(startDate)?.isCompleted() ? 1 : 0;
+    let date = new Date(startDate);
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - 1);
+
+    while (date > this.startsOn && !this.showToday(date)) {
+      date.setDate(date.getDate() - 1);
     }
-
-    getCompleted(date: Date): Completed | undefined{
-      const beginning = new Date(date);
-      const end = new Date(date);
-      const MorningStart = 8;
-      const WeekStart = 2 // Monday
-
-      if (this.repeats.period == "weekly"){
-        const currentDay = beginning.getDay();
-        const difference = (currentDay - WeekStart + 7) % 7;
-        
-        beginning.setDate(beginning.getDate() - difference);
-        end.setDate(end.getDate() + (6 - difference));
-      }else if (this.repeats.period  == "daily"){
-        end.setDate(end.getDate() + 1);
+    while (this.getCompleted(date)?.isCompleted()) {
+      streak++;
+      date.setDate(date.getDate() - 1);
+      while (date > this.startsOn && !this.showToday(date)) {
+        date.setDate(date.getDate() - 1);
       }
-      beginning.setHours(0,0,0,0)
-      end.setHours(23,59,59,0);
-
-      
-      for (let i = this.completed.length - 1; i >= 0; i--){
-
-        if (this.completed[i].completedAt >= beginning && this.completed[i].completedAt <= end)
-          return this.completed[i];
-      } 
-      return undefined;
     }
+    return streak;
+  }
 
-    static schema = {
-        name: 'Task',
-        primaryKey: '_id',
-        properties: {
-            _id: 'objectId',
-            title: 'string',
-            description: 'string',
-            completed:"Completed[]",
-            repeats: "Repeat",
-            goal: "Goal",
-            color: 'string',
-            createdAt: 'date',
-            startsOn: 'date'
-        },
-    } as ObjectSchema;
+  getCompleted(date: Date): Completed | undefined {
+    const beginning = new Date(date);
+    const end = new Date(date);
+    const MorningStart = 8;
+    const WeekStart = 2; // Monday
+
+    if (this.repeats.period == "weekly") {
+      const currentDay = beginning.getDay();
+      const difference = (currentDay - WeekStart + 7) % 7;
+
+      beginning.setDate(beginning.getDate() - difference);
+      end.setDate(end.getDate() + (6 - difference));
+    } else if (this.repeats.period == "daily") {
+      end.setDate(end.getDate() + 1);
+    }
+    beginning.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 0);
+
+    for (let i = this.completed.length - 1; i >= 0; i--) {
+      if (
+        this.completed[i].completedAt >= beginning &&
+        this.completed[i].completedAt <= end
+      )
+        return this.completed[i];
+    }
+    return undefined;
+  }
+
+  static schema = {
+    name: "Task",
+    primaryKey: "_id",
+    properties: {
+      _id: "objectId",
+      title: "string",
+      description: "string",
+      completed: "Completed[]",
+      repeats: "Repeat",
+      goal: "Goal",
+      color: "string",
+      createdAt: "date",
+      startsOn: "date",
+    },
+  } as ObjectSchema;
 }
-export {Task,Repeat,Completed,Goal,UNITS}
+export { Task, Repeat, Completed, Goal, UNITS };
