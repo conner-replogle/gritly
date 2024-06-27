@@ -127,21 +127,21 @@ function HeaderCard({
       </CardHeader>
       <CardContent>
         <View className="flex-row justify-around gap-4">
-          <View className="items-center w-12">
+          <View className="items-center flex-1">
             <Text className="text-sm text-muted-foreground">Daily</Text>
             <Text className="text-xl font-semibold">
               {daily.filter((a) => a.getCompleted(date)?.isCompleted()).length}{" "}
               / {daily.length}
             </Text>
           </View>
-          <View className="items-center w-12">
+          <View className="items-center flex-1">
             <Text className="text-sm text-muted-foreground">Weekly</Text>
             <Text className="text-xl font-semibold">
               {weekly.filter((a) => a.getCompleted(date)?.isCompleted()).length}{" "}
               / {weekly.length}
             </Text>
           </View>
-          <View className="items-center w-12">
+          <View className="items-center flex-1">
             <Text className="text-sm text-muted-foreground">Daily</Text>
             <Text className="text-xl font-semibold">14</Text>
           </View>

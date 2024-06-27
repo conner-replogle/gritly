@@ -205,9 +205,9 @@ export function EditTaskScreen({
     <Tabs
       value={value}
       onValueChange={setValue}
-      className="w-full max-w-[400px] mx-auto flex-col gap-4"
+      className=" mx-2  flex-col gap-4"
     >
-      <TabsList className="flex-row w-full">
+      <TabsList className="flex-row ">
         <TabsTrigger value="basic" className="flex-1">
           <Text>Basic</Text>
         </TabsTrigger>
@@ -218,7 +218,7 @@ export function EditTaskScreen({
           <Text>Goal</Text>
         </TabsTrigger>
       </TabsList>
-      <View className={"flex flex-col gap-3 p-3"}>
+      <View className={"flex flex-col gap-3 p-2"}>
         <TabsContent value="basic" className="flex flex-col gap-3">
           <Label nativeID="title">Title</Label>
           <Input
