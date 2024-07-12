@@ -1,5 +1,11 @@
-import { CALENDAR, Task, UNITS } from "~/lib/states/task";
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { CALENDAR, Completed, Repeat, Task, UNITS } from "~/lib/states/task";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { ScrollView, View } from "react-native";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
@@ -30,6 +36,9 @@ import { TaskCard } from "~/components/Task/taskCard";
 import { formatDate } from "date-fns";
 import DateTimePicker from "react-native-ui-datepicker/src/DateTimePicker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Unmanaged } from "realm";
+import { useRealm } from "@realm/react";
+import { useTheme } from "@react-navigation/native";
 
 function SelectColor(props: {
   ntask: Task;
@@ -186,9 +195,19 @@ export function EditTaskScreen({
   task: Task;
   onSubmit: (task: Task) => void;
 }) {
-  const [ntask, setInnerTask] = useState({
-    ...task,
-  } as Task);
+  useEffect(() => {
+    realm.beginTransaction();
+    return () => {
+      if (realm.isInTransaction) {
+        realm.cancelTransaction();
+      }
+    };
+  }, []);
+  const { colors } = useTheme();
+  const realm = useRealm();
+  const [ntask, setInnerTask] = useState(task);
+  console.log("Here");
+  console.log(ntask);
   const setTask = useCallback((write: (a: Task) => void) => {
     write(ntask);
     setInnerTask({
@@ -200,7 +219,6 @@ export function EditTaskScreen({
     return ntask.title.length > 0;
   }
   const [value, setValue] = useState("basic");
-  function onDayPress(nDays: string[]) {}
   return (
     <Tabs
       value={value}
@@ -285,6 +303,10 @@ export function EditTaskScreen({
             <CollapsibleContent>
               <DateTimePicker
                 mode="single"
+                todayTextStyle={{ color: colors.text }}
+                calendarTextStyle={{ color: colors.text }}
+                headerTextStyle={{ color: colors.text }}
+                weekDaysTextStyle={{ color: colors.text }}
                 date={ntask.startsOn}
                 onChange={({ date }) => {
                   setTask((a) => {

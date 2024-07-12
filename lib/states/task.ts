@@ -1,12 +1,3 @@
-import React, { useState } from "react";
-import {
-  SafeAreaView,
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  Pressable,
-} from "react-native";
 import { Realm, RealmProvider, useRealm, useQuery } from "@realm/react";
 import { ObjectSchema } from "realm";
 import { differenceInDays } from "date-fns";
@@ -175,16 +166,17 @@ class Task extends Realm.Object {
     let streak = this.getCompleted(startDate)?.isCompleted() ? 1 : 0;
     let date = new Date(startDate);
     date.setHours(0, 0, 0, 0);
-    date.setDate(date.getDate() - 1);
+    const back = this.repeats.period == "Weekly" ? 7 : 1;
+    date.setDate(date.getDate() - back);
 
     while (date > this.startsOn && !this.showToday(date)) {
-      date.setDate(date.getDate() - 1);
+      date.setDate(date.getDate() - back);
     }
     while (this.getCompleted(date)?.isCompleted()) {
       streak++;
-      date.setDate(date.getDate() - 1);
+      date.setDate(date.getDate() - back);
       while (date > this.startsOn && !this.showToday(date)) {
-        date.setDate(date.getDate() - 1);
+        date.setDate(date.getDate() - back);
       }
     }
     return streak;
@@ -194,16 +186,14 @@ class Task extends Realm.Object {
     const beginning = new Date(date);
     const end = new Date(date);
     const MorningStart = 8;
-    const WeekStart = 2; // Monday
+    const WeekStart = 0; // Monday
 
-    if (this.repeats.period == "weekly") {
+    if (this.repeats.period == "Weekly") {
       const currentDay = beginning.getDay();
       const difference = (currentDay - WeekStart + 7) % 7;
 
       beginning.setDate(beginning.getDate() - difference);
       end.setDate(end.getDate() + (6 - difference));
-    } else if (this.repeats.period == "daily") {
-      end.setDate(end.getDate() + 1);
     }
     beginning.setHours(0, 0, 0, 0);
     end.setHours(23, 59, 59, 0);

@@ -118,13 +118,11 @@ export default function TaskContent({
               bottomSheetModalRef.current?.dismiss();
             }}
             submitLabel="Save"
-            onSubmit={(task) => {
+            onSubmit={(atask) => {
               // @ts-ignore
-              delete task["completed"];
-              realm.write(() => {
-                console.log(task.completed);
-                realm.create("Task", task, UpdateMode.Modified);
-              });
+              delete atask["completed"];
+              console.log(atask);
+              realm.commitTransaction();
               bottomSheetModalRef.current?.dismiss();
             }}
             task={task}

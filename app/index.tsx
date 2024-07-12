@@ -141,7 +141,7 @@ function HeaderCard({
               / {weekly.length}
             </Text>
           </View>
-          <View className="items-center flex-1">
+          <View className="items-center flex-1 ">
             <Text className="text-sm text-muted-foreground">Daily</Text>
             <Text className="text-xl font-semibold">14</Text>
           </View>
