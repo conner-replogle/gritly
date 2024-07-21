@@ -88,6 +88,7 @@ function AddTaskSheet({
           submitLabel="Create"
           task={newTask}
           onSubmit={(task) => {
+            if (realm.isInTransaction) realm.cancelTransaction();
             realm.write(() => {
               realm.create("Task", task);
             });

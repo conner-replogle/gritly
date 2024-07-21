@@ -20,7 +20,11 @@
     }
   },
   "submit": {
-    "production": {
+    "production":{
+      "ios": {
+        "appleId": "conner.replogle@proton.me",
+        "ascAppId": "6504501634"
+      }
    
     }
   }

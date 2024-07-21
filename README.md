@@ -26,3 +26,12 @@ Task to be completed every day for X days.
 - [X] added color bordor on tasks
 - [X] Added color picker on Add Task
 - [ ] Don't lose all progress on update
+- [X] Repeat N times Weekly
+- [ ] Specific Days of month 
+- [ ] Every N Days
+- [ ] Groups
+- [ ] Notifications
+- [ ] End Date
+- [ ] Subscriptions
+- [ ] Insights
+- [ ] Timers

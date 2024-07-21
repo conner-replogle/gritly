@@ -3,7 +3,7 @@ import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import * as React from "react";
 import { useCallback, useRef } from "react";
-import { LayoutAnimation, View } from "react-native";
+import { LayoutAnimation, Linking, View } from "react-native";
 import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
 import { useTheme } from "@react-navigation/native";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
@@ -18,6 +18,7 @@ import { MoonStar } from "~/lib/icons/MoonStar";
 import { Sun } from "~/lib/icons/Sun";
 import { cn } from "~/lib/utils";
 import { ThemeToggle } from "~/components/ThemeToggle";
+import Svg, { Path } from "react-native-svg";
 export default function SettingsButton() {
   const { colors } = useTheme();
   const { isDarkColorScheme, setColorScheme } = useColorScheme();
@@ -54,6 +55,14 @@ export default function SettingsButton() {
               <Text className={"text-2xl"}>Settings</Text>
               <ThemeToggle />
             </View>
+            <Button
+              className="bg-[#FFDD00]"
+              onPress={() => {
+                Linking.openURL("https://buymeacoffee.com/conner.replogle");
+              }}
+            >
+              <Text className=" text-black">Buy me a Coffee</Text>
+            </Button>
           </View>
         </BottomSheetView>
       </BottomSheetModal>

@@ -1,6 +1,10 @@
 import { Realm, RealmProvider, useRealm, useQuery } from "@realm/react";
 import { ObjectSchema } from "realm";
-import { differenceInDays } from "date-fns";
+import {
+  differenceInCalendarMonths,
+  differenceInCalendarWeeks,
+  differenceInDays,
+} from "date-fns";
 export const CALENDAR = ["S", "M", "T", "W", "Th", "F", "Sa"];
 
 const UNITS = [
@@ -157,7 +161,20 @@ class Task extends Realm.Object {
       )
         return true;
     } else if (this.repeats.period == "Weekly") {
-      return true;
+      if (
+        this.repeats.every_n &&
+        differenceInCalendarWeeks(date, this.startsOn) % this.repeats.every_n ==
+          0
+      )
+        return true;
+    } else if (this.repeats.period == "Monthly") {
+      if (
+        this.repeats.every_n &&
+        differenceInCalendarMonths(date, this.startsOn) %
+          this.repeats.every_n ==
+          0
+      )
+        return true;
     }
     return false;
   }

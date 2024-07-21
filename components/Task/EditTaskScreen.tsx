@@ -173,14 +173,70 @@ function RepeatPeriod(props: {
   };
 
   return (
-    <RadioGroup
-      value={props.ntask.repeats.period}
-      onValueChange={onValueChange}
-      className="gap-3"
-    >
-      <RadioGroupItemWithLabel onLabelPress={onValueChange} value="Daily" />
-      <RadioGroupItemWithLabel onLabelPress={onValueChange} value="Weekly" />
-    </RadioGroup>
+    <View className="bg-secondary p-3 rounded-xl">
+      <RadioGroup
+        value={props.ntask.repeats.period}
+        onValueChange={onValueChange}
+        className="gap-3"
+      >
+        <RadioGroupItemWithLabel onLabelPress={onValueChange} value="Daily" />
+        <RadioGroupItemWithLabel onLabelPress={onValueChange} value="Weekly" />
+        <RadioGroupItemWithLabel onLabelPress={onValueChange} value="Monthly" />
+      </RadioGroup>
+    </View>
+  );
+}
+
+function FrequencyPeriod({
+  ntask,
+  setTask,
+}: {
+  ntask: Task;
+  setTask: (a: (a: Task) => void) => void;
+}) {
+  return (
+    <View className="bg-secondary p-3 rounded-xl">
+      {ntask.repeats.period === "Daily" && (
+        <ToggleGroup
+          value={ntask.repeats.specific_weekday?.map((a) => a.toString()) ?? []}
+          onValueChange={(nDays) => {
+            console.log(nDays);
+            const parsedDays = nDays.map((a) => parseInt(a));
+            console.log(parsedDays);
+            setTask((a) => {
+              a.repeats.specific_weekday = parsedDays;
+              return a;
+            });
+          }}
+          type="multiple"
+        >
+          {Array.from(CALENDAR, (a, i) => (
+            <ToggleGroupItem key={i} value={i.toString()}>
+              <Text className="w-[20px] text-center">{a}</Text>
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      )}
+      {(ntask.repeats.period === "Weekly" ||
+        ntask.repeats.period == "Monthly") && (
+        <View className="flex flex-row items-center gap-2">
+          <Text className="font-semibold text-xl">Repeats Every</Text>
+          <Input
+            defaultValue={ntask.repeats.every_n?.toString() ?? "1"}
+            onChange={(a) => {
+              setTask((b) => {
+                let c = parseInt(a.nativeEvent.text);
+                if (!Number.isNaN(c)) {
+                  b.repeats.every_n = c;
+                }
+              });
+            }}
+            className="w-12 text-center"
+          />
+          <Text className="font-semibold text-xl ">weeks</Text>
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -218,6 +274,7 @@ export function EditTaskScreen({
   function ValidateForm() {
     return ntask.title.length > 0;
   }
+  const tabs = ["basic", "repeats", "goal"];
   const [value, setValue] = useState("basic");
   return (
     <Tabs
@@ -266,33 +323,15 @@ export function EditTaskScreen({
           />
         </TabsContent>
         <TabsContent value="repeats" className="flex flex-col gap-2 ">
+          <Text className="text-l font-semibold text-muted-foreground">
+            REPEATS
+          </Text>
           <RepeatPeriod ntask={ntask} setTask={setTask} />
-          {ntask.repeats.period === "Daily" && (
-            <ToggleGroup
-              value={
-                ntask.repeats.specific_weekday?.map((a) => a.toString()) ?? []
-              }
-              onValueChange={(nDays) => {
-                console.log(nDays);
-                const parsedDays = nDays.map((a) => parseInt(a));
-                console.log(parsedDays);
-                setTask((a) => {
-                  a.repeats.specific_weekday = parsedDays;
-                  return a;
-                });
-              }}
-              type="multiple"
-            >
-              {Array.from(CALENDAR, (a, i) => (
-                <ToggleGroupItem key={i} value={i.toString()}>
-                  <Text className="w-[20px] text-center">{a}</Text>
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          )}
-          {ntask.repeats.period === "Weekly" && (
-            <Input value={ntask.repeats.every_n?.toString()} />
-          )}
+
+          <Text className="text-l font-semibold text-muted-foreground">
+            FREQUENCY
+          </Text>
+          <FrequencyPeriod ntask={ntask} setTask={setTask} />
 
           <Collapsible>
             <CollapsibleTrigger asChild>
@@ -341,13 +380,17 @@ export function EditTaskScreen({
 
         <Button
           onPress={() => {
+            if (value != "goal") {
+              setValue(tabs[tabs.indexOf(value) + 1] ?? "basic");
+              return;
+            }
             if (!ValidateForm()) {
               return;
             }
             onSubmit(ntask);
           }}
         >
-          <Text>{submitLabel}</Text>
+          <Text>{value == "goal" ? submitLabel : "Next"}</Text>
         </Button>
         {onDelete && (
           <Button variant={"destructive"} onPress={onDelete}>

@@ -112,6 +112,9 @@ export default function TaskContent({
         <BottomSheetView>
           <EditTaskScreen
             onDelete={() => {
+              if (realm.isInTransaction) {
+                realm.cancelTransaction();
+              }
               realm.write(() => {
                 realm.delete(task);
               });
