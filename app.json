@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.connerreplogle.habittracker",
-      "buildNumber": "30",
+      "buildNumber": "32",
       "config": {
         "usesNonExemptEncryption": false
       }

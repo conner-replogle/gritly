@@ -22,6 +22,7 @@ import ColorPicker, {
   Panel1,
   Preview,
   returnedResults,
+  Swatches,
 } from "reanimated-color-picker";
 import {
   Select,
@@ -55,9 +56,7 @@ function SelectColor(props: {
           value={props.ntask.color}
           onChange={props.onChange}
         >
-          <Preview />
-          <Panel1 />
-          <HueSlider />
+          <Swatches />
         </ColorPicker>
       </CollapsibleContent>
     </Collapsible>
@@ -197,25 +196,46 @@ function FrequencyPeriod({
   return (
     <View className="bg-secondary p-3 rounded-xl">
       {ntask.repeats.period === "Daily" && (
-        <ToggleGroup
-          value={ntask.repeats.specific_weekday?.map((a) => a.toString()) ?? []}
-          onValueChange={(nDays) => {
-            console.log(nDays);
-            const parsedDays = nDays.map((a) => parseInt(a));
-            console.log(parsedDays);
-            setTask((a) => {
-              a.repeats.specific_weekday = parsedDays;
-              return a;
-            });
-          }}
-          type="multiple"
-        >
-          {Array.from(CALENDAR, (a, i) => (
-            <ToggleGroupItem key={i} value={i.toString()}>
-              <Text className="w-[20px] text-center">{a}</Text>
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        <View className="flex-col gap-3 items-start pl-3 pr-3">
+          <Text className="font-semibold">Specific Days of the Week.</Text>
+          <ToggleGroup
+            value={
+              ntask.repeats.specific_weekday?.map((a) => a.toString()) ?? []
+            }
+            onValueChange={(nDays) => {
+              console.log(nDays);
+              const parsedDays = nDays.map((a) => parseInt(a));
+              console.log(parsedDays);
+              setTask((a) => {
+                a.repeats.specific_weekday = parsedDays;
+                return a;
+              });
+            }}
+            type="multiple"
+          >
+            {Array.from(CALENDAR, (a, i) => (
+              <ToggleGroupItem key={i} value={i.toString()}>
+                <Text className="w-[20px] text-center">{a}</Text>
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+          <View className="flex-row gap-3 items-center">
+            <Text className="font-semibold">Repeats Every</Text>
+            <Input
+              defaultValue={ntask.repeats.every_n?.toString() ?? "1"}
+              onChange={(a) => {
+                setTask((b) => {
+                  let c = parseInt(a.nativeEvent.text);
+                  if (!Number.isNaN(c)) {
+                    b.repeats.every_n = c;
+                  }
+                });
+              }}
+              className="w-12 text-center"
+            />
+            <Text className="font-semibold text-xl ">days</Text>
+          </View>
+        </View>
       )}
       {(ntask.repeats.period === "Weekly" ||
         ntask.repeats.period == "Monthly") && (
@@ -277,128 +297,130 @@ export function EditTaskScreen({
   const tabs = ["basic", "repeats", "goal"];
   const [value, setValue] = useState("basic");
   return (
-    <Tabs
-      value={value}
-      onValueChange={setValue}
-      className=" mx-2  flex-col gap-4"
-    >
-      <TabsList className="flex-row ">
-        <TabsTrigger value="basic" className="flex-1">
-          <Text>Basic</Text>
-        </TabsTrigger>
-        <TabsTrigger value="repeats" className="flex-1">
-          <Text>Repeats</Text>
-        </TabsTrigger>
-        <TabsTrigger value="goal" className="flex-1">
-          <Text>Goal</Text>
-        </TabsTrigger>
-      </TabsList>
-      <View className={"flex flex-col gap-3 p-2"}>
-        <TabsContent value="basic" className="flex flex-col gap-3">
-          <Label nativeID="title">Title</Label>
-          <Input
-            placeholder="Name your task"
-            nativeID="title"
-            value={ntask.title}
-            onChangeText={(b) => {
+    <ScrollView>
+      <Tabs
+        value={value}
+        onValueChange={setValue}
+        className=" mx-2  flex-col gap-4"
+      >
+        <TabsList className="flex-row ">
+          <TabsTrigger value="basic" className="flex-1">
+            <Text>Basic</Text>
+          </TabsTrigger>
+          <TabsTrigger value="repeats" className="flex-1">
+            <Text>Repeats</Text>
+          </TabsTrigger>
+          <TabsTrigger value="goal" className="flex-1">
+            <Text>Goal</Text>
+          </TabsTrigger>
+        </TabsList>
+        <View className={"flex flex-col gap-3 p-2"}>
+          <TabsContent value="basic" className="flex flex-col gap-3">
+            <Label nativeID="title">Title</Label>
+            <Input
+              placeholder="Name your task"
+              nativeID="title"
+              value={ntask.title}
+              onChangeText={(b) => {
+                setTask((a) => {
+                  a.title = b;
+                });
+              }}
+              aria-labelledbyledBy="inputLabel"
+              aria-errormessage="inputError"
+            />
+            <Label nativeID="description">Description</Label>
+            <Input
+              placeholder="What exactly is this task?"
+              nativeID="description"
+              value={ntask.description}
+              onChangeText={(b) => {
+                setTask((a) => {
+                  a.description = b;
+                });
+              }}
+              aria-labelledbyledBy="inputLabel"
+              aria-errormessage="inputError"
+            />
+          </TabsContent>
+          <TabsContent value="repeats" className="flex flex-col gap-2 ">
+            <Text className="text-l font-semibold text-muted-foreground">
+              REPEATS
+            </Text>
+            <RepeatPeriod ntask={ntask} setTask={setTask} />
+
+            <Text className="text-l font-semibold text-muted-foreground">
+              FREQUENCY
+            </Text>
+            <FrequencyPeriod ntask={ntask} setTask={setTask} />
+
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Text className="">
+                  Starting Day - {formatDate(ntask.startsOn, "MMMM, dd, yyyy")}
+                </Text>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <DateTimePicker
+                  mode="single"
+                  todayTextStyle={{ color: colors.text }}
+                  calendarTextStyle={{ color: colors.text }}
+                  headerTextStyle={{ color: colors.text }}
+                  weekDaysTextStyle={{ color: colors.text }}
+                  date={ntask.startsOn}
+                  onChange={({ date }) => {
+                    setTask((a) => {
+                      a.startsOn = new Date(date as string);
+                    });
+                  }}
+                />
+              </CollapsibleContent>
+            </Collapsible>
+          </TabsContent>
+          <TabsContent value="goal" className="flex flex-col gap-2 ">
+            <Goal ntask={ntask} setTask={setTask} />
+          </TabsContent>
+          <SelectColor
+            ntask={ntask}
+            onChange={(colors) => {
               setTask((a) => {
-                a.title = b;
+                a.color = colors.hex;
               });
             }}
-            aria-labelledbyledBy="inputLabel"
-            aria-errormessage="inputError"
           />
-          <Label nativeID="description">Description</Label>
-          <Input
-            placeholder="What exactly is this task?"
-            nativeID="description"
-            value={ntask.description}
-            onChangeText={(b) => {
-              setTask((a) => {
-                a.description = b;
-              });
+
+          <TaskCard
+            task={ntask}
+            completed={undefined}
+            completable={true}
+            streak={0}
+            onCardPress={() => {}}
+            onCompletePress={() => {}}
+            onCompleteLongPress={() => {}}
+          />
+
+          <Button
+            onPress={() => {
+              if (value != "goal") {
+                setValue(tabs[tabs.indexOf(value) + 1] ?? "basic");
+                return;
+              }
+              if (!ValidateForm()) {
+                return;
+              }
+              onSubmit(ntask);
             }}
-            aria-labelledbyledBy="inputLabel"
-            aria-errormessage="inputError"
-          />
-        </TabsContent>
-        <TabsContent value="repeats" className="flex flex-col gap-2 ">
-          <Text className="text-l font-semibold text-muted-foreground">
-            REPEATS
-          </Text>
-          <RepeatPeriod ntask={ntask} setTask={setTask} />
-
-          <Text className="text-l font-semibold text-muted-foreground">
-            FREQUENCY
-          </Text>
-          <FrequencyPeriod ntask={ntask} setTask={setTask} />
-
-          <Collapsible>
-            <CollapsibleTrigger asChild>
-              <Text className="">
-                Starting Day - {formatDate(ntask.startsOn, "MMMM, dd, yyyy")}
-              </Text>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <DateTimePicker
-                mode="single"
-                todayTextStyle={{ color: colors.text }}
-                calendarTextStyle={{ color: colors.text }}
-                headerTextStyle={{ color: colors.text }}
-                weekDaysTextStyle={{ color: colors.text }}
-                date={ntask.startsOn}
-                onChange={({ date }) => {
-                  setTask((a) => {
-                    a.startsOn = new Date(date as string);
-                  });
-                }}
-              />
-            </CollapsibleContent>
-          </Collapsible>
-        </TabsContent>
-        <TabsContent value="goal" className="flex flex-col gap-2 ">
-          <Goal ntask={ntask} setTask={setTask} />
-        </TabsContent>
-        <SelectColor
-          ntask={ntask}
-          onChange={(colors) => {
-            setTask((a) => {
-              a.color = colors.hex;
-            });
-          }}
-        />
-
-        <TaskCard
-          task={ntask}
-          completed={undefined}
-          completable={true}
-          streak={0}
-          onCardPress={() => {}}
-          onCompletePress={() => {}}
-          onCompleteLongPress={() => {}}
-        />
-
-        <Button
-          onPress={() => {
-            if (value != "goal") {
-              setValue(tabs[tabs.indexOf(value) + 1] ?? "basic");
-              return;
-            }
-            if (!ValidateForm()) {
-              return;
-            }
-            onSubmit(ntask);
-          }}
-        >
-          <Text>{value == "goal" ? submitLabel : "Next"}</Text>
-        </Button>
-        {onDelete && (
-          <Button variant={"destructive"} onPress={onDelete}>
-            <Text>Delete</Text>
+          >
+            <Text>{value == "goal" ? submitLabel : "Next"}</Text>
           </Button>
-        )}
-      </View>
-    </Tabs>
+          {onDelete && (
+            <Button variant={"destructive"} onPress={onDelete}>
+              <Text>Delete</Text>
+            </Button>
+          )}
+        </View>
+      </Tabs>
+    </ScrollView>
   );
 }
 
