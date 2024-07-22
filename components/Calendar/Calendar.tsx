@@ -58,9 +58,9 @@ export function CalendarSection(props: {
       }}
       className="w-full  flex flex-col items-end"
     >
-      <View className="flex flex-row justify-end w-full h-6">
-        {referenceText()}
-      </View>
+      {/*<View className="flex flex-row justify-end w-full h-6">*/}
+      {/*  {referenceText()}*/}
+      {/*</View>*/}
       <VirtualizedList<Date[]>
         ref={flatlistRef}
         onScrollToIndexFailed={(info) => {}}
@@ -156,7 +156,7 @@ function Week(props: {
                   style={{
                     backgroundColor: `${task.color}`,
                     opacity: task.getCompleted(date)?.isCompleted() ? 1.0 : 0.3,
-                    height: 3,
+                    height: 5,
                   }}
                 />
               )
