@@ -40,13 +40,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Unmanaged } from "realm";
 import { useRealm } from "@realm/react";
 import { useTheme } from "@react-navigation/native";
+export const SWATCHES_COLORS = [
+  "#f44336",
+  "#E91E63",
+  "#9C27B0",
+  "#673AB7",
+  "#3F51B5",
+  "#2196F3",
+  "#03A9F4",
+  "#00BCD4",
+  "#009688",
+  "#4CAF50",
+  "#8BC34A",
+  "#CDDC39",
+  "#FFEB3B",
+  "#FFC107",
+  "#FF9800",
+  "#FF5722",
+];
 
 function SelectColor(props: {
   ntask: Task;
   onChange: (colors: returnedResults) => void;
 }) {
   return (
-    <Collapsible>
+    <Collapsible defaultOpen>
       <CollapsibleTrigger asChild>
         <Text className=" font-semibold">Select Color </Text>
       </CollapsibleTrigger>
@@ -56,7 +74,7 @@ function SelectColor(props: {
           value={props.ntask.color}
           onChange={props.onChange}
         >
-          <Swatches />
+          <Swatches colors={SWATCHES_COLORS} />
         </ColorPicker>
       </CollapsibleContent>
     </Collapsible>

@@ -25,7 +25,10 @@ import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/typ
 import { useTheme } from "@react-navigation/native";
 import { Handle } from "./customhandle";
 
-import { EditTaskScreen } from "~/components/Task/EditTaskScreen";
+import {
+  EditTaskScreen,
+  SWATCHES_COLORS,
+} from "~/components/Task/EditTaskScreen";
 
 export function AddTasks(props: { dense?: boolean }) {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -44,15 +47,11 @@ export function AddTasks(props: { dense?: boolean }) {
     </View>
   );
 }
-function getRandomBrightColor() {
-  const getRandomValue = () => Math.floor(Math.random() * 128) + 128; // Values between 128 and 255
 
-  const red = getRandomValue().toString(16).padStart(2, "0");
-  const green = getRandomValue().toString(16).padStart(2, "0");
-  const blue = getRandomValue().toString(16).padStart(2, "0");
-
-  return `#${red}${green}${blue}`;
+function getRandomBrightColor(): string {
+  return SWATCHES_COLORS[Math.floor(Math.random() * SWATCHES_COLORS.length)];
 }
+
 function AddTaskSheet({
   bottomSheetModalRef,
 }: {
