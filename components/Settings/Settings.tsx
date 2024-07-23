@@ -32,7 +32,6 @@ export default function SettingsButton() {
   }, []);
 
   const ref = useRef<BottomSheetModalMethods | null>(null);
-  const [nuttable, setNuttable] = useMMKVBoolean("settings.nuttable");
 
   return (
     <>
@@ -52,38 +51,7 @@ export default function SettingsButton() {
         }}
       >
         <BottomSheetView>
-          <View className="flex flex-col p-5 gap-4">
-            <View className="flex flex-row justify-between">
-              <Text className={"text-2xl"}>Settings</Text>
-              <ThemeToggle />
-            </View>
-            <Button
-              className="bg-[#FFDD00]"
-              onPress={() => {
-                Linking.openURL("https://buymeacoffee.com/conner.replogle");
-              }}
-            >
-              <Text className=" text-black">Buy me a Coffee</Text>
-            </Button>
-            <View className="flex-row gap-3 items-center">
-              <Switch
-                nativeID={"explosion"}
-                checked={nuttable ?? false}
-                onCheckedChange={(value) => {
-                  setNuttable(value);
-                }}
-              />
-              <Label
-                nativeID="explosion"
-                onPress={() => {
-                  setNuttable(!nuttable);
-                }}
-                className={"text-lg"}
-              >
-                Explosion
-              </Label>
-            </View>
-          </View>
+          <SettingsSheet />
         </BottomSheetView>
       </BottomSheetModal>
       <Button
@@ -97,5 +65,44 @@ export default function SettingsButton() {
         <SettingsIcon />
       </Button>
     </>
+  );
+}
+
+function SettingsSheet() {
+  const [nuttable, setNuttable] = useMMKVBoolean("settings.nuttable");
+
+  return (
+    <View className="flex flex-col p-5 gap-4">
+      <View className="flex flex-row justify-between">
+        <Text className={"text-2xl"}>Settings</Text>
+        <ThemeToggle />
+      </View>
+      <Button
+        className="bg-[#FFDD00]"
+        onPress={() => {
+          Linking.openURL("https://buymeacoffee.com/conner.replogle");
+        }}
+      >
+        <Text className=" text-black">Buy me a Coffee</Text>
+      </Button>
+      <View className="flex-row gap-3 items-center">
+        <Switch
+          nativeID={"explosion"}
+          checked={nuttable ?? false}
+          onCheckedChange={(value) => {
+            setNuttable(value);
+          }}
+        />
+        <Label
+          nativeID="explosion"
+          onPress={() => {
+            setNuttable(!nuttable);
+          }}
+          className={"text-lg"}
+        >
+          Explosion
+        </Label>
+      </View>
+    </View>
   );
 }
