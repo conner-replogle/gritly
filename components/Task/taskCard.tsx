@@ -5,6 +5,10 @@ import { Text } from "~/components/ui/text";
 import Svg, { Path } from "react-native-svg";
 import { CheckIcon, PlusIcon } from "lucide-react-native";
 import * as React from "react";
+import ConfettiCannon from "react-native-confetti-cannon";
+import { Context } from "react-native-helmet-async/lib/Provider";
+import { useContext } from "react";
+import { ExplosionContext } from "~/app/index";
 
 export function TaskCard({
   onCardPress,
@@ -23,6 +27,7 @@ export function TaskCard({
   completed: Completed | undefined;
   streak: number;
 }) {
+  const nut = useContext(ExplosionContext);
   return (
     <Pressable onPress={onCardPress}>
       <View
@@ -41,7 +46,10 @@ export function TaskCard({
           <View className="flex flex-col items-center justify-center">
             <Pressable
               onLongPress={onCompleteLongPress}
-              onPress={onCompletePress}
+              onPress={() => {
+                onCompletePress();
+                completed?.goal.amount == completed?.amount && nut();
+              }}
             >
               <CompleteIcon completed={completed} />
             </Pressable>

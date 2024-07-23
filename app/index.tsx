@@ -29,22 +29,37 @@ import { Button } from "~/components/ui/button";
 import { CalendarSection } from "~/components/Calendar/Calendar";
 
 import TaskContent from "~/components/Task/task";
-import { useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { ThemeToggle } from "~/components/ThemeToggle";
 import { CollectionChangeCallback } from "realm";
 import SettingsButton from "~/components/Settings/Settings";
+import ConfettiCannon from "react-native-confetti-cannon";
+import Explosion from "react-native-confetti-cannon";
+import { useMMKVBoolean } from "react-native-mmkv";
 
-const DateContext = React.createContext(new Date(Date.now()));
+export const ExplosionContext = createContext(() => {
+  console.log("nut");
+});
+
 export default function Screen() {
   const [date, setInnerDate] = React.useState(new Date(Date.now()));
   const setDate = useCallback((date: Date) => {
     date.setHours(6, 0, 0, 0);
     setInnerDate(date);
   }, []);
+  const [nuttable, _] = useMMKVBoolean("settings.nuttable");
+
   const [tasks, setTasks] = useState<Task[] | undefined>(undefined);
   const realm = useRealm();
-
+  const cannonRef = useRef<ConfettiCannon>(null);
   const handleChanges: CollectionChangeCallback<Task, [number, Task]> =
     useCallback((newTasks, changes) => {
       if (changes.insertions.length == 0 && changes.deletions.length == 0) {
@@ -69,19 +84,34 @@ export default function Screen() {
   console.log(tasks);
   return (
     <SafeAreaView>
-      <View className="h-[100vh] bg-secondary/50">
-        <HeaderCard date={date} setDate={setDate} />
+      <ExplosionContext.Provider
+        value={() => {
+          if (nuttable) cannonRef.current?.start();
+        }}
+      >
+        <View className="h-[100vh] bg-secondary/50">
+          <HeaderCard date={date} setDate={setDate} />
 
-        <View className="p-6 flex flex-col gap-4 h-full">
-          <FlatList
-            ListFooterComponent={AddTasks}
-            data={todayTasks}
-            renderItem={(item) => (
-              <TaskContent date={date} task_id={item.item} />
-            )}
+          <View className="p-6 flex flex-col gap-4 h-full">
+            <FlatList
+              ListFooterComponent={AddTasks}
+              data={todayTasks}
+              renderItem={(item) => (
+                <TaskContent date={date} task_id={item.item} />
+              )}
+            />
+          </View>
+          <ConfettiCannon
+            ref={cannonRef}
+            count={200}
+            explosionSpeed={400}
+            fallSpeed={3500}
+            autoStart={false}
+            fadeOut={true}
+            origin={{ x: 10, y: 0 }}
           />
         </View>
-      </View>
+      </ExplosionContext.Provider>
     </SafeAreaView>
   );
 }

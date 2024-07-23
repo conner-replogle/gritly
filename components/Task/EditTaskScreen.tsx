@@ -326,8 +326,7 @@ export function EditTaskScreen({
   const { colors } = useTheme();
   const realm = useRealm();
   const [ntask, setInnerTask] = useState(task);
-  console.log("Here");
-  console.log(ntask);
+
   const setTask = useCallback((write: (a: Task) => void) => {
     write(ntask);
     setInnerTask({

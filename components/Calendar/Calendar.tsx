@@ -7,10 +7,11 @@ import {
   format,
   startOfWeek,
 } from "date-fns";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Task } from "~/lib/states/task";
 import { useQuery } from "@realm/react";
 import { Results } from "realm";
+import { ExplosionContext } from "~/app";
 
 export function CalendarSection(props: {
   date: Date;

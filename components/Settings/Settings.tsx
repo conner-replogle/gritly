@@ -1,4 +1,4 @@
-import { SettingsIcon } from "lucide-react-native";
+import { Bold, SettingsIcon } from "lucide-react-native";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import * as React from "react";
@@ -19,10 +19,11 @@ import { Sun } from "~/lib/icons/Sun";
 import { cn } from "~/lib/utils";
 import { ThemeToggle } from "~/components/ThemeToggle";
 import Svg, { Path } from "react-native-svg";
+import { Toggle, ToggleIcon } from "~/components/ui/toggle";
+import { useMMKVBoolean, useMMKVString } from "react-native-mmkv";
 export default function SettingsButton() {
   const { colors } = useTheme();
   const { isDarkColorScheme, setColorScheme } = useColorScheme();
-
   const toggleColorScheme = useCallback(() => {
     const newTheme = isDarkColorScheme ? "light" : "dark";
     setColorScheme(newTheme);
@@ -31,6 +32,7 @@ export default function SettingsButton() {
   }, []);
 
   const ref = useRef<BottomSheetModalMethods | null>(null);
+  const [nuttable, setNuttable] = useMMKVBoolean("settings.nuttable");
 
   return (
     <>
@@ -63,6 +65,24 @@ export default function SettingsButton() {
             >
               <Text className=" text-black">Buy me a Coffee</Text>
             </Button>
+            <View className="flex-row gap-3 items-center">
+              <Switch
+                nativeID={"explosion"}
+                checked={nuttable ?? false}
+                onCheckedChange={(value) => {
+                  setNuttable(value);
+                }}
+              />
+              <Label
+                nativeID="explosion"
+                onPress={() => {
+                  setNuttable(!nuttable);
+                }}
+                className={"text-lg"}
+              >
+                Explosion
+              </Label>
+            </View>
           </View>
         </BottomSheetView>
       </BottomSheetModal>
