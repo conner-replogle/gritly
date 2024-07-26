@@ -69,6 +69,7 @@ function SelectColor(props: {
       <View className="flex-row flex-wrap justify-between ">
         {SWATCHES_COLORS.map((color, index) => (
           <Pressable
+            key={index}
             onPress={() => {
               props.onChange({
                 hex: color,
@@ -366,7 +367,6 @@ export function EditTaskScreen({
                 completed={undefined}
                 completable={true}
                 streak={0}
-                onCardPress={() => {}}
                 onCompletePress={() => {}}
                 onCompleteLongPress={() => {}}
               />

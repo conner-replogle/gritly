@@ -1,3 +1,9 @@
-import { MMKV } from "react-native-mmkv";
+import { createContext } from "react";
 
-export const storage = new MMKV();
+export const ExplosionContext = createContext(() => {
+  console.log("nut");
+});
+export const SubscriptionContext = createContext({
+  active: false,
+  sku: "",
+});

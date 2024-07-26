@@ -21,6 +21,7 @@ import { ThemeToggle } from "~/components/ThemeToggle";
 import Svg, { Path } from "react-native-svg";
 import { Toggle, ToggleIcon } from "~/components/ui/toggle";
 import { useMMKVBoolean, useMMKVString } from "react-native-mmkv";
+import Purchase from "~/components/Settings/Purchase";
 export default function SettingsButton() {
   const { colors } = useTheme();
   const { isDarkColorScheme, setColorScheme } = useColorScheme();
@@ -77,32 +78,32 @@ function SettingsSheet() {
         <Text className={"text-2xl"}>Settings</Text>
         <ThemeToggle />
       </View>
-      <Button
-        className="bg-[#FFDD00]"
-        onPress={() => {
-          Linking.openURL("https://buymeacoffee.com/conner.replogle");
-        }}
-      >
-        <Text className=" text-black">Buy me a Coffee</Text>
-      </Button>
-      <View className="flex-row gap-3 items-center">
-        <Switch
-          nativeID={"explosion"}
-          checked={nuttable ?? false}
-          onCheckedChange={(value) => {
-            setNuttable(value);
-          }}
-        />
-        <Label
-          nativeID="explosion"
-          onPress={() => {
-            setNuttable(!nuttable);
-          }}
-          className={"text-lg"}
-        >
-          Explosion
-        </Label>
+
+      <Text className="text-l font-semibold text-muted-foreground">
+        OPTIONS
+      </Text>
+      <View>
+        <View className="flex-row gap-3 items-center">
+          <Switch
+            nativeID={"explosion"}
+            checked={nuttable ?? false}
+            onCheckedChange={(value) => {
+              setNuttable(value);
+            }}
+          />
+          <Label
+            nativeID="explosion"
+            onPress={() => {
+              setNuttable(!nuttable);
+            }}
+            className={"text-lg"}
+          >
+            Confetti
+          </Label>
+        </View>
       </View>
+
+      <Purchase />
     </View>
   );
 }

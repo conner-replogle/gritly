@@ -85,6 +85,7 @@ android {
 
     namespace 'com.connerreplogle.habittracker'
     defaultConfig {
+missingDimensionStrategy "store", "play"
         applicationId 'com.connerreplogle.habittracker'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion

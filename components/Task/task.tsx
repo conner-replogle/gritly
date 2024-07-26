@@ -1,15 +1,21 @@
 import * as React from "react";
 import { FlatList, Pressable, View } from "react-native";
-import Animated, {
-  useAnimatedProps,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
 import uuid from "react-native-uuid";
 import { Text } from "~/components/ui/text";
-import { CardDescription, CardTitle } from "~/components/ui/card";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Completed, Task } from "~/lib/states/task";
 
 import Svg, { Circle, Path } from "react-native-svg";
@@ -20,6 +26,9 @@ import { useTheme } from "@react-navigation/native";
 import { UpdateMode } from "realm";
 import { EditTaskScreen } from "~/components/Task/EditTaskScreen";
 import { TaskCard } from "~/components/Task/taskCard";
+import { useContext } from "react";
+import { ExplosionContext } from "~/lib/config";
+import { Button } from "~/components/ui/button";
 
 export default function TaskContent({
   task_id,
@@ -35,70 +44,80 @@ export default function TaskContent({
   if (!task) {
     return <Text>Task not found</Text>;
   }
+  const menuRef = React.useRef(null);
   const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
   const snapPoints = React.useMemo(() => ["90%"], []);
 
   const completable = date <= new Date(Date.now());
   const completed = task.getCompleted(date);
   const streak = task.getStreak(date);
+
+  const nut = useContext(ExplosionContext);
   return (
     <>
-      <TaskCard
-        task={task}
-        streak={streak}
-        completable={completable}
-        completed={completed}
-        onCardPress={() => {
+      <Pressable
+        onPress={() => {
           bottomSheetModalRef.current?.present();
         }}
-        onCompletePress={() => {
-          const today = new Date(date);
-          date.setHours(
-            today.getHours(),
-            today.getMinutes(),
-            today.getSeconds(),
-            0
-          );
-          if (completed && completed.isCompleted()) {
-            return;
-          }
-          realm.write(() => {
-            if (completed) {
-              completed.amount += completed.goal.steps;
-            } else {
-              task.completed.push({
-                _id: new Realm.BSON.ObjectId(),
-                completedAt: date,
-                amount: task.goal.steps,
-                goal: {
-                  ...task.goal,
-                },
-              } as Completed);
+      >
+        <TaskCard
+          task={task}
+          streak={streak}
+          completable={completable}
+          completed={completed}
+          onCompletePress={() => {
+            const today = new Date(date);
+            date.setHours(
+              today.getHours(),
+              today.getMinutes(),
+              today.getSeconds(),
+              0
+            );
+            if (completed && completed.isCompleted()) {
+              return;
             }
-          }); //completed={item.completed[item.completed.length].goal}
-        }}
-        onCompleteLongPress={() => {
-          console.log("long press");
-          realm.write(() => {
-            if (completed) {
-              if (completed.amount <= task.goal?.steps) {
-                realm.delete(completed);
-                return;
+            realm.write(() => {
+              if (completed) {
+                completed.amount += completed.goal.steps;
+                if (completed.amount >= completed.goal.amount) {
+                  completed.completedAt = date;
+                  nut();
+                }
+              } else {
+                task.completed.push({
+                  _id: new Realm.BSON.ObjectId(),
+                  completedAt: date,
+                  amount: task.goal.steps,
+                  goal: {
+                    ...task.goal,
+                  },
+                } as Completed);
               }
-              completed.amount -= task.goal?.steps;
-            } else {
-              task.completed.push({
-                _id: new Realm.BSON.ObjectId(),
-                completedAt: date,
-                amount: task.goal.amount,
-                goal: {
-                  ...task.goal,
-                },
-              } as Completed);
-            }
-          });
-        }}
-      />
+            }); //completed={item.completed[item.completed.length].goal}
+          }}
+          onCompleteLongPress={() => {
+            console.log("long press");
+            realm.write(() => {
+              if (completed) {
+                if (completed.amount <= task.goal?.steps) {
+                  realm.delete(completed);
+                  return;
+                }
+                completed.amount -= task.goal?.steps;
+              } else {
+                task.completed.push({
+                  _id: new Realm.BSON.ObjectId(),
+                  completedAt: date,
+                  amount: task.goal.amount,
+                  goal: {
+                    ...task.goal,
+                  },
+                } as Completed);
+              }
+            });
+          }}
+        />
+      </Pressable>
       <BottomSheetModal
         ref={bottomSheetModalRef}
         snapPoints={snapPoints}

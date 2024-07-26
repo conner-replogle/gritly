@@ -9,12 +9,13 @@ import { Platform } from "react-native";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { PortalHost } from "~/components/primitives/portal";
-import { ThemeToggle } from "~/components/ThemeToggle";
-import { AddTasks } from "~/components/AddTask/AddTasks";
 import { RealmProvider } from "@realm/react";
 import { Completed, Goal, Task, Repeat } from "~/lib/states/task";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
+import { SubscriptionContext } from "~/lib/config";
+import { useEffect } from "react";
 
 const LIGHT_THEME: Theme = {
   dark: false,
@@ -35,7 +36,19 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
+  const [subscription, setSubscription] = React.useState({
+    active: false,
+    sku: "",
+  });
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+
+  React.useEffect(() => {
+    Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+
+    if (Platform.OS === "ios") {
+      Purchases.configure({ apiKey: "appl_olIiJisoQvuIrQgmmzXHYdcnrnY" });
+    }
+  }, []);
 
   React.useEffect(() => {
     (async () => {
@@ -61,6 +74,25 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     });
   }, []);
+  useEffect(() => {
+    const CheckSubscription = async () => {
+      try {
+        const customerInfo = await Purchases.getCustomerInfo();
+        // access latest customerInfo
+        console.log(customerInfo.activeSubscriptions);
+        if (customerInfo.activeSubscriptions.includes("pro")) {
+          setSubscription({
+            active: true,
+            sku: "pro",
+          });
+        }
+      } catch (e) {
+        // Error fetching customer info
+        console.log(e);
+      }
+    };
+    CheckSubscription();
+  }, []);
 
   if (!isColorSchemeLoaded) {
     return null;
@@ -73,18 +105,20 @@ export default function RootLayout() {
         deleteRealmIfMigrationNeeded
       >
         <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-          <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-          <BottomSheetModalProvider>
-            <Stack>
-              <Stack.Screen
-                name="index"
-                options={{
-                  headerShown: false,
-                }}
-              />
-            </Stack>
-          </BottomSheetModalProvider>
-          <PortalHost />
+          <SubscriptionContext.Provider value={subscription}>
+            <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+            <BottomSheetModalProvider>
+              <Stack>
+                <Stack.Screen
+                  name="index"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+              </Stack>
+              <PortalHost />
+            </BottomSheetModalProvider>
+          </SubscriptionContext.Provider>
         </ThemeProvider>
       </RealmProvider>
     </GestureHandlerRootView>

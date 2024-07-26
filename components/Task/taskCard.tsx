@@ -5,13 +5,8 @@ import { Text } from "~/components/ui/text";
 import Svg, { Path } from "react-native-svg";
 import { CheckIcon, PlusIcon } from "lucide-react-native";
 import * as React from "react";
-import ConfettiCannon from "react-native-confetti-cannon";
-import { Context } from "react-native-helmet-async/lib/Provider";
-import { useContext } from "react";
-import { ExplosionContext } from "~/app/index";
 
 export function TaskCard({
-  onCardPress,
   task,
   streak,
   onCompletePress,
@@ -22,45 +17,40 @@ export function TaskCard({
   completable: boolean;
   onCompletePress: () => void;
   onCompleteLongPress: () => void;
-  onCardPress: () => void;
   task: Task;
   completed: Completed | undefined;
   streak: number;
 }) {
-  const nut = useContext(ExplosionContext);
   return (
-    <Pressable onPress={onCardPress}>
-      <View
-        style={{ borderColor: task.color, borderWidth: 2 }}
-        className=" p-5 mb-2 flex flex-row justify-between bg-background rounded-lg"
-      >
-        <View className="text-start flex flex-col justify-start items-start">
-          <CardTitle>
-            {task.title} {streak > 1 ? ` 🔥${streak}` : ""}{" "}
-          </CardTitle>
+    <View
+      style={{ borderColor: task.color, borderWidth: 2 }}
+      className=" p-5 mb-2 flex flex-row justify-between bg-background rounded-lg"
+    >
+      <View className="text-start flex flex-col justify-start items-start">
+        <CardTitle>
+          {task.title} {streak > 1 ? ` 🔥${streak}` : ""}{" "}
+        </CardTitle>
 
-          <CardDescription className="ml-1"></CardDescription>
-        </View>
-
-        {completable && (
-          <View className="flex flex-col items-center justify-center">
-            <Pressable
-              onLongPress={onCompleteLongPress}
-              onPress={() => {
-                onCompletePress();
-                completed?.goal.amount == completed?.amount && nut();
-              }}
-            >
-              <CompleteIcon completed={completed} />
-            </Pressable>
-            <Text className="text-xs font-semibold">
-              {completed?.amount ?? 0} /{" "}
-              {completed?.goal.amount ?? task.goal.amount}
-            </Text>
-          </View>
-        )}
+        <CardDescription className="ml-1"></CardDescription>
       </View>
-    </Pressable>
+
+      {completable && (
+        <View className="flex flex-col items-center justify-center">
+          <Pressable
+            onLongPress={onCompleteLongPress}
+            onPress={() => {
+              onCompletePress();
+            }}
+          >
+            <CompleteIcon completed={completed} />
+          </Pressable>
+          <Text className="text-xs font-semibold">
+            {completed?.amount ?? 0} /{" "}
+            {completed?.goal.amount ?? task.goal.amount}
+          </Text>
+        </View>
+      )}
+    </View>
   );
 }
 

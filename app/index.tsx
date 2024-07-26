@@ -42,15 +42,14 @@ import { ThemeToggle } from "~/components/ThemeToggle";
 import { CollectionChangeCallback } from "realm";
 import SettingsButton from "~/components/Settings/Settings";
 import ConfettiCannon from "react-native-confetti-cannon";
-import Explosion from "react-native-confetti-cannon";
-import { useMMKVBoolean } from "react-native-mmkv";
-
-export const ExplosionContext = createContext(() => {
-  console.log("nut");
-});
+import { useMMKV, useMMKVBoolean } from "react-native-mmkv";
+import { ExplosionContext } from "~/lib/config";
+import { PortalHost } from "~/components/primitives/portal";
 
 export default function Screen() {
   const [date, setInnerDate] = React.useState(new Date(Date.now()));
+  const storage = useMMKV();
+
   const setDate = useCallback((date: Date) => {
     date.setHours(6, 0, 0, 0);
     setInnerDate(date);
@@ -129,7 +128,7 @@ function HeaderCard({
   const weekly = todayTasks.filter((a) => a.repeats.period == "Weekly");
   return (
     <View className="bg-background">
-      <CardHeader className="flex flex-row justify-between  items-center">
+      <CardHeader className="flex flex-row justify-between  items-start">
         <View>
           <CardTitle className="text-start">
             {date.toLocaleString("en-US", {
@@ -142,7 +141,7 @@ function HeaderCard({
             {date.toLocaleString("en-US", { weekday: "long" })}
           </CardDescription>
         </View>
-        <View className="flex flex-row items-center gap-2">
+        <View className="flex flex-row items-start gap-2">
           <Button
             variant={"outline"}
             size="sm"
@@ -156,31 +155,8 @@ function HeaderCard({
         </View>
       </CardHeader>
       <CardContent>
-        {/*<View className="flex-row justify-around gap-4">*/}
-        {/*  <View className="items-center flex-1">*/}
-        {/*    <Text className="text-sm text-muted-foreground">Daily</Text>*/}
-        {/*    <Text className="text-xl font-semibold">*/}
-        {/*      {daily.filter((a) => a.getCompleted(date)?.isCompleted()).length}{" "}*/}
-        {/*      / {daily.length}*/}
-        {/*    </Text>*/}
-        {/*  </View>*/}
-        {/*  <View className="items-center flex-1">*/}
-        {/*    <Text className="text-sm text-muted-foreground">Weekly</Text>*/}
-        {/*    <Text className="text-xl font-semibold">*/}
-        {/*      {weekly.filter((a) => a.getCompleted(date)?.isCompleted()).length}{" "}*/}
-        {/*      / {weekly.length}*/}
-        {/*    </Text>*/}
-        {/*  </View>*/}
-        {/*  <View className="items-center flex-1 ">*/}
-        {/*    <Text className="text-sm text-muted-foreground">Daily</Text>*/}
-        {/*    <Text className="text-xl font-semibold">14</Text>*/}
-        {/*  </View>*/}
-        {/*</View>*/}
-
         <CalendarSection date={date} setDate={setDate} />
       </CardContent>
-      {/*<CardFooter>*/}
-      {/*</CardFooter>*/}
     </View>
   );
 }

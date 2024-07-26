@@ -20,7 +20,7 @@ import { Button } from "../ui/button";
 import { useRealm } from "@realm/react";
 import { CALENDAR, Goal, Repeat, Task, UNITS } from "~/lib/states/task";
 
-import { useMemo, useRef, useState } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { useTheme } from "@react-navigation/native";
 import { Handle } from "./customhandle";
@@ -29,10 +29,11 @@ import {
   EditTaskScreen,
   SWATCHES_COLORS,
 } from "~/components/Task/EditTaskScreen";
+import { SubscriptionContext } from "~/lib/config";
 
 export function AddTasks(props: { dense?: boolean }) {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
+  const subscription = useContext(SubscriptionContext);
   return (
     <View>
       <AddTaskSheet bottomSheetModalRef={bottomSheetModalRef} />
