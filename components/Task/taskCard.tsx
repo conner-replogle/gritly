@@ -5,6 +5,7 @@ import { Text } from "~/components/ui/text";
 import Svg, { Path } from "react-native-svg";
 import { CheckIcon, PlusIcon } from "lucide-react-native";
 import * as React from "react";
+import { useObject } from "@realm/react";
 
 export function TaskCard({
   task,
@@ -42,7 +43,7 @@ export function TaskCard({
               onCompletePress();
             }}
           >
-            <CompleteIcon completed={completed} />
+            <CompleteIcon completed={completed ?? undefined} />
           </Pressable>
           <Text className="text-xs font-semibold">
             {completed?.amount ?? 0} /{" "}

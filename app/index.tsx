@@ -43,7 +43,7 @@ import { CollectionChangeCallback } from "realm";
 import SettingsButton from "~/components/Settings/Settings";
 import ConfettiCannon from "react-native-confetti-cannon";
 import { useMMKV, useMMKVBoolean } from "react-native-mmkv";
-import { ExplosionContext } from "~/lib/config";
+import { ExplosionContext, log } from "~/lib/config";
 import { PortalHost } from "~/components/primitives/portal";
 
 export default function Screen() {
@@ -79,7 +79,9 @@ export default function Screen() {
     return <Text>Loading...</Text>;
   }
   const todayTasks = tasks.filter((a) => a.showToday(date)).map((a) => a._id);
-  console.log(tasks);
+  log.debug(`Date ${date}`);
+  log.debug(`Today Tasks ${todayTasks}`);
+  log.info(`Realm Path ${realm.path}`);
   return (
     <SafeAreaView>
       <ExplosionContext.Provider

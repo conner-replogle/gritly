@@ -27,8 +27,9 @@ import { UpdateMode } from "realm";
 import { EditTaskScreen } from "~/components/Task/EditTaskScreen";
 import { TaskCard } from "~/components/Task/taskCard";
 import { useContext } from "react";
-import { ExplosionContext } from "~/lib/config";
+import { ExplosionContext, log } from "~/lib/config";
 import { Button } from "~/components/ui/button";
+import { colorScheme } from "nativewind";
 
 export default function TaskContent({
   task_id,
@@ -50,6 +51,7 @@ export default function TaskContent({
 
   const completable = date <= new Date(Date.now());
   const completed = task.getCompleted(date);
+
   const streak = task.getStreak(date);
 
   const nut = useContext(ExplosionContext);
@@ -78,11 +80,13 @@ export default function TaskContent({
             }
             realm.write(() => {
               if (completed) {
+                log.debug(
+                  `Adding to completed ${completed.amount} by ${completed.goal.steps} `
+                );
                 completed.amount += completed.goal.steps;
-
                 completed.completedAt = [...completed.completedAt, date];
                 if (completed.amount >= completed.goal.amount) {
-                  console.log("nut");
+                  log.debug("Confetti Activating");
                   nut();
                 }
               } else {
@@ -101,16 +105,23 @@ export default function TaskContent({
             }); //completed={item.completed[item.completed.length].goal}
           }}
           onCompleteLongPress={() => {
-            console.log("long press");
+            log.debug("long press");
             realm.write(() => {
               if (completed) {
                 if (completed.amount <= task.goal?.steps) {
+                  log.debug(`deleting ${completed.completedAt}`);
                   realm.delete(completed);
                   return;
                 }
+                log.debug(
+                  `substracting ${task.goal?.steps} from ${completed.amount}`
+                );
                 completed.amount -= task.goal?.steps;
-                completed.completedAt = completed.completedAt.slice(0, -1);
+                if (task.repeats.period !== "Daily") {
+                  completed.completedAt = completed.completedAt.slice(0, -1);
+                }
               } else {
+                log.debug("adding");
                 task.completed.push({
                   _id: new Realm.BSON.ObjectId(),
                   completedAt: [date],
@@ -149,7 +160,6 @@ export default function TaskContent({
             onSubmit={(atask) => {
               // @ts-ignore
               delete atask["completed"];
-              console.log(atask);
               realm.commitTransaction();
               bottomSheetModalRef.current?.dismiss();
             }}

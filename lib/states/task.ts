@@ -76,6 +76,7 @@ class Completed extends Realm.Object {
       amount: "int",
       goal: "Goal",
     },
+    primaryKey: "_id",
   };
 }
 
@@ -162,7 +163,6 @@ class Task extends Realm.Object {
       )
         return true;
     } else if (this.repeats.period == "Weekly") {
-      console.log(this.repeats.every_n);
       if (
         this.repeats.every_n &&
         differenceInCalendarWeeks(date, this.startsOn) % this.repeats.every_n ==

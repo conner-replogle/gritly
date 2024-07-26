@@ -1,9 +1,11 @@
 import { createContext } from "react";
+import { logger } from "react-native-logs";
 
 export const ExplosionContext = createContext(() => {
-  console.log("nut");
+  log.debug("nut");
 });
 export const SubscriptionContext = createContext({
   active: false,
   sku: "",
 });
+export const log = logger.createLogger();

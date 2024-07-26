@@ -248,9 +248,7 @@ function FrequencyPeriod({
               ntask.repeats.specific_weekday?.map((a) => a.toString()) ?? []
             }
             onValueChange={(nDays) => {
-              console.log(nDays);
               const parsedDays = nDays.map((a) => parseInt(a));
-              console.log(parsedDays);
               setTask((a) => {
                 a.repeats.specific_weekday = parsedDays;
                 return a;

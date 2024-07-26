@@ -14,8 +14,9 @@ import { Completed, Goal, Task, Repeat } from "~/lib/states/task";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import Purchases, { LOG_LEVEL } from "react-native-purchases";
-import { SubscriptionContext } from "~/lib/config";
+import { log, SubscriptionContext } from "~/lib/config";
 import { useEffect } from "react";
+import { logger } from "react-native-logs";
 
 const LIGHT_THEME: Theme = {
   dark: false,
@@ -79,7 +80,7 @@ export default function RootLayout() {
       try {
         const customerInfo = await Purchases.getCustomerInfo();
         // access latest customerInfo
-        console.log(customerInfo.activeSubscriptions);
+        log.debug(customerInfo.activeSubscriptions);
         if (customerInfo.activeSubscriptions.includes("pro")) {
           setSubscription({
             active: true,
@@ -88,7 +89,7 @@ export default function RootLayout() {
         }
       } catch (e) {
         // Error fetching customer info
-        console.log(e);
+        log.error(e);
       }
     };
     CheckSubscription();

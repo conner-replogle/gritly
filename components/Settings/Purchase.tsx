@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { View } from "react-native";
 import Purchases, { PurchasesPackage } from "react-native-purchases";
-import { SubscriptionContext } from "~/lib/config";
+import { log, SubscriptionContext } from "~/lib/config";
 export default function Purchase() {
   const subscription = useContext(SubscriptionContext);
 
@@ -17,11 +17,11 @@ export default function Purchase() {
       const { customerInfo } = await Purchases.purchasePackage(product);
       if (typeof customerInfo.entitlements.active["pro"] !== "undefined") {
         // Unlock that great "pro" content
-        console.log("Pro content unlocked");
+        log.debug("Pro content unlocked");
       }
     } catch (e: any) {
       if (!e.userCancelled) {
-        console.log(e);
+        log.error(e);
       }
     }
   };
@@ -37,7 +37,7 @@ export default function Purchase() {
           setPackages(offerings.current.availablePackages);
         }
       } catch (e) {
-        console.log("Error fetching packages", e);
+        log.error("Error fetching packages", e);
       }
     };
 
