@@ -74,8 +74,7 @@ export default function Screen() {
       tasks.removeListener(handleChanges);
     };
   }, []);
-  console.log(`User Realm User file location: ${realm.path}`);
-  console.log(`Current Date ${date}`);
+
   if (tasks === undefined) {
     return <Text>Loading...</Text>;
   }

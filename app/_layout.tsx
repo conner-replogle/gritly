@@ -116,8 +116,9 @@ export default function RootLayout() {
                   }}
                 />
               </Stack>
-              <PortalHost />
             </BottomSheetModalProvider>
+
+            <PortalHost />
           </SubscriptionContext.Provider>
         </ThemeProvider>
       </RealmProvider>

@@ -5,13 +5,14 @@ import {
   addDays,
   differenceInCalendarWeeks,
   format,
+  isSameDay,
   startOfWeek,
 } from "date-fns";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Task } from "~/lib/states/task";
 import { useQuery } from "@realm/react";
 import { Results } from "realm";
-import { ExplosionContext } from "~/app";
+import { sameDate } from "react-native-calendars/src/dateutils";
 
 export function CalendarSection(props: {
   date: Date;
@@ -114,6 +115,20 @@ function Week(props: {
   setDate: (date: Date) => void;
 }) {
   const { dates, width, currentDate, tasks, setDate } = props;
+
+  const showBar = (task: Task, date: Date) => {
+    if (task.repeats.period == "Daily") {
+      return task.showToday(date);
+    } else if (task.repeats.period == "Weekly") {
+      let completed = task.getCompleted(date);
+      if (completed) {
+        return (
+          completed.completedAt.filter((a) => isSameDay(a, date)).length > 0
+        );
+      }
+    }
+    return false;
+  };
   return (
     <View
       className={`flex flex-row justify-evenly items-start `}
@@ -143,14 +158,7 @@ function Week(props: {
           </Pressable>
           <View className="flex flex-col mt-4 gap-1">
             {Array.from(
-              tasks.filter(
-                (a) =>
-                  a.showToday(date) &&
-                  !(
-                    a.repeats.period == "Weekly" &&
-                    !a.getCompleted(date)?.isCompleted()
-                  )
-              ),
+              tasks.filter((a) => showBar(a, date)),
               (task, i) => (
                 <View
                   key={task._id.toString()}

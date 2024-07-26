@@ -44,10 +44,11 @@ export default function Purchase() {
     getPackages();
   }, []);
   return (
-    <View>
+    <View className="gap-2 flex-col">
       <Text className="text-l font-semibold text-muted-foreground">
         SUBSCRIPTION
       </Text>
+
       <View className="flex flex-row gap-5 ">
         {packages.map((product) => (
           <View
@@ -73,6 +74,15 @@ export default function Purchase() {
           </View>
         ))}
       </View>
+      <Button
+        variant="link"
+        size="sm"
+        onPress={() => {
+          Purchases.restorePurchases();
+        }}
+      >
+        <Text>Restore Purchases</Text>
+      </Button>
     </View>
   );
 }

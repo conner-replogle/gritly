@@ -79,19 +79,24 @@ export default function TaskContent({
             realm.write(() => {
               if (completed) {
                 completed.amount += completed.goal.steps;
+
+                completed.completedAt = [...completed.completedAt, date];
                 if (completed.amount >= completed.goal.amount) {
-                  completed.completedAt = date;
+                  console.log("nut");
                   nut();
                 }
               } else {
                 task.completed.push({
                   _id: new Realm.BSON.ObjectId(),
-                  completedAt: date,
+                  completedAt: [date],
                   amount: task.goal.steps,
                   goal: {
                     ...task.goal,
                   },
                 } as Completed);
+                if (task.goal.steps >= task.goal.amount) {
+                  nut();
+                }
               }
             }); //completed={item.completed[item.completed.length].goal}
           }}
@@ -104,10 +109,11 @@ export default function TaskContent({
                   return;
                 }
                 completed.amount -= task.goal?.steps;
+                completed.completedAt = completed.completedAt.slice(0, -1);
               } else {
                 task.completed.push({
                   _id: new Realm.BSON.ObjectId(),
-                  completedAt: date,
+                  completedAt: [date],
                   amount: task.goal.amount,
                   goal: {
                     ...task.goal,

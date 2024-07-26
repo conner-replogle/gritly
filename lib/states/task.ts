@@ -60,7 +60,7 @@ class Repeat extends Realm.Object {
 }
 class Completed extends Realm.Object {
   _id!: Realm.BSON.ObjectId;
-  completedAt!: Date;
+  completedAt!: Date[];
   amount: number = 0;
 
   goal!: Goal;
@@ -72,7 +72,7 @@ class Completed extends Realm.Object {
     name: "Completed",
     properties: {
       _id: "objectId",
-      completedAt: "date",
+      completedAt: "date<>",
       amount: "int",
       goal: "Goal",
     },
@@ -126,6 +126,7 @@ class Task extends Realm.Object {
         ({
           period: "Daily",
           specific_weekday: [0, 1, 2, 3, 4, 5, 6],
+          every_n: 1,
         } as Repeat),
       color,
       goal:
@@ -161,6 +162,7 @@ class Task extends Realm.Object {
       )
         return true;
     } else if (this.repeats.period == "Weekly") {
+      console.log(this.repeats.every_n);
       if (
         this.repeats.every_n &&
         differenceInCalendarWeeks(date, this.startsOn) % this.repeats.every_n ==
@@ -217,8 +219,10 @@ class Task extends Realm.Object {
 
     for (let i = this.completed.length - 1; i >= 0; i--) {
       if (
-        this.completed[i].completedAt >= beginning &&
-        this.completed[i].completedAt <= end
+        this.completed[i].completedAt[0] >= beginning &&
+        this.completed[i].completedAt[
+          this.completed[i].completedAt.length - 1
+        ] <= end
       )
         return this.completed[i];
     }
