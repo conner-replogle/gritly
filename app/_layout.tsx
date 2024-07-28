@@ -8,7 +8,6 @@ import * as React from "react";
 import { Platform } from "react-native";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
-import { PortalHost } from "~/components/primitives/portal";
 import { RealmProvider } from "@realm/react";
 import { Completed, Goal, Task, Repeat } from "~/lib/states/task";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -17,6 +16,7 @@ import Purchases, { LOG_LEVEL } from "react-native-purchases";
 import { log, SubscriptionContext } from "~/lib/config";
 import { useEffect } from "react";
 import { logger } from "react-native-logs";
+import { PortalHost } from "@rn-primitives/portal";
 
 const LIGHT_THEME: Theme = {
   dark: false,
@@ -107,8 +107,8 @@ export default function RootLayout() {
       >
         <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
           <SubscriptionContext.Provider value={subscription}>
-            <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
             <BottomSheetModalProvider>
+              <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
               <Stack>
                 <Stack.Screen
                   name="index"
@@ -117,9 +117,9 @@ export default function RootLayout() {
                   }}
                 />
               </Stack>
-            </BottomSheetModalProvider>
 
-            <PortalHost />
+              <PortalHost />
+            </BottomSheetModalProvider>
           </SubscriptionContext.Provider>
         </ThemeProvider>
       </RealmProvider>

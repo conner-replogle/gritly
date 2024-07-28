@@ -1,6 +1,7 @@
 import * as React from "react";
 import { FlatList, Pressable, View } from "react-native";
 import Animated, {
+  FadeIn,
   useAnimatedProps,
   useSharedValue,
   withSpring,
@@ -16,6 +17,20 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 
 import { Text } from "~/components/ui/text";
 
@@ -45,6 +60,7 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import { useMMKV, useMMKVBoolean } from "react-native-mmkv";
 import { ExplosionContext, log } from "~/lib/config";
 import { PortalHost } from "~/components/primitives/portal";
+import { DropdownMenuTriggerRef } from "@rn-primitives/dropdown-menu";
 
 export default function Screen() {
   const [date, setInnerDate] = React.useState(new Date(Date.now()));
@@ -127,6 +143,8 @@ function HeaderCard({
 
   const daily = todayTasks.filter((a) => a.repeats.period == "Daily");
   const weekly = todayTasks.filter((a) => a.repeats.period == "Weekly");
+
+  const tiggerRef = useRef<DropdownMenuTriggerRef>(null);
   return (
     <View className="bg-background">
       <CardHeader className="flex flex-row justify-between  items-start">

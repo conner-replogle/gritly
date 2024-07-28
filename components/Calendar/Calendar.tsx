@@ -13,6 +13,7 @@ import { Task } from "~/lib/states/task";
 import { useQuery } from "@realm/react";
 import { Results } from "realm";
 import { sameDate } from "react-native-calendars/src/dateutils";
+import { log } from "~/lib/config";
 
 export function CalendarSection(props: {
   date: Date;
@@ -24,7 +25,7 @@ export function CalendarSection(props: {
   const ref = useRef<View>(null);
 
   const flatlistRef = useRef<VirtualizedList<Date[]>>(null);
-  const [index, setIndex] = useState(HALF);
+  const [indexG, setIndexG] = useState(HALF);
   const [width, setWidth] = useState(0);
   const tasks = useQuery(Task);
 
@@ -41,13 +42,13 @@ export function CalendarSection(props: {
     });
   };
   const referenceText = useCallback(() => {
-    let diff = differenceInCalendarWeeks(Date.now(), getWeek(index)[3]);
+    let diff = differenceInCalendarWeeks(Date.now(), getWeek(indexG)[3]);
     if (diff == 0) {
       return null;
     }
     return (
       <Text>
-        {format(getWeek(index)[3], "MMMM")}, {Math.abs(diff)} week
+        {format(getWeek(indexG)[3], "MMMM")}, {Math.abs(diff)} week
         {Math.abs(diff) == 1 ? "" : "s"} {diff > 0 ? "ago" : "ahead"}
       </Text>
     );
@@ -72,7 +73,7 @@ export function CalendarSection(props: {
         snapToAlignment={"center"}
         initialScrollIndex={HALF}
         onViewableItemsChanged={(info) => {
-          setIndex(info.changed[0].index ?? index);
+          setIndexG(info.changed[0].index ?? indexG);
         }}
         viewabilityConfig={{
           itemVisiblePercentThreshold: 90,
@@ -83,12 +84,12 @@ export function CalendarSection(props: {
           index,
         })}
         // WHY THE FUCK DOES IT RENDER EVERYTHING
-        initialNumToRender={1}
+        initialNumToRender={2}
         getItemCount={(data) => LENGTH}
         getItem={(_data, index) => getWeek(index)}
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item[0].toISOString()}
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           return (
             <Week
               tasks={tasks}
@@ -96,7 +97,7 @@ export function CalendarSection(props: {
               dates={item}
               currentDate={date}
               setDate={(a) => {
-                setIndex(HALF);
+                setIndexG(HALF);
                 setDate(a);
               }}
             />

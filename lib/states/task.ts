@@ -5,6 +5,7 @@ import {
   differenceInCalendarWeeks,
   differenceInDays,
 } from "date-fns";
+import { RealmSet } from "realm/dist/Set";
 export const CALENDAR = ["S", "M", "T", "W", "Th", "F", "Sa"];
 
 const UNITS = [
@@ -60,7 +61,7 @@ class Repeat extends Realm.Object {
 }
 class Completed extends Realm.Object {
   _id!: Realm.BSON.ObjectId;
-  completedAt!: Date[];
+  completedAt!: Realm.List<Date>;
   amount: number = 0;
 
   goal!: Goal;
@@ -103,7 +104,7 @@ class Task extends Realm.Object {
   repeats!: Repeat;
   description!: string;
   color!: string;
-  completed!: Completed[];
+  completed!: Realm.List<Completed>;
   createdAt!: Date;
   startsOn!: Date;
   goal!: Goal;
