@@ -1,11 +1,11 @@
-import { Completed, Task } from "~/lib/states/task";
 import { Pressable, View } from "react-native";
 import { CardDescription, CardTitle } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
 import Svg, { Path } from "react-native-svg";
 import { CheckIcon, PlusIcon } from "lucide-react-native";
 import * as React from "react";
-import { useObject } from "@realm/react";
+import { EditableTask, Task } from "~/models/Task";
+import { Completed } from "~/models/Completed";
 
 export function TaskCard({
   task,

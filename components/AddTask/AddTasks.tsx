@@ -1,24 +1,9 @@
-import { Plus } from "lucide-react-native";
-import {
-  LayoutAnimation,
-  Modal,
-  NativeSyntheticEvent,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  TextInput,
-  TextInputFocusEventData,
-  TextInputProps,
-  View,
-} from "react-native";
+import { LayoutAnimation, View } from "react-native";
 
-import { cn } from "~/lib/utils";
 import { Text } from "../ui/text";
 
 import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
 import { Button } from "../ui/button";
-import { useRealm } from "@realm/react";
-import { CALENDAR, Goal, Repeat, Task, UNITS } from "~/lib/states/task";
 
 import { useContext, useMemo, useRef, useState } from "react";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
@@ -30,6 +15,9 @@ import {
   SWATCHES_COLORS,
 } from "~/components/Task/EditTaskScreen";
 import { SubscriptionContext } from "~/lib/config";
+import { EditableTask, GenerateTask, Task } from "~/models/Task";
+import { useDatabase } from "@nozbe/watermelondb/hooks";
+import { TableName } from "~/models/schema";
 
 export function AddTasks(props: { dense?: boolean }) {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -49,20 +37,15 @@ export function AddTasks(props: { dense?: boolean }) {
   );
 }
 
-function getRandomBrightColor(): string {
-  return SWATCHES_COLORS[Math.floor(Math.random() * SWATCHES_COLORS.length)];
-}
-
 function AddTaskSheet({
   bottomSheetModalRef,
 }: {
   bottomSheetModalRef: React.RefObject<BottomSheetModalMethods>;
 }) {
-  const realm = useRealm();
+  const database = useDatabase();
+
   const { colors } = useTheme();
-  const [newTask, setNewTask] = useState<Task>(
-    Task.generate("", "", getRandomBrightColor())
-  );
+  const [newTask, setNewTask] = useState<EditableTask>(GenerateTask());
 
   // variables
   const snapPoints = ["90%"];
@@ -87,12 +70,19 @@ function AddTaskSheet({
         <EditTaskScreen
           submitLabel="Create"
           task={newTask}
-          onSubmit={(task) => {
-            if (realm.isInTransaction) realm.cancelTransaction();
-            realm.write(() => {
-              realm.create("Task", task);
+          onSubmit={async (task) => {
+            await database.write(async () => {
+              await database.get<Task>(TableName.TASKS).create((newTask) => {
+                newTask.title = task.title;
+                newTask.goal = task.goal;
+                newTask.color = task.color;
+                newTask.repeats = task.repeats;
+                newTask.startsOn = task.startsOn;
+                newTask.description = task.description;
+              });
             });
-            setNewTask(Task.generate("", "", getRandomBrightColor()));
+
+            setNewTask(GenerateTask());
             bottomSheetModalRef.current?.dismiss();
             bottomSheetModalRef.current?.forceClose();
           }}

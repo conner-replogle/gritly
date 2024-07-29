@@ -10,61 +10,47 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Completed, Task } from "~/lib/states/task";
-import { useObject, useRealm } from "@realm/react";
+import { of as of$ } from "rxjs";
+
 import { EditIcon, LineChart, Redo2 } from "lucide-react-native";
 import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
 import { useTheme } from "@react-navigation/native";
-import { UpdateMode } from "realm";
 import { EditTaskScreen } from "~/components/Task/EditTaskScreen";
 import { TaskCard } from "~/components/Task/taskCard";
 import { ExplosionContext, log } from "~/lib/config";
-import { ObjectId } from "bson";
-import { RealmSet } from "realm/dist/Set";
-
-function useTaskAndCompleted(
-  task_id: ObjectId,
-  date: Date
-): [Task | null, Completed | undefined] {
-  const task = useObject(Task, task_id);
-  log.debug("Task Changed");
-  const completed = task?.getCompleted(date);
-
-  return [task, completed];
-}
+import { Task } from "~/models/Task";
+import { useCompleted } from "~/components/hooks/Tasks";
+import { useDatabase } from "@nozbe/watermelondb/hooks";
+import { withObservables } from "@nozbe/watermelondb/react";
 
 export default function TaskContent({
-  task_id,
+  task,
   date,
 }: {
-  task_id: Realm.BSON.ObjectId;
+  task: Task;
   date: Date;
 }) {
+  const database = useDatabase();
+
+  const completed = useCompleted(task, date);
+
   const { colors } = useTheme();
-  const [task, completed] = useTaskAndCompleted(task_id, date);
-  const realm = useRealm();
-  if (!task) {
-    return <Text>Task not found</Text>;
-  }
-  const menuRef = React.useRef(null);
   const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
   const snapPoints = React.useMemo(() => ["90%"], []);
 
   const completable = date <= new Date(Date.now());
-
-  const streak = task.getStreak(date);
 
   const nut = useContext(ExplosionContext);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Pressable>
-          <TaskCard
+          <EnhancedTask
             task={task}
-            streak={streak}
+            streak={0}
             completable={completable}
             completed={completed}
-            onCompletePress={() => {
+            onCompletePress={async () => {
               const today = new Date(date);
               date.setHours(
                 today.getHours(),
@@ -75,63 +61,21 @@ export default function TaskContent({
               if (completed && completed.isCompleted()) {
                 return;
               }
-              realm.write(() => {
-                if (completed) {
-                  log.debug(
-                    `Adding to completed ${completed.amount} by ${completed.goal.steps} ${completed.completedAt} `
-                  );
-                  completed.completedAt.push(date);
-                  log.debug(`New Completed At ${completed.completedAt}`);
-                  completed.amount += completed.goal.steps;
-
-                  if (completed.amount >= completed.goal.amount) {
-                    log.debug("Confetti Activating");
-                    nut();
-                  }
-                } else {
-                  task.completed.push({
-                    _id: new Realm.BSON.ObjectId(),
-                    completedAt: [date],
-                    amount: task.goal.steps,
-                    goal: {
-                      ...task.goal,
-                    },
-                  } as unknown as Completed);
-                  if (task.goal.steps >= task.goal.amount) {
-                    nut();
-                  }
+              log.debug("Completing task");
+              if (completed) {
+                log.debug(
+                  `Adding ${completed.goal.steps} steps to ${completed.amount}`
+                );
+                await completed.complete(completed.goal.steps, date);
+                if (completed.amount >= completed.goal.amount) {
+                  nut();
                 }
-              }); //completed={item.completed[item.completed.length].goal}
+              } else {
+                log.debug("Creating new completed");
+                await task.createCompleted(date);
+              }
             }}
-            onCompleteLongPress={() => {
-              log.debug("long press");
-              realm.write(() => {
-                if (completed) {
-                  if (completed.amount <= task.goal?.steps) {
-                    log.debug(`deleting ${completed.completedAt}`);
-                    realm.delete(completed);
-                    return;
-                  }
-                  log.debug(
-                    `substracting ${task.goal?.steps} from ${completed.amount}`
-                  );
-                  completed.amount -= task.goal?.steps;
-                  if (task.repeats.period !== "Daily") {
-                    completed.completedAt.pop();
-                  }
-                } else {
-                  log.debug("adding");
-                  task.completed.push({
-                    _id: new Realm.BSON.ObjectId(),
-                    completedAt: [date],
-                    amount: task.goal.amount,
-                    goal: {
-                      ...task.goal,
-                    },
-                  });
-                }
-              });
-            }}
+            onCompleteLongPress={() => {}}
           />
         </Pressable>
       </DropdownMenuTrigger>
@@ -152,13 +96,9 @@ export default function TaskContent({
             <DropdownMenuLabel>Analytics</DropdownMenuLabel>
           </DropdownMenuItem>
           <DropdownMenuItem
-            onPress={() => {
-              realm.write(() => {
-                let completed = task.getCompleted(date);
-                if (completed) {
-                  log.debug("deleting completed");
-                  realm.delete(completed);
-                }
+            onPress={async () => {
+              await database.write(async () => {
+                completed?.markAsDeleted();
               });
             }}
           >
@@ -179,26 +119,36 @@ export default function TaskContent({
       >
         <BottomSheetView>
           <EditTaskScreen
-            onDelete={() => {
-              if (realm.isInTransaction) {
-                realm.cancelTransaction();
-              }
-              realm.write(() => {
-                realm.delete(task);
-              });
+            onDelete={async () => {
+              await task.markAsDeleted();
               bottomSheetModalRef.current?.dismiss();
             }}
             submitLabel="Save"
-            onSubmit={(atask) => {
+            onSubmit={async (atask) => {
               // @ts-ignore
-              delete atask["completed"];
-              realm.commitTransaction();
+              await database.write(async () => {
+                await task.update((a) => {
+                  a.title = atask.title;
+                  a.goal = atask.goal;
+                  a.repeats = atask.repeats;
+                  a.startsOn = atask.startsOn;
+                  a.description = atask.description;
+                  a.color = atask.color;
+                });
+              });
+
               bottomSheetModalRef.current?.dismiss();
             }}
-            task={task}
+            task={task.toEditableTask()}
           />
         </BottomSheetView>
       </BottomSheetModal>
     </DropdownMenu>
   );
 }
+
+const enhance = withObservables(["completed"], ({ completed }) => ({
+  completed: completed ? completed.observe() : of$(undefined),
+}));
+
+const EnhancedTask = enhance(TaskCard);

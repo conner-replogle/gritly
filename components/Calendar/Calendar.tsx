@@ -9,10 +9,8 @@ import {
   startOfWeek,
 } from "date-fns";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { Task } from "~/lib/states/task";
-import { useQuery } from "@realm/react";
-import { Results } from "realm";
-import { sameDate } from "react-native-calendars/src/dateutils";
+import useTasks, { useCompleted } from "~/components/hooks/Tasks";
+import { Task } from "~/models/Task";
 import { log } from "~/lib/config";
 
 export function CalendarSection(props: {
@@ -27,8 +25,7 @@ export function CalendarSection(props: {
   const flatlistRef = useRef<VirtualizedList<Date[]>>(null);
   const [indexG, setIndexG] = useState(HALF);
   const [width, setWidth] = useState(0);
-  const tasks = useQuery(Task);
-
+  const tasks = useTasks();
   useEffect(() => {
     flatlistRef.current?.scrollToIndex({ index: HALF, animated: false });
   }, [date]);
@@ -41,18 +38,18 @@ export function CalendarSection(props: {
       return a;
     });
   };
-  const referenceText = useCallback(() => {
-    let diff = differenceInCalendarWeeks(Date.now(), getWeek(indexG)[3]);
-    if (diff == 0) {
-      return null;
-    }
-    return (
-      <Text>
-        {format(getWeek(indexG)[3], "MMMM")}, {Math.abs(diff)} week
-        {Math.abs(diff) == 1 ? "" : "s"} {diff > 0 ? "ago" : "ahead"}
-      </Text>
-    );
-  }, []);
+  // const referenceText = useCallback(() => {
+  //   let diff = differenceInCalendarWeeks(Date.now(), getWeek(indexG)[3]);
+  //   if (diff == 0) {
+  //     return null;
+  //   }
+  //   return (
+  //     <Text>
+  //       {format(getWeek(indexG)[3], "MMMM")}, {Math.abs(diff)} week
+  //       {Math.abs(diff) == 1 ? "" : "s"} {diff > 0 ? "ago" : "ahead"}
+  //     </Text>
+  //   );
+  // }, []);
 
   return (
     <View
@@ -85,6 +82,8 @@ export function CalendarSection(props: {
         })}
         // WHY THE FUCK DOES IT RENDER EVERYTHING
         initialNumToRender={2}
+        windowSize={3}
+        maxToRenderPerBatch={1}
         getItemCount={(data) => LENGTH}
         getItem={(_data, index) => getWeek(index)}
         showsHorizontalScrollIndicator={false}
@@ -109,7 +108,7 @@ export function CalendarSection(props: {
 }
 
 function Week(props: {
-  tasks: Results<Task>;
+  tasks: Task[];
   width: number;
   dates: Date[];
   currentDate: Date;
@@ -117,19 +116,6 @@ function Week(props: {
 }) {
   const { dates, width, currentDate, tasks, setDate } = props;
 
-  const showBar = (task: Task, date: Date) => {
-    if (task.repeats.period == "Daily") {
-      return task.showToday(date);
-    } else if (task.repeats.period == "Weekly") {
-      let completed = task.getCompleted(date);
-      if (completed) {
-        return (
-          completed.completedAt.filter((a) => isSameDay(a, date)).length > 0
-        );
-      }
-    }
-    return false;
-  };
   return (
     <View
       className={`flex flex-row justify-evenly items-start `}
@@ -138,42 +124,83 @@ function Week(props: {
       }}
     >
       {Array.from(dates, (date, i) => (
-        <View key={i} className="flex flex-col justify-start">
-          <Pressable
-            className={
-              date.getDate() == currentDate.getDate() &&
-              date.getMonth() == currentDate.getMonth()
-                ? "w-[30px] border-2 border-primary rounded-lg"
-                : "w-[30px] p-[2px]"
-            }
-            onPress={() => setDate(date)}
-          >
-            <View>
-              <Text className=" text-center text-lg font-bold">
-                {format(date, "EEEEE")}
-              </Text>
-              <Text className="text-muted-foreground text-center text-xs font-semibold">
-                {date.getDate()}
-              </Text>
-            </View>
-          </Pressable>
-          <View className="flex flex-col mt-4 gap-1">
-            {Array.from(
-              tasks.filter((a) => showBar(a, date)),
-              (task, i) => (
-                <View
-                  key={task._id.toString()}
-                  style={{
-                    backgroundColor: `${task.color}`,
-                    opacity: task.getCompleted(date)?.isCompleted() ? 1.0 : 0.3,
-                    height: 5,
-                  }}
-                />
-              )
-            )}
-          </View>
-        </View>
+        <Day
+          key={`${date.getDay()}${i}`}
+          tasks={tasks}
+          date={date}
+          currentDate={currentDate}
+          setDate={setDate}
+        />
       ))}
     </View>
   );
 }
+
+const Day = ({
+  tasks,
+  date,
+  currentDate,
+  setDate,
+}: {
+  tasks: Task[];
+  date: Date;
+  currentDate: Date;
+  setDate: (date: Date) => void;
+}) => {
+  const showBar = (task: Task, date: Date) => {
+    if (task.repeats.period == "Daily") {
+      return task.showToday(date);
+    } else if (task.repeats.period == "Weekly") {
+      // let completed =  task.getCompleted(date);
+      // if (completed) {
+      //   return isSameDay(completed.createdAt, date);
+      // }
+    }
+    return false;
+  };
+  return (
+    <View className="flex flex-col justify-start">
+      <Pressable
+        className={
+          date.getDate() == currentDate.getDate() &&
+          date.getMonth() == currentDate.getMonth()
+            ? "w-[30px] border-2 border-primary rounded-lg"
+            : "w-[30px] p-[2px]"
+        }
+        onPress={() => setDate(date)}
+      >
+        <View>
+          <Text className=" text-center text-lg font-bold">
+            {format(date, "EEEEE")}
+          </Text>
+          <Text className="text-muted-foreground text-center text-xs font-semibold">
+            {date.getDate()}
+          </Text>
+        </View>
+      </Pressable>
+      <View className="flex flex-col mt-4 gap-1">
+        {Array.from(
+          tasks.filter((a) => showBar(a, date)),
+          (task, i) => (
+            <Bar key={`${task.id}`} date={date} task={task} />
+          )
+        )}
+      </View>
+    </View>
+  );
+};
+
+const Bar = ({ task, date }: { task: Task; date: Date }) => {
+  const completed = useCompleted(task, date);
+
+  return (
+    <View
+      key={task.id.toString()}
+      style={{
+        backgroundColor: `${task.color}`,
+        opacity: completed?.isCompleted() ? 1.0 : 0.3,
+        height: 5,
+      }}
+    />
+  );
+};

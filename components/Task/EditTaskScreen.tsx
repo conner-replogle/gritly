@@ -1,4 +1,3 @@
-import { CALENDAR, Completed, Repeat, Task, UNITS } from "~/lib/states/task";
 import {
   Dispatch,
   SetStateAction,
@@ -37,9 +36,9 @@ import { TaskCard } from "~/components/Task/taskCard";
 import { formatDate } from "date-fns";
 import DateTimePicker from "react-native-ui-datepicker/src/DateTimePicker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Unmanaged } from "realm";
-import { useRealm } from "@realm/react";
 import { useTheme } from "@react-navigation/native";
+import { EditableTask, Task } from "~/models/Task";
+import { CALENDAR, UNITS } from "~/models/schema";
 export const SWATCHES_COLORS = [
   "#f44336",
   "#E91E63",
@@ -60,7 +59,7 @@ export const SWATCHES_COLORS = [
 ];
 
 function SelectColor(props: {
-  ntask: Task;
+  ntask: EditableTask;
   onChange: (colors: returnedResults) => void;
 }) {
   const theme = useTheme();
@@ -112,8 +111,8 @@ function Goal({
   ntask,
   setTask,
 }: {
-  ntask: Task;
-  setTask: (a: (a: Task) => void) => void;
+  ntask: EditableTask;
+  setTask: (a: (a: EditableTask) => void) => void;
 }) {
   let value =
     UNITS.find((a) => a.value == ntask.goal.unit)?.name ?? ntask.goal.unit!;
@@ -207,8 +206,8 @@ function Goal({
 }
 
 function RepeatPeriod(props: {
-  ntask: Task;
-  setTask: (a: (a: Task) => void) => void;
+  ntask: EditableTask;
+  setTask: (a: (a: EditableTask) => void) => void;
 }) {
   const onValueChange = (label: string) => {
     props.setTask((a) => {
@@ -235,8 +234,8 @@ function FrequencyPeriod({
   ntask,
   setTask,
 }: {
-  ntask: Task;
-  setTask: (a: (a: Task) => void) => void;
+  ntask: EditableTask;
+  setTask: (a: (a: EditableTask) => void) => void;
 }) {
   return (
     <View className="bg-secondary p-3 rounded-xl">
@@ -311,23 +310,15 @@ export function EditTaskScreen({
 }: {
   onDelete?: () => void;
   submitLabel: string;
-  task: Task;
-  onSubmit: (task: Task) => void;
+  task: EditableTask;
+  onSubmit: (task: EditableTask) => void;
 }) {
-  useEffect(() => {
-    realm.beginTransaction();
-    return () => {
-      if (realm.isInTransaction) {
-        realm.cancelTransaction();
-      }
-    };
-  }, []);
   const { colors } = useTheme();
-  const realm = useRealm();
   const [ntask, setInnerTask] = useState(task);
 
-  const setTask = useCallback((write: (a: Task) => void) => {
+  const setTask = useCallback((write: (a: EditableTask) => void) => {
     write(ntask);
+
     setInnerTask({
       ...ntask,
     } as Task);
@@ -361,7 +352,7 @@ export function EditTaskScreen({
 
             <View className={"flex-grow flex flex-col gap-3 p-2"}>
               <TaskCard
-                task={ntask}
+                task={ntask as Task}
                 completed={undefined}
                 completable={true}
                 streak={0}
