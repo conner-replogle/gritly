@@ -58,11 +58,9 @@ export const schema = appSchema({
     tableSchema({
       name: TableName.COMPLETED,
       columns: [
-        { name: "amount", type: "number" },
         { name: "task_id", type: "string" },
-        { name: "created_at", type: "number" },
-        { name: "goal", type: "string" },
-        { name: "completed_at", type: "number", isOptional: true },
+        { name: "amount", type: "number" },
+        { name: "completed_on", type: "number" },
       ],
     }),
   ],

@@ -45,7 +45,7 @@ export default function TaskContent({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Pressable>
-          <EnhancedTask
+          <TaskCard
             task={task}
             streak={0}
             completable={completable}
@@ -58,16 +58,16 @@ export default function TaskContent({
                 today.getSeconds(),
                 0
               );
-              if (completed && completed.isCompleted()) {
+              if (completed.isCompleted) {
                 return;
               }
               log.debug("Completing task");
               if (completed) {
                 log.debug(
-                  `Adding ${completed.goal.steps} steps to ${completed.amount}`
+                  `Adding ${task.goal.steps} steps to ${completed.total}`
                 );
-                await completed.complete(completed.goal.steps, date);
-                if (completed.amount >= completed.goal.amount) {
+                await task.createCompleted(date);
+                if (completed.total + task.goal.steps >= task.goal.amount) {
                   nut();
                 }
               } else {
@@ -98,7 +98,9 @@ export default function TaskContent({
           <DropdownMenuItem
             onPress={async () => {
               await database.write(async () => {
-                completed?.markAsDeleted();
+                for (let a of completed.completed) {
+                  await a.destroyPermanently();
+                }
               });
             }}
           >
@@ -148,9 +150,3 @@ export default function TaskContent({
     </DropdownMenu>
   );
 }
-
-const enhance = withObservables(["completed"], ({ completed }) => ({
-  completed: completed ? completed.observe() : of$(undefined),
-}));
-
-const EnhancedTask = enhance(TaskCard);

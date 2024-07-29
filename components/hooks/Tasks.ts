@@ -1,11 +1,18 @@
 import { useDatabase } from "@nozbe/watermelondb/hooks";
 import { TableName } from "~/models/schema";
-import { Task } from "~/models/Task";
+import { CompletedResult, Task } from "~/models/Task";
 import { useEffect, useState } from "react";
 import { Completed } from "~/models/Completed";
-import { isSameDay, isSameWeek } from "date-fns";
+import {
+  endOfDay,
+  endOfWeek,
+  isSameDay,
+  isSameWeek,
+  startOfDay,
+  startOfWeek,
+} from "date-fns";
 import { log } from "~/lib/config";
-import { withObservables } from "@nozbe/watermelondb/react";
+import { Q } from "@nozbe/watermelondb";
 
 export default function useTasks(date?: Date) {
   const database = useDatabase();
@@ -23,21 +30,19 @@ export default function useTasks(date?: Date) {
 }
 
 export function useCompleted(task: Task, date: Date) {
-  const [completed, setCompleted] = useState<Completed | undefined>(undefined);
+  const [completed, setCompleted] = useState<CompletedResult>({
+    total: 0,
+    completed: [],
+    isCompleted: false,
+  });
   useEffect(() => {
-    let subscriber = task.sortedCompleted.observe().subscribe((a) => {
-      const completed = a.find((completed) => {
-        if (task.repeats.period == "Weekly") {
-          if (isSameWeek(completed.createdAt, date)) return true;
-        }
-        if (task.repeats.period == "Daily") {
-          if (isSameDay(completed.createdAt, date)) return true;
-        }
-        return false;
+    let subscriber = task
+      .getCompleted(date)
+      .observe()
+      .subscribe((a) => {
+        let result = task.checkCompleted(a);
+        setCompleted(result);
       });
-
-      setCompleted(completed);
-    });
 
     return () => subscriber.unsubscribe();
   }, [task, date]);

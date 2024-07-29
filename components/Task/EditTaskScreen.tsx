@@ -353,7 +353,11 @@ export function EditTaskScreen({
             <View className={"flex-grow flex flex-col gap-3 p-2"}>
               <TaskCard
                 task={ntask as Task}
-                completed={undefined}
+                completed={{
+                  completed: [],
+                  isCompleted: false,
+                  total: 0,
+                }}
                 completable={true}
                 streak={0}
                 onCompletePress={() => {}}

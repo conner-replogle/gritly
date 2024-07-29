@@ -143,17 +143,7 @@ const Day = ({
   currentDate: Date;
   setDate: (date: Date) => void;
 }) => {
-  const showBar = (task: Task, date: Date) => {
-    if (task.repeats.period == "Daily") {
-      return task.showToday(date);
-    } else if (task.repeats.period == "Weekly") {
-      // let completed =  task.getCompleted(date);
-      // if (completed) {
-      //   return isSameDay(completed.createdAt, date);
-      // }
-    }
-    return false;
-  };
+  const showBar = (task: Task, date: Date) => {};
   return (
     <View className="flex flex-col justify-start">
       <Pressable
@@ -175,12 +165,9 @@ const Day = ({
         </View>
       </Pressable>
       <View className="flex flex-col mt-4 gap-1">
-        {Array.from(
-          tasks.filter((a) => showBar(a, date)),
-          (task, i) => {
-            return <TaskBar key={`${task.id}`} task={task} date={date} />;
-          }
-        )}
+        {Array.from(tasks, (task, i) => {
+          return <TaskBar key={`${task.id}`} task={task} date={date} />;
+        })}
       </View>
     </View>
   );
@@ -188,23 +175,29 @@ const Day = ({
 
 const TaskBar = ({ task, date }: { task: Task; date: Date }) => {
   const completed = useCompleted(task, date);
-  return <EnhancedBar completed={completed} color={task.color} />;
+  let show = false;
+  if (task.repeats.period == "Daily") {
+    show = task.showToday(date);
+  } else if (task.repeats.period == "Weekly") {
+    for (let completedDate of completed.completed) {
+      if (isSameDay(completedDate.completedOn, date)) {
+        show = true;
+        break;
+      }
+    }
+  }
+  if (show) {
+    return (
+      <View
+        style={{
+          backgroundColor: `${task.color}`,
+
+          opacity: completed?.isCompleted ? 1.0 : 0.3,
+          height: 5,
+        }}
+      />
+    );
+  } else {
+    return null;
+  }
 };
-
-const Bar = ({ completed, color }: { completed: Completed; color: string }) => {
-  return (
-    <View
-      style={{
-        backgroundColor: `${color}`,
-        opacity: completed?.isCompleted() ? 1.0 : 0.3,
-        height: 5,
-      }}
-    />
-  );
-};
-
-const enhance = withObservables(["completed"], ({ completed }) => ({
-  completed: completed ? completed.observe() : of$(undefined),
-}));
-
-const EnhancedBar = enhance(Bar);

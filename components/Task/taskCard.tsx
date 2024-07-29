@@ -4,7 +4,7 @@ import { Text } from "~/components/ui/text";
 import Svg, { Path } from "react-native-svg";
 import { CheckIcon, PlusIcon } from "lucide-react-native";
 import * as React from "react";
-import { EditableTask, Task } from "~/models/Task";
+import { CompletedResult, EditableTask, Task } from "~/models/Task";
 import { Completed } from "~/models/Completed";
 
 export function TaskCard({
@@ -19,7 +19,7 @@ export function TaskCard({
   onCompletePress: () => void;
   onCompleteLongPress: () => void;
   task: Task;
-  completed: Completed | undefined;
+  completed: CompletedResult;
   streak: number;
 }) {
   return (
@@ -43,11 +43,13 @@ export function TaskCard({
               onCompletePress();
             }}
           >
-            <CompleteIcon completed={completed ?? undefined} />
+            <CompleteIcon
+              completed={completed ?? undefined}
+              goal={task.goal.amount}
+            />
           </Pressable>
           <Text className="text-xs font-semibold">
-            {completed?.amount ?? 0} /{" "}
-            {completed?.goal.amount ?? task.goal.amount}
+            {completed?.total ?? 0} / {task.goal.amount}
           </Text>
         </View>
       )}
@@ -55,8 +57,14 @@ export function TaskCard({
   );
 }
 
-function CompleteIcon({ completed }: { completed: Completed | undefined }) {
-  const isCompleted = completed?.isCompleted();
+function CompleteIcon({
+  completed,
+  goal,
+}: {
+  completed: CompletedResult;
+  goal: number;
+}) {
+  const isCompleted = completed.isCompleted;
   const color = isCompleted ? "green" : "#3498db";
   return (
     <View>
@@ -72,9 +80,7 @@ function CompleteIcon({ completed }: { completed: Completed | undefined }) {
             radius={10}
             color={color}
             strokeWidth={3}
-            percentage={
-              completed ? (completed!.amount / completed!.goal.amount) * 100 : 0
-            }
+            percentage={completed ? (completed!.total / goal) * 100 : 0}
           />
         )}
       </Svg>

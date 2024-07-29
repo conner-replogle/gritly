@@ -16,8 +16,12 @@ import {
   differenceInCalendarMonths,
   differenceInCalendarWeeks,
   differenceInDays,
+  endOfDay,
+  endOfWeek,
   isSameDay,
   isSameWeek,
+  startOfDay,
+  startOfWeek,
 } from "date-fns";
 import { SWATCHES_COLORS } from "~/components/Task/EditTaskScreen";
 import { log } from "~/lib/config";
@@ -51,7 +55,9 @@ export class Task extends Model {
   @lazy completed = this.collections
     .get<Completed>(TableName.COMPLETED)
     .query(Q.where("task_id", this.id));
-  @lazy sortedCompleted = this.completed.extend(Q.sortBy("created_at", Q.desc));
+  @lazy sortedCompleted = this.completed.extend(
+    Q.sortBy("completed_on", Q.desc)
+  );
   toEditableTask(): EditableTask {
     return {
       startsOn: this.startsOn,
@@ -100,30 +106,58 @@ export class Task extends Model {
     }
     return false;
   }
-  async getCompleted(date: Date): Promise<Completed | undefined> {
-    const completed = await this.sortedCompleted.fetch();
 
-    if (this.repeats.period == "Weekly") {
-      for (let i = completed.length - 1; i >= 0; i--) {
-        if (isSameWeek(completed[i].createdAt, date)) return completed[i];
-      }
+  checkCompleted(completedArray: Completed[]): CompletedResult {
+    let total = 0;
+    for (let i = 0; i < completedArray.length; i++) {
+      total += completedArray[i].amount;
     }
+    return {
+      completed: completedArray,
+      isCompleted: total >= this.goal.amount,
+      total: total,
+    };
+  }
+  getCompleted(date: Date): Query<Completed> {
+    let beginning: Date;
+    let end: Date;
     if (this.repeats.period == "Daily") {
-      for (let i = completed.length - 1; i >= 0; i--) {
-        if (isSameDay(completed[i].createdAt, date)) return completed[i];
-      }
+      beginning = startOfDay(date);
+      end = endOfDay(date);
+    } else if (this.repeats.period == "Weekly") {
+      beginning = startOfWeek(date);
+      end = endOfWeek(date);
+    } else {
+      log.debug("Unsupported period");
+      throw new Error("Unsupported period");
     }
+    return this.sortedCompleted.extend(
+      Q.and(
+        Q.where("completed_on", Q.gte(beginning.getTime())),
+        Q.where("completed_on", Q.lte(end.getTime()))
+      )
+    );
   }
   @writer async createCompleted(date: Date) {
     await this.collections
       .get<Completed>(TableName.COMPLETED)
       .create((completed) => {
         completed.amount = this.goal.steps;
-        completed.goal = this.goal;
-        completed.createdAt = date;
+        completed.completedOn = date;
         completed.task.set(this);
       });
   }
+
+  markAsDeleted(): Promise<void> {
+    this.completed.markAllAsDeleted();
+    return super.markAsDeleted();
+  }
+}
+
+export interface CompletedResult {
+  completed: Completed[];
+  isCompleted: boolean;
+  total: number;
 }
 
 function getRandomBrightColor(): string {
