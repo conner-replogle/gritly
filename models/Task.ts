@@ -41,6 +41,7 @@ export class Task extends Model {
   };
   @readonly @date("created_at") createdAt!: Date;
   @date("starts_on") startsOn!: Date;
+  @date("ends_on") endsOn?: Date;
   @text("title") title!: string;
   @text("description") description!: string;
   @text("color") color!: string;
@@ -62,7 +63,7 @@ export class Task extends Model {
     };
   }
   showToday(date: Date): boolean {
-    if (date < this.startsOn) {
+    if (date < this.startsOn || (this.endsOn && date > this.endsOn)) {
       return false;
     }
     if (this.repeats.period == "Daily") {
@@ -138,6 +139,7 @@ export function GenerateTask(): EditableTask {
     repeats: {
       period: "Daily",
       specific_weekday: [0, 1, 2, 3, 4, 5, 6],
+      every_n: 1,
     } as Repeats,
     goal: {
       amount: 1,

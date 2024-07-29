@@ -22,6 +22,7 @@ import Svg, { Path } from "react-native-svg";
 import { Toggle, ToggleIcon } from "~/components/ui/toggle";
 import { useMMKVBoolean, useMMKVString } from "react-native-mmkv";
 import Purchase from "~/components/Settings/Purchase";
+import theme from "tailwindcss/defaultTheme";
 export default function SettingsButton() {
   const { colors } = useTheme();
   const { isDarkColorScheme, setColorScheme } = useColorScheme();
@@ -63,7 +64,7 @@ export default function SettingsButton() {
           ref.current?.present();
         }}
       >
-        <SettingsIcon />
+        <SettingsIcon color={colors.primary} />
       </Button>
     </>
   );

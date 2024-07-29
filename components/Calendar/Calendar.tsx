@@ -12,14 +12,19 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import useTasks, { useCompleted } from "~/components/hooks/Tasks";
 import { Task } from "~/models/Task";
 import { log } from "~/lib/config";
+import { withObservables } from "@nozbe/watermelondb/react";
+import { of as of$ } from "rxjs";
+import { TaskCard } from "~/components/Task/taskCard";
+import { Completed } from "~/models/Completed";
 
 export function CalendarSection(props: {
   date: Date;
   setDate: (date: Date) => void;
 }) {
   const { date, setDate } = props;
-  const LENGTH = 100;
-  const HALF = 50;
+  const today = new Date(Date.now());
+  const LENGTH = 24;
+  const HALF = 12;
   const ref = useRef<View>(null);
 
   const flatlistRef = useRef<VirtualizedList<Date[]>>(null);
@@ -27,29 +32,20 @@ export function CalendarSection(props: {
   const [width, setWidth] = useState(0);
   const tasks = useTasks();
   useEffect(() => {
-    flatlistRef.current?.scrollToIndex({ index: HALF, animated: false });
+    if (isSameDay(today, date)) {
+      flatlistRef.current?.scrollToIndex({ index: HALF, animated: false });
+    }
   }, [date]);
+
   const getWeek = (index: number) => {
     const a = index - HALF;
-    const weekStart = startOfWeek(addDays(date, a * 7));
+    const weekStart = startOfWeek(addDays(today, a * 7));
     return Array.from({ length: 7 }, (_, i) => {
       let a = addDays(weekStart, i);
       a.setHours(12, 0, 0, 0);
       return a;
     });
   };
-  // const referenceText = useCallback(() => {
-  //   let diff = differenceInCalendarWeeks(Date.now(), getWeek(indexG)[3]);
-  //   if (diff == 0) {
-  //     return null;
-  //   }
-  //   return (
-  //     <Text>
-  //       {format(getWeek(indexG)[3], "MMMM")}, {Math.abs(diff)} week
-  //       {Math.abs(diff) == 1 ? "" : "s"} {diff > 0 ? "ago" : "ahead"}
-  //     </Text>
-  //   );
-  // }, []);
 
   return (
     <View
@@ -181,26 +177,34 @@ const Day = ({
       <View className="flex flex-col mt-4 gap-1">
         {Array.from(
           tasks.filter((a) => showBar(a, date)),
-          (task, i) => (
-            <Bar key={`${task.id}`} date={date} task={task} />
-          )
+          (task, i) => {
+            return <TaskBar key={`${task.id}`} task={task} date={date} />;
+          }
         )}
       </View>
     </View>
   );
 };
 
-const Bar = ({ task, date }: { task: Task; date: Date }) => {
+const TaskBar = ({ task, date }: { task: Task; date: Date }) => {
   const completed = useCompleted(task, date);
+  return <EnhancedBar completed={completed} color={task.color} />;
+};
 
+const Bar = ({ completed, color }: { completed: Completed; color: string }) => {
   return (
     <View
-      key={task.id.toString()}
       style={{
-        backgroundColor: `${task.color}`,
+        backgroundColor: `${color}`,
         opacity: completed?.isCompleted() ? 1.0 : 0.3,
         height: 5,
       }}
     />
   );
 };
+
+const enhance = withObservables(["completed"], ({ completed }) => ({
+  completed: completed ? completed.observe() : of$(undefined),
+}));
+
+const EnhancedBar = enhance(Bar);

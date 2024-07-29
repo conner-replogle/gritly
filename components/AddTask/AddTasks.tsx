@@ -14,7 +14,7 @@ import {
   EditTaskScreen,
   SWATCHES_COLORS,
 } from "~/components/Task/EditTaskScreen";
-import { SubscriptionContext } from "~/lib/config";
+import { log, SubscriptionContext } from "~/lib/config";
 import { EditableTask, GenerateTask, Task } from "~/models/Task";
 import { useDatabase } from "@nozbe/watermelondb/hooks";
 import { TableName } from "~/models/schema";
@@ -81,9 +81,9 @@ function AddTaskSheet({
                 newTask.description = task.description;
               });
             });
+            log.debug(`Created Task ${task.title}`);
 
             setNewTask(GenerateTask());
-            bottomSheetModalRef.current?.dismiss();
             bottomSheetModalRef.current?.forceClose();
           }}
         />

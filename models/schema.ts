@@ -49,6 +49,7 @@ export const schema = appSchema({
         { name: "description", type: "string" },
         { name: "color", type: "string" },
         { name: "starts_on", type: "number" },
+        { name: "ends_on", type: "number", isOptional: true },
         { name: "created_at", type: "number" },
         { name: "repeats", type: "string" },
         { name: "goal", type: "string" },

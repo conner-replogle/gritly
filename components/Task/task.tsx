@@ -120,7 +120,9 @@ export default function TaskContent({
         <BottomSheetView>
           <EditTaskScreen
             onDelete={async () => {
-              await task.markAsDeleted();
+              await database.write(async () => {
+                await task.markAsDeleted();
+              });
               bottomSheetModalRef.current?.dismiss();
             }}
             submitLabel="Save"
