@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useContext } from "react";
 import { Pressable } from "react-native";
-import { Text } from "~/components/ui/text";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +9,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { of as of$ } from "rxjs";
 
 import { EditIcon, LineChart, Redo2 } from "lucide-react-native";
 import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
@@ -18,10 +16,67 @@ import { useTheme } from "@react-navigation/native";
 import { EditTaskScreen } from "~/components/Task/EditTaskScreen";
 import { TaskCard } from "~/components/Task/taskCard";
 import { ExplosionContext, log } from "~/lib/config";
-import { Task } from "~/models/Task";
+import { EditableTask, Task } from "~/models/Task";
 import { useCompleted } from "~/components/hooks/Tasks";
 import { useDatabase } from "@nozbe/watermelondb/hooks";
-import { withObservables } from "@nozbe/watermelondb/react";
+import { PortalHost } from "~/components/primitives/portal";
+import { AnalyticsScreen } from "~/components/Analytics/AnalyticsScreen";
+
+function EditBottomSheet(props: {
+  bottomSheetRef: React.RefObject<BottomSheetModal>;
+  snapPoints: string[];
+
+  onDelete: () => Promise<void>;
+  onSubmit: (atask: EditableTask) => Promise<void>;
+  task: EditableTask;
+}) {
+  const { colors } = useTheme();
+  return (
+    <BottomSheetModal
+      ref={props.bottomSheetRef}
+      snapPoints={props.snapPoints}
+      handleIndicatorStyle={{
+        backgroundColor: colors.border,
+      }}
+      backgroundStyle={{
+        backgroundColor: colors.background,
+      }}
+    >
+      <BottomSheetView>
+        <EditTaskScreen
+          onDelete={props.onDelete}
+          submitLabel="Save"
+          onSubmit={props.onSubmit}
+          task={props.task}
+        />
+      </BottomSheetView>
+    </BottomSheetModal>
+  );
+}
+
+function AnalyicsBottomSheet(props: {
+  bottomSheetRef: React.RefObject<BottomSheetModal>;
+  snapPoints: string[];
+  task: Task;
+}) {
+  const { colors } = useTheme();
+  return (
+    <BottomSheetModal
+      ref={props.bottomSheetRef}
+      snapPoints={props.snapPoints}
+      handleIndicatorStyle={{
+        backgroundColor: colors.border,
+      }}
+      backgroundStyle={{
+        backgroundColor: colors.background,
+      }}
+    >
+      <BottomSheetView>
+        <AnalyticsScreen task={props.task} />
+      </BottomSheetView>
+    </BottomSheetModal>
+  );
+}
 
 export default function TaskContent({
   task,
@@ -35,7 +90,9 @@ export default function TaskContent({
   const completed = useCompleted(task, date);
 
   const { colors } = useTheme();
-  const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
+  const editSheetRef = React.useRef<BottomSheetModal>(null);
+
+  const analyticalSheetRef = React.useRef<BottomSheetModal>(null);
   const snapPoints = React.useMemo(() => ["90%"], []);
 
   const completable = date <= new Date(Date.now());
@@ -85,13 +142,17 @@ export default function TaskContent({
         <DropdownMenuGroup>
           <DropdownMenuItem
             onPress={() => {
-              bottomSheetModalRef.current?.present();
+              editSheetRef.current?.present();
             }}
           >
             <EditIcon size={16} />
             <DropdownMenuLabel>Edit</DropdownMenuLabel>
           </DropdownMenuItem>
-          <DropdownMenuItem onPress={() => {}}>
+          <DropdownMenuItem
+            onPress={() => {
+              analyticalSheetRef.current?.present();
+            }}
+          >
             <LineChart size={16} />
             <DropdownMenuLabel>Analytics</DropdownMenuLabel>
           </DropdownMenuItem>
@@ -109,44 +170,37 @@ export default function TaskContent({
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
-      <BottomSheetModal
-        ref={bottomSheetModalRef}
+      <EditBottomSheet
+        bottomSheetRef={editSheetRef}
         snapPoints={snapPoints}
-        handleIndicatorStyle={{
-          backgroundColor: colors.border,
+        onDelete={async () => {
+          await database.write(async () => {
+            await task.markAsDeleted();
+          });
+          editSheetRef.current?.dismiss();
         }}
-        backgroundStyle={{
-          backgroundColor: colors.background,
-        }}
-      >
-        <BottomSheetView>
-          <EditTaskScreen
-            onDelete={async () => {
-              await database.write(async () => {
-                await task.markAsDeleted();
-              });
-              bottomSheetModalRef.current?.dismiss();
-            }}
-            submitLabel="Save"
-            onSubmit={async (atask) => {
-              // @ts-ignore
-              await database.write(async () => {
-                await task.update((a) => {
-                  a.title = atask.title;
-                  a.goal = atask.goal;
-                  a.repeats = atask.repeats;
-                  a.startsOn = atask.startsOn;
-                  a.description = atask.description;
-                  a.color = atask.color;
-                });
-              });
+        onSubmit={async (atask) => {
+          // @ts-ignore
+          await database.write(async () => {
+            await task.update((a) => {
+              a.title = atask.title;
+              a.goal = atask.goal;
+              a.repeats = atask.repeats;
+              a.startsOn = atask.startsOn;
+              a.description = atask.description;
+              a.color = atask.color;
+            });
+          });
 
-              bottomSheetModalRef.current?.dismiss();
-            }}
-            task={task.toEditableTask()}
-          />
-        </BottomSheetView>
-      </BottomSheetModal>
+          editSheetRef.current?.dismiss();
+        }}
+        task={task.toEditableTask()}
+      />
+      <AnalyicsBottomSheet
+        bottomSheetRef={analyticalSheetRef}
+        snapPoints={snapPoints}
+        task={task}
+      />
     </DropdownMenu>
   );
 }

@@ -4,7 +4,12 @@ import { Text } from "~/components/ui/text";
 import Svg, { Path } from "react-native-svg";
 import { CheckIcon, PlusIcon } from "lucide-react-native";
 import * as React from "react";
-import { CompletedResult, EditableTask, Task } from "~/models/Task";
+import {
+  CompletedResult,
+  EditableTask,
+  repeatsToString,
+  Task,
+} from "~/models/Task";
 import { Completed } from "~/models/Completed";
 
 export function TaskCard({
@@ -25,14 +30,16 @@ export function TaskCard({
   return (
     <View
       style={{ borderColor: task.color, borderWidth: 2 }}
-      className=" p-5 mb-2 flex flex-row justify-between bg-background rounded-lg"
+      className=" p-5 mb-2 flex flex-row justify-between items-center bg-background rounded-lg h-24"
     >
-      <View className="text-start flex flex-col justify-start items-start">
+      <View className="text-start flex flex-col justify-evenly items-start">
         <CardTitle>
           {task.title} {streak > 1 ? ` 🔥${streak}` : ""}{" "}
         </CardTitle>
 
-        <CardDescription className="ml-1"></CardDescription>
+        <CardDescription>
+          {repeatsToString(task.goal, task.repeats)}
+        </CardDescription>
       </View>
 
       {completable && (

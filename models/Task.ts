@@ -10,7 +10,7 @@ import {
   writer,
 } from "@nozbe/watermelondb/decorators";
 
-import { TableName } from "./schema";
+import { CALENDAR, TableName } from "./schema";
 import { Completed } from "~/models/Completed";
 import {
   differenceInCalendarMonths,
@@ -23,7 +23,7 @@ import {
   startOfDay,
   startOfWeek,
 } from "date-fns";
-import { SWATCHES_COLORS } from "~/components/Task/EditTaskScreen";
+import { SWATCHES_COLORS } from "~/components/Task/EditTaskScreen/SelectColor";
 import { log } from "~/lib/config";
 
 export interface EditableTask {
@@ -154,6 +154,28 @@ export class Task extends Model {
   }
 }
 
+export function repeatsToString(goal: Goal, repeats: Repeats) {
+  let prefix = "";
+  if (repeats.period == "Daily") {
+    if (repeats.specific_weekday) {
+      prefix += `Every ${repeats.specific_weekday
+        .map((a) => CALENDAR[a])
+        .join(", ")} `;
+    } else if (repeats.every_n) {
+      prefix += `Every ${repeats.every_n} days `;
+    }
+  } else if (repeats.period == "Weekly") {
+    if (repeats.every_n) {
+      prefix += `Every ${repeats.every_n} weeks `;
+    }
+  } else if (repeats.period == "Monthly") {
+  } else {
+  }
+
+  prefix += `for ${goal.amount} ${goal.unit}`;
+  return prefix;
+}
+
 export interface CompletedResult {
   completed: Completed[];
   isCompleted: boolean;
@@ -168,7 +190,7 @@ export function GenerateTask(): EditableTask {
     title: "New Task",
     description: "",
     createdAt: new Date(Date.now()),
-    startsOn: new Date(Date.now()),
+    startsOn: startOfDay(new Date(Date.now())),
     color: getRandomBrightColor(),
     repeats: {
       period: "Daily",

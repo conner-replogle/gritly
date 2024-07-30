@@ -13,7 +13,6 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import Purchases, { LOG_LEVEL } from "react-native-purchases";
 import { log, SubscriptionContext } from "~/lib/config";
 import { useEffect } from "react";
-import { logger } from "react-native-logs";
 import { PortalHost } from "@rn-primitives/portal";
 import { database } from "~/lib/watermelon";
 import { DatabaseProvider } from "@nozbe/watermelondb/react";
@@ -107,16 +106,11 @@ export default function RootLayout() {
             <BottomSheetModalProvider>
               <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
               <Stack>
-                <Stack.Screen
-                  name="index"
-                  options={{
-                    headerShown: false,
-                  }}
-                />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               </Stack>
-
-              <PortalHost />
             </BottomSheetModalProvider>
+
+            <PortalHost />
           </SubscriptionContext.Provider>
         </DatabaseProvider>
       </ThemeProvider>

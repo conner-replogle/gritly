@@ -23,54 +23,54 @@ import { Toggle, ToggleIcon } from "~/components/ui/toggle";
 import { useMMKVBoolean, useMMKVString } from "react-native-mmkv";
 import Purchase from "~/components/Settings/Purchase";
 import theme from "tailwindcss/defaultTheme";
-export default function SettingsButton() {
-  const { colors } = useTheme();
-  const { isDarkColorScheme, setColorScheme } = useColorScheme();
-  const toggleColorScheme = useCallback(() => {
-    const newTheme = isDarkColorScheme ? "light" : "dark";
-    setColorScheme(newTheme);
-    setAndroidNavigationBar(newTheme);
-    AsyncStorage.setItem("theme", newTheme);
-  }, []);
+// export default function SettingsButton() {
+//   const { colors } = useTheme();
+//   const { isDarkColorScheme, setColorScheme } = useColorScheme();
+//   const toggleColorScheme = useCallback(() => {
+//     const newTheme = isDarkColorScheme ? "light" : "dark";
+//     setColorScheme(newTheme);
+//     setAndroidNavigationBar(newTheme);
+//     AsyncStorage.setItem("theme", newTheme);
+//   }, []);
+//
+//   const ref = useRef<BottomSheetModalMethods | null>(null);
+//
+//   return (
+//     <>
+//       <BottomSheetModal
+//         handleHeight={5}
+//         ref={ref}
+//         keyboardBehavior="interactive"
+//         snapPoints={["90%"]}
+//         handleIndicatorStyle={{
+//           backgroundColor: colors.border,
+//         }}
+//         backgroundStyle={{
+//           backgroundColor: colors.background,
+//         }}
+//         onAnimate={(_, index) => {
+//           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+//         }}
+//       >
+//         <BottomSheetView>
+//           <SettingsSheet />
+//         </BottomSheetView>
+//       </BottomSheetModal>
+//       <Button
+//         className="aspect-square"
+//         variant={"ghost"}
+//         size="sm"
+//         onPress={() => {
+//           ref.current?.present();
+//         }}
+//       >
+//         <SettingsIcon color={colors.primary} />
+//       </Button>
+//     </>
+//   );
+// }
 
-  const ref = useRef<BottomSheetModalMethods | null>(null);
-
-  return (
-    <>
-      <BottomSheetModal
-        handleHeight={5}
-        ref={ref}
-        keyboardBehavior="interactive"
-        snapPoints={["90%"]}
-        handleIndicatorStyle={{
-          backgroundColor: colors.border,
-        }}
-        backgroundStyle={{
-          backgroundColor: colors.background,
-        }}
-        onAnimate={(_, index) => {
-          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        }}
-      >
-        <BottomSheetView>
-          <SettingsSheet />
-        </BottomSheetView>
-      </BottomSheetModal>
-      <Button
-        className="aspect-square"
-        variant={"ghost"}
-        size="sm"
-        onPress={() => {
-          ref.current?.present();
-        }}
-      >
-        <SettingsIcon color={colors.primary} />
-      </Button>
-    </>
-  );
-}
-
-function SettingsSheet() {
+export function SettingsSheet() {
   const [nuttable, setNuttable] = useMMKVBoolean("settings.nuttable");
 
   return (

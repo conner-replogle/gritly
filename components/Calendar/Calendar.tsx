@@ -193,7 +193,7 @@ const TaskBar = ({ task, date }: { task: Task; date: Date }) => {
           backgroundColor: `${task.color}`,
 
           opacity: completed?.isCompleted ? 1.0 : 0.3,
-          height: 5,
+          height: completed?.isCompleted ? 5 : 3,
         }}
       />
     );

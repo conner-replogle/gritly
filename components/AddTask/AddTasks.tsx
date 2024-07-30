@@ -10,10 +10,7 @@ import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/typ
 import { useTheme } from "@react-navigation/native";
 import { Handle } from "./customhandle";
 
-import {
-  EditTaskScreen,
-  SWATCHES_COLORS,
-} from "~/components/Task/EditTaskScreen";
+import { EditTaskScreen } from "~/components/Task/EditTaskScreen";
 import { log, SubscriptionContext } from "~/lib/config";
 import { EditableTask, GenerateTask, Task } from "~/models/Task";
 import { useDatabase } from "@nozbe/watermelondb/hooks";
@@ -71,6 +68,8 @@ function AddTaskSheet({
           submitLabel="Create"
           task={newTask}
           onSubmit={async (task) => {
+            bottomSheetModalRef.current?.dismiss();
+            bottomSheetModalRef.current?.forceClose();
             await database.write(async () => {
               await database.get<Task>(TableName.TASKS).create((newTask) => {
                 newTask.title = task.title;
@@ -84,7 +83,6 @@ function AddTaskSheet({
             log.debug(`Created Task ${task.title}`);
 
             setNewTask(GenerateTask());
-            bottomSheetModalRef.current?.forceClose();
           }}
         />
       </BottomSheetView>

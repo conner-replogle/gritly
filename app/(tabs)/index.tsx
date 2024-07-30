@@ -52,23 +52,20 @@ import {
   useState,
 } from "react";
 
-import { ThemeToggle } from "~/components/ThemeToggle";
-import SettingsButton from "~/components/Settings/Settings";
 import ConfettiCannon from "react-native-confetti-cannon";
 import { useMMKV, useMMKVBoolean } from "react-native-mmkv";
 import { ExplosionContext, log } from "~/lib/config";
-import { PortalHost } from "~/components/primitives/portal";
 import { DropdownMenuTriggerRef } from "@rn-primitives/dropdown-menu";
 import useTasks from "~/components/hooks/Tasks";
 import { Task } from "~/models/Task";
+import { endOfDay, startOfDay } from "date-fns";
 
 export default function Screen() {
-  const [date, setInnerDate] = React.useState(new Date(Date.now()));
+  const [date, setInnerDate] = React.useState(startOfDay(Date.now()));
   const storage = useMMKV();
 
   const setDate = useCallback((date: Date) => {
-    date.setHours(0, 0, 0, 0);
-    setInnerDate(date);
+    setInnerDate(startOfDay(date));
   }, []);
   const [nuttable, _] = useMMKVBoolean("settings.nuttable");
 
@@ -150,7 +147,6 @@ function HeaderCard({
           >
             <Text>Today</Text>
           </Button>
-          <SettingsButton />
         </View>
       </CardHeader>
       <CardContent>
