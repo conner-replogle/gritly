@@ -34,13 +34,15 @@ export function useCompleted(task: Task, date: Date) {
     total: 0,
     completed: [],
     isCompleted: false,
+    streak: 0,
   });
   useEffect(() => {
     let subscriber = task
-      .getCompleted(date)
+      .getCompletedQuery(date)
       .observe()
       .subscribe((a) => {
-        let result = task.checkCompleted(a);
+        let result = task.computeCompletedResult(a, date);
+
         setCompleted(result);
       });
 

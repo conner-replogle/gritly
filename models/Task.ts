@@ -18,10 +18,13 @@ import {
   differenceInDays,
   endOfDay,
   endOfWeek,
+  getDay,
   isSameDay,
   isSameWeek,
   startOfDay,
   startOfWeek,
+  subDays,
+  subWeeks,
 } from "date-fns";
 import { SWATCHES_COLORS } from "~/components/Task/EditTaskScreen/SelectColor";
 import { log } from "~/lib/config";
@@ -106,8 +109,54 @@ export class Task extends Model {
     }
     return false;
   }
+  //Starting from a valid date go to the nth next date
+  getPrevValidDate(date: Date): Date {
+    if (this.repeats.period == "Daily") {
+      if (this.repeats.specific_weekday) {
+        const currentDayIndex = getDay(date); // Get the index of the current day (0 for Sunday, 1 for Monday, etc.)
 
-  checkCompleted(completedArray: Completed[]): CompletedResult {
+        // Filter selected weekdays that are before the current day
+        const validDaysBeforeCurrent = this.repeats.specific_weekday
+          .filter((day) => day < currentDayIndex)
+          .sort();
+
+        // If there are any valid days before the current day, get the last one
+        // Otherwise, use the largest selected day (wrap around to the previous week)
+        const previousDayIndex =
+          validDaysBeforeCurrent.length > 0
+            ? validDaysBeforeCurrent[validDaysBeforeCurrent.length - 1]
+            : Math.max(...this.repeats.specific_weekday);
+
+        // Calculate the number of days to subtract
+        const daysToSubtract =
+          currentDayIndex > previousDayIndex
+            ? currentDayIndex - previousDayIndex
+            : 7 - (previousDayIndex - currentDayIndex);
+
+        // Return the previous valid date
+        return subDays(date, daysToSubtract);
+      }
+      if (this.repeats.every_n) {
+        return subDays(date, this.repeats.every_n);
+      }
+    } else if (this.repeats.period == "Weekly") {
+      return subDays(date, 7 * this.repeats.every_n);
+    } else if (this.repeats.period == "Monthly") {
+      return subDays(date, 30 * this.repeats.every_n);
+    }
+    return date;
+  }
+
+  getStreak(completedArray: Completed[], date: Date): number {
+    let streak = 0;
+    let completed = completedArray;
+    let completedOn = completed.map((a) => a.completedOn);
+    let period = this.repeats.period == "Daily" ? 1 : 7;
+
+    return streak;
+  }
+
+  getCompleted(completedArray: Completed[]) {
     let total = 0;
     for (let i = 0; i < completedArray.length; i++) {
       total += completedArray[i].amount;
@@ -118,7 +167,20 @@ export class Task extends Model {
       total: total,
     };
   }
-  getCompleted(date: Date): Query<Completed> {
+
+  computeCompletedResult(
+    completedArray: Completed[],
+    date: Date
+  ): CompletedResult {
+    let completed = this.getCompleted(completedArray);
+    let streak = this.getStreak(completedArray, date);
+
+    return {
+      ...completed,
+      streak,
+    };
+  }
+  getCompletedQuery(date: Date): Query<Completed> {
     let beginning: Date;
     let end: Date;
     if (this.repeats.period == "Daily") {
@@ -180,6 +242,7 @@ export interface CompletedResult {
   completed: Completed[];
   isCompleted: boolean;
   total: number;
+  streak: number;
 }
 
 function getRandomBrightColor(): string {

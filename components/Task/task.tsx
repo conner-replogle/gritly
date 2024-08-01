@@ -22,7 +22,7 @@ import { useDatabase } from "@nozbe/watermelondb/hooks";
 import { PortalHost } from "~/components/primitives/portal";
 import { AnalyticsScreen } from "~/components/Analytics/AnalyticsScreen";
 
-function EditBottomSheet(props: {
+export function EditBottomSheet(props: {
   bottomSheetRef: React.RefObject<BottomSheetModal>;
   snapPoints: string[];
 
@@ -54,7 +54,7 @@ function EditBottomSheet(props: {
   );
 }
 
-function AnalyicsBottomSheet(props: {
+export function AnalyicsBottomSheet(props: {
   bottomSheetRef: React.RefObject<BottomSheetModal>;
   snapPoints: string[];
   task: Task;
@@ -104,7 +104,7 @@ export default function TaskContent({
         <Pressable>
           <TaskCard
             task={task}
-            streak={0}
+            streak={completed.streak}
             completable={completable}
             completed={completed}
             onCompletePress={async () => {

@@ -22,6 +22,7 @@ export function useAnalytics(task: Task) {
       let completed = await task.sortedCompleted.fetch();
 
       let map = new Map<number, number>();
+
       completed.forEach((a) => {
         let key: number;
         if (task.repeats.period == "Daily") {

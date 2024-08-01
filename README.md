@@ -33,6 +33,7 @@ Task to be completed every day for X days.
 - [ ] Groups
 - [ ] Notifications
 - [ ] End Date
+- [ ] Change themes
 - [X] Subscriptions
 - [ ] Insights
 - [ ] Timers
