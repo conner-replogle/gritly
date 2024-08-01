@@ -122,7 +122,7 @@ export class Task extends Model {
       total: total,
     };
   }
-  getStreak(date: Date, completed: Completed[]): number {
+  getStreak(date: Date): number {
     let streak = 0;
     let current = date;
     if (this.repeats.period == "Daily") {
