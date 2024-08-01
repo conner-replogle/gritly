@@ -28,7 +28,7 @@ export function AddTasks(props: { dense?: boolean }) {
           bottomSheetModalRef.current?.present();
         }}
       >
-        <Text>Add Task</Text>
+        <Text>Add Habit</Text>
       </Button>
     </View>
   );

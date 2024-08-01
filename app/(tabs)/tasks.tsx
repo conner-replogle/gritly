@@ -11,12 +11,19 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { log } from "~/lib/config";
-import { EditIcon, LineChart, Redo2 } from "lucide-react-native";
+import {
+  EditIcon,
+  LineChart,
+  PauseIcon,
+  Redo2,
+  Trash,
+} from "lucide-react-native";
 import * as React from "react";
 import { Task } from "~/models/Task";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { AnalyicsBottomSheet, EditBottomSheet } from "~/components/Task/task";
 import { useDatabase } from "@nozbe/watermelondb/hooks";
+import { addDays } from "date-fns";
 
 export default function Tasks() {
   const tasks = useTasks();
@@ -50,7 +57,6 @@ function TaskCardWithDropdown({ task }: { task: Task }) {
               total: 0,
               isCompleted: false,
               completed: [],
-              streak: 3,
             }}
             streak={0}
             completable={true}
@@ -78,6 +84,24 @@ function TaskCardWithDropdown({ task }: { task: Task }) {
           >
             <LineChart size={16} />
             <DropdownMenuLabel>Analytics</DropdownMenuLabel>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onPress={async () => {
+              await task.endTask(new Date(Date.now()));
+            }}
+          >
+            <PauseIcon size={16} />
+            <DropdownMenuLabel>End Task</DropdownMenuLabel>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onPress={async () => {
+              await database.write(async () => {
+                await task.markAsDeleted();
+              });
+            }}
+          >
+            <Trash size={16} />
+            <DropdownMenuLabel>Delete Task</DropdownMenuLabel>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

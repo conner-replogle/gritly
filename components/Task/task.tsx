@@ -10,7 +10,13 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
-import { EditIcon, LineChart, Redo2 } from "lucide-react-native";
+import {
+  EditIcon,
+  LineChart,
+  PauseIcon,
+  Redo2,
+  Trash,
+} from "lucide-react-native";
 import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
 import { useTheme } from "@react-navigation/native";
 import { EditTaskScreen } from "~/components/Task/EditTaskScreen";
@@ -21,6 +27,7 @@ import { useCompleted } from "~/components/hooks/Tasks";
 import { useDatabase } from "@nozbe/watermelondb/hooks";
 import { PortalHost } from "~/components/primitives/portal";
 import { AnalyticsScreen } from "~/components/Analytics/AnalyticsScreen";
+import { addDays } from "date-fns";
 
 export function EditBottomSheet(props: {
   bottomSheetRef: React.RefObject<BottomSheetModal>;
@@ -104,7 +111,7 @@ export default function TaskContent({
         <Pressable>
           <TaskCard
             task={task}
-            streak={completed.streak}
+            streak={0}
             completable={completable}
             completed={completed}
             onCompletePress={async () => {
@@ -167,6 +174,24 @@ export default function TaskContent({
           >
             <Redo2 size={16} />
             <DropdownMenuLabel>Reset</DropdownMenuLabel>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onPress={async () => {
+              await task.endTask(addDays(date, 1));
+            }}
+          >
+            <PauseIcon size={16} />
+            <DropdownMenuLabel>End Task</DropdownMenuLabel>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onPress={async () => {
+              await database.write(async () => {
+                await task.markAsDeleted();
+              });
+            }}
+          >
+            <Trash size={16} />
+            <DropdownMenuLabel>Delete Task</DropdownMenuLabel>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

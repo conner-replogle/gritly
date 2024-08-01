@@ -34,14 +34,13 @@ export function useCompleted(task: Task, date: Date) {
     total: 0,
     completed: [],
     isCompleted: false,
-    streak: 0,
   });
   useEffect(() => {
     let subscriber = task
       .getCompletedQuery(date)
       .observe()
       .subscribe((a) => {
-        let result = task.computeCompletedResult(a, date);
+        let result = task.computeCompletedResult(a);
 
         setCompleted(result);
       });
@@ -50,4 +49,19 @@ export function useCompleted(task: Task, date: Date) {
   }, [task, date]);
 
   return completed;
+}
+
+export function useStreak(task: Task, date: Date) {
+  const [streak, setStreak] = useState(0);
+  useEffect(() => {
+    let subscriber = task.sortedCompleted.observe().subscribe((a) => {
+      let result = task.getStreak(date, a);
+
+      setStreak(result);
+    });
+
+    return () => subscriber.unsubscribe();
+  }, [task, date]);
+
+  return streak;
 }
