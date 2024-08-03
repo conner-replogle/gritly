@@ -63,13 +63,11 @@ import { endOfDay, startOfDay } from "date-fns";
 export default function Screen() {
   const [date, setInnerDate] = React.useState(startOfDay(Date.now()));
   const storage = useMMKV();
-
   const setDate = useCallback((date: Date) => {
     setInnerDate(startOfDay(date));
   }, []);
   const [nuttable, _] = useMMKVBoolean("settings.nuttable");
 
-  const tasks = useTasks(date);
   const cannonRef = useRef<ConfettiCannon>(null);
 
   if (tasks === undefined) {
@@ -86,15 +84,7 @@ export default function Screen() {
         <View className="h-[100vh] bg-secondary/50">
           <HeaderCard date={date} setDate={setDate} todayTasks={tasks} />
 
-          <View className="p-6 flex flex-col gap-4 h-full">
-            <FlatList
-              ListFooterComponent={AddTasks}
-              data={tasks}
-              renderItem={(item) => (
-                <TaskContent date={date} task={item.item} />
-              )}
-            />
-          </View>
+          <View className="p-6 flex flex-col gap-4 h-full"></View>
           <ConfettiCannon
             ref={cannonRef}
             count={200}
@@ -109,6 +99,22 @@ export default function Screen() {
     </SafeAreaView>
   );
 }
+
+function ListCard({ date }: { date: Date }) {
+  return (
+    <>
+      <View className="flex-row justify-between items-center">
+        <Text className="font-semibold text-lg">Habits</Text>
+        <Text className="text-xs text-blue-700 font-bold">VIEW ALL</Text>
+      </View>
+      <FlatList
+        data={tasks}
+        renderItem={(item) => <TaskContent date={date} task={item.item} />}
+      />
+    </>
+  );
+}
+
 function HeaderCard({
   date,
   setDate,
@@ -128,7 +134,7 @@ function HeaderCard({
         <View>
           <CardTitle className="text-start">
             {date.toLocaleString("en-US", {
-              year: "2-digit",
+              year: "numeric",
               month: "long",
               day: "numeric",
             })}
@@ -149,7 +155,7 @@ function HeaderCard({
           </Button>
         </View>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-28">
         <CalendarSection date={date} setDate={setDate} />
       </CardContent>
     </View>

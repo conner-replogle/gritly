@@ -21,6 +21,115 @@ import { RepeatPeriod } from "~/components/Task/EditTaskScreen/RepeatPeriod";
 import { Goal } from "~/components/Task/EditTaskScreen/Goal";
 import { FrequencyPeriod } from "~/components/Task/EditTaskScreen/FrequencyPeriod";
 import { PortalHost } from "~/components/primitives/portal";
+import { SelectIcon } from "~/components/Task/EditTaskScreen/SelectIcon";
+
+function Basic({
+  ntask,
+  setTask,
+}: {
+  ntask: EditableTask;
+  setTask: (a: (a: EditableTask) => void) => void;
+}) {
+  const colors = useTheme().colors;
+
+  return (
+    <>
+      <Text className="text-l font-semibold text-muted-foreground">INFO</Text>
+
+      <View className="bg-secondary p-3 rounded-xl">
+        <Label nativeID="title">Title</Label>
+        <Input
+          placeholder="Name your task"
+          nativeID="title"
+          value={ntask.title}
+          onChangeText={(b) => {
+            setTask((a) => {
+              a.title = b;
+            });
+          }}
+          aria-labelledbyledBy="inputLabel"
+          aria-errormessage="inputError"
+        />
+        <Label nativeID="description">Description</Label>
+        <Input
+          placeholder="What exactly is this task?"
+          nativeID="description"
+          value={ntask.description}
+          onChangeText={(b) => {
+            setTask((a) => {
+              a.description = b;
+            });
+          }}
+          aria-labelledbyledBy="inputLabel"
+          aria-errormessage="inputError"
+        />
+
+        <Label nativeID="select-icon">Select Icon</Label>
+        <SelectIcon />
+      </View>
+
+      <Text className="text-l font-semibold text-muted-foreground">COLOR</Text>
+      <SelectColor
+        ntask={ntask}
+        onChange={(colors) => {
+          setTask((a) => {
+            a.color = colors.hex;
+          });
+        }}
+      />
+    </>
+  );
+}
+
+function Repeats({
+  ntask,
+  setTask,
+}: {
+  ntask: EditableTask;
+  setTask: (a: (a: EditableTask) => void) => void;
+}) {
+  const colors = useTheme().colors;
+  return (
+    <>
+      <Text className="text-l font-semibold text-muted-foreground">
+        REPEATS
+      </Text>
+      <RepeatPeriod ntask={ntask} setTask={setTask} />
+
+      <Text className="text-l font-semibold text-muted-foreground">
+        FREQUENCY
+      </Text>
+      <FrequencyPeriod ntask={ntask} setTask={setTask} />
+      <Text className="text-l font-semibold text-muted-foreground">
+        STARTING DAY
+      </Text>
+      <View className="bg-secondary p-3 rounded-xl">
+        <Collapsible>
+          <CollapsibleTrigger asChild>
+            <Text className="">
+              {formatDate(ntask.startsOn, "MMMM, dd, yyyy")}
+            </Text>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <DateTimePicker
+              mode="single"
+              todayTextStyle={{ color: colors.text }}
+              calendarTextStyle={{ color: colors.text }}
+              headerTextStyle={{ color: colors.text }}
+              weekDaysTextStyle={{ color: colors.text }}
+              date={ntask.startsOn}
+              onChange={({ date }) => {
+                setTask((a) => {
+                  a.startsOn = new Date(date as string);
+                });
+              }}
+            />
+          </CollapsibleContent>
+        </Collapsible>
+      </View>
+    </>
+  );
+}
 
 export function EditTaskScreen({
   onDelete,
@@ -84,87 +193,10 @@ export function EditTaskScreen({
                 onCompleteLongPress={() => {}}
               />
               <TabsContent value="basic" className="flex flex-col gap-3">
-                <Text className="text-l font-semibold text-muted-foreground">
-                  INFO
-                </Text>
-
-                <View className="bg-secondary p-3 rounded-xl">
-                  <Label nativeID="title">Title</Label>
-                  <Input
-                    placeholder="Name your task"
-                    nativeID="title"
-                    value={ntask.title}
-                    onChangeText={(b) => {
-                      setTask((a) => {
-                        a.title = b;
-                      });
-                    }}
-                    aria-labelledbyledBy="inputLabel"
-                    aria-errormessage="inputError"
-                  />
-                  <Label nativeID="description">Description</Label>
-                  <Input
-                    placeholder="What exactly is this task?"
-                    nativeID="description"
-                    value={ntask.description}
-                    onChangeText={(b) => {
-                      setTask((a) => {
-                        a.description = b;
-                      });
-                    }}
-                    aria-labelledbyledBy="inputLabel"
-                    aria-errormessage="inputError"
-                  />
-                </View>
-                <Text className="text-l font-semibold text-muted-foreground">
-                  COLOR
-                </Text>
-                <SelectColor
-                  ntask={ntask}
-                  onChange={(colors) => {
-                    setTask((a) => {
-                      a.color = colors.hex;
-                    });
-                  }}
-                />
+                <Basic ntask={ntask} setTask={setTask} />
               </TabsContent>
               <TabsContent value="repeats" className="flex flex-col gap-2 ">
-                <Text className="text-l font-semibold text-muted-foreground">
-                  REPEATS
-                </Text>
-                <RepeatPeriod ntask={ntask} setTask={setTask} />
-
-                <Text className="text-l font-semibold text-muted-foreground">
-                  FREQUENCY
-                </Text>
-                <FrequencyPeriod ntask={ntask} setTask={setTask} />
-                <Text className="text-l font-semibold text-muted-foreground">
-                  STARTING DAY
-                </Text>
-                <View className="bg-secondary p-3 rounded-xl">
-                  <Collapsible>
-                    <CollapsibleTrigger asChild>
-                      <Text className="">
-                        {formatDate(ntask.startsOn, "MMMM, dd, yyyy")}
-                      </Text>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <DateTimePicker
-                        mode="single"
-                        todayTextStyle={{ color: colors.text }}
-                        calendarTextStyle={{ color: colors.text }}
-                        headerTextStyle={{ color: colors.text }}
-                        weekDaysTextStyle={{ color: colors.text }}
-                        date={ntask.startsOn}
-                        onChange={({ date }) => {
-                          setTask((a) => {
-                            a.startsOn = new Date(date as string);
-                          });
-                        }}
-                      />
-                    </CollapsibleContent>
-                  </Collapsible>
-                </View>
+                <Repeats ntask={ntask} setTask={setTask} />
               </TabsContent>
               <TabsContent value="goal" className="flex flex-col gap-2 ">
                 <Text className="text-l font-semibold text-muted-foreground">

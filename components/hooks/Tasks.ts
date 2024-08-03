@@ -14,14 +14,14 @@ import {
 import { log } from "~/lib/config";
 import { Q } from "@nozbe/watermelondb";
 
-export default function useTasks(date?: Date) {
+export default function useTasks(date?: Date, getCompleted: boolean = false) {
   const database = useDatabase();
   const [tasks, setTasks] = useState<Task[]>([]);
   const tasksCollection = database.collections
     .get<Task>(TableName.TASKS)
     .query();
   useEffect(() => {
-    const subscription = tasksCollection.observe().subscribe((a) => {
+    const subscription = tasksCollection.observe().subscribe(async (a) => {
       setTasks(a.filter((task) => (date ? task.showToday(date) : true)));
     });
     return () => subscription.unsubscribe();
@@ -54,11 +54,7 @@ export function useCompleted(task: Task, date: Date) {
 export function useStreak(task: Task, date: Date) {
   const [streak, setStreak] = useState(0);
   useEffect(() => {
-    let subscriber = task.sortedCompleted.observe().subscribe((a) => {
-      let result = task.getStreak(date, a);
-
-      setStreak(result);
-    });
+    let subscriber = task.sortedCompleted.observe().subscribe((a) => {});
 
     return () => subscriber.unsubscribe();
   }, [task, date]);

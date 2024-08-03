@@ -1,4 +1,4 @@
-import { LayoutAnimation, View } from "react-native";
+import { LayoutAnimation, Pressable, View } from "react-native";
 
 import { Text } from "../ui/text";
 
@@ -15,6 +15,7 @@ import { log, SubscriptionContext } from "~/lib/config";
 import { EditableTask, GenerateTask, Task } from "~/models/Task";
 import { useDatabase } from "@nozbe/watermelondb/hooks";
 import { TableName } from "~/models/schema";
+import { PlusCircleIcon } from "lucide-react-native";
 
 export function AddTasks(props: { dense?: boolean }) {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -30,6 +31,27 @@ export function AddTasks(props: { dense?: boolean }) {
       >
         <Text>Add Habit</Text>
       </Button>
+    </View>
+  );
+}
+
+export function AddTasksIcon(props: {
+  color: string;
+  fill: string;
+  size: number;
+}) {
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  return (
+    <View>
+      <AddTaskSheet bottomSheetModalRef={bottomSheetModalRef} />
+
+      <Pressable
+        onPress={() => {
+          bottomSheetModalRef.current?.present();
+        }}
+      >
+        <PlusCircleIcon {...props} />
+      </Pressable>
     </View>
   );
 }

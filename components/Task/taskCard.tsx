@@ -11,6 +11,16 @@ import {
   Task,
 } from "~/models/Task";
 import { Completed } from "~/models/Completed";
+import { useTheme } from "@react-navigation/native";
+import Animated, {
+  useAnimatedProps,
+  useAnimatedRef,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
+import { useEffect, useRef } from "react";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 export function TaskCard({
   task,
@@ -28,17 +38,33 @@ export function TaskCard({
   streak: number;
 }) {
   return (
-    <View
-      style={{ borderColor: task.color, borderWidth: 2 }}
-      className=" p-5 mb-2 flex flex-row justify-between items-center bg-background rounded-lg h-24"
-    >
-      <View className="text-start flex flex-col justify-evenly items-start">
-        <CardTitle>
+    <View className=" p-3 mb-2 flex flex-row justify-start border-secondary border-2 items-center bg-background rounded-3xl h-24 ">
+      <View className="aspect-square w-16 flex items-center justify-center">
+        <CirclePath
+          radius={18}
+          color={"#3498db"}
+          strokeWidth={3}
+          percent={(completed.total / task.goal.amount) * 100}
+        />
+        <View
+          style={{
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <FontAwesome name="map" size={16} />
+        </View>
+      </View>
+      <View className="text-start border-primary flex-1 flex flex-col justify-evenly items-start">
+        <Text className="text-lg font-semibold">
           {task.title} {streak > 1 ? ` 🔥${streak}` : ""}{" "}
-        </CardTitle>
+        </Text>
 
         <CardDescription>
-          {repeatsToString(task.goal, task.repeats)}
+          {completed.total}/{task.goal.amount} {task.goal.unit.toUpperCase()}{" "}
         </CardDescription>
       </View>
 
@@ -55,9 +81,6 @@ export function TaskCard({
               goal={task.goal.amount}
             />
           </Pressable>
-          <Text className="text-xs font-semibold">
-            {completed?.total ?? 0} / {task.goal.amount}
-          </Text>
         </View>
       )}
     </View>
@@ -74,51 +97,32 @@ function CompleteIcon({
   const isCompleted = completed.isCompleted;
   const color = isCompleted ? "green" : "#3498db";
   return (
-    <View>
-      <Svg
-        className="absolute"
-        width={36}
-        height={36}
-        viewBox="0 0 24 24"
-        fill="none"
-      >
-        {!isCompleted && (
-          <CirclePath
-            radius={10}
-            color={color}
-            strokeWidth={3}
-            percentage={completed ? (completed!.total / goal) * 100 : 0}
-          />
-        )}
-      </Svg>
-      <View className="absolute flex-row items-center justify-center w-full h-full">
-        {isCompleted && <CheckIcon size={24} strokeWidth={3} color={color} />}
-        {!isCompleted && <PlusIcon size={24} strokeWidth={3} color={color} />}
-      </View>
+    <View className=" flex-row items-center justify-center aspect-square mr-3">
+      {isCompleted && <CheckIcon size={24} strokeWidth={3} color={color} />}
+      {!isCompleted && <PlusIcon size={24} strokeWidth={3} color={color} />}
     </View>
   );
 }
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+
 const CirclePath = ({
   radius,
   strokeWidth,
   color,
-  percentage,
+  percent,
 }: {
   radius: number;
   color: string;
   strokeWidth: number;
-  percentage: number;
+  percent: number;
 }) => {
-  if (percentage == 0) {
-    return null;
-  }
+  const percentage = useSharedValue<number>(0);
+  useEffect(() => {
+    percentage.value = withSpring(percent);
+  }, [percent]);
+
   const circumference = 2 * Math.PI * radius;
-  const strokeDasharray = `${
-    (percentage / 100) * circumference
-  } ${circumference}`;
-  const strokeDasharray2 = `${
-    ((percentage - 50) / 100) * circumference
-  } ${circumference}`;
+
   // Calculate start and end points of the circle
   const startX = radius + strokeWidth / 2;
   const startY = strokeWidth / 2;
@@ -126,35 +130,45 @@ const CirclePath = ({
   const endY = radius * 2 + strokeWidth / 2;
 
   // Calculate path to create an arc that can extend to full circle
-  const largeArcFlag = percentage > 50 ? 1 : 0;
+  const largeArcFlag = percent > 50 ? 1 : 0;
   const sweepFlag = 1; // Always sweep in the same direction
   const path = `
         M ${startX}, ${startY}
-        A ${radius},${radius} 0 ${largeArcFlag},${sweepFlag} ${endX},${endY}
+        A ${radius},${radius} 0 ${percent > 50 ? 1 : 0},${1} ${endX},${endY}
+        A ${radius},${radius} 0 ${percent > 50 ? 1 : 0},${1} ${startX},${startY}
     `;
-  const path2 = `
+
+  const backgroundCircle = `
+        M ${startX}, ${startY}
+        A ${radius},${radius} 0 ${largeArcFlag},${sweepFlag} ${endX},${endY}
+        
         M ${endX}, ${endY}
         A ${radius},${radius} 0 ${largeArcFlag},${sweepFlag} ${startX},${startY}
     `;
 
+  const animatedProps = useAnimatedProps(() => ({
+    strokeDasharray: `${
+      (percentage.value / 100) * circumference
+    } ${circumference}`,
+  }));
+
   return (
     <Svg height={radius * 2 + strokeWidth} width={radius * 2 + strokeWidth}>
       <Path
-        d={path}
-        stroke={color}
+        d={backgroundCircle}
+        stroke={"#f0f0f0"}
         strokeWidth={strokeWidth}
         fill="none"
         strokeLinecap="round"
-        strokeDasharray={strokeDasharray}
       />
-      {percentage > 50 && (
-        <Path
-          d={path2}
+      {percent > 0 && (
+        <AnimatedPath
+          d={path}
           stroke={color}
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
-          strokeDasharray={strokeDasharray2}
+          animatedProps={animatedProps}
         />
       )}
     </Svg>

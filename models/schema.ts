@@ -47,6 +47,7 @@ export const schema = appSchema({
       columns: [
         { name: "title", type: "string" },
         { name: "description", type: "string" },
+        { name: "icon", type: "string" },
         { name: "color", type: "string" },
         { name: "starts_on", type: "number" },
         { name: "ends_on", type: "number", isOptional: true },
@@ -60,7 +61,8 @@ export const schema = appSchema({
       columns: [
         { name: "task_id", type: "string" },
         { name: "amount", type: "number" },
-        { name: "completed_on", type: "number" },
+        { name: "completion_time", type: "number" },
+        { name: "completed_at", type: "string" },
       ],
     }),
   ],

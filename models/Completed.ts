@@ -17,5 +17,6 @@ export class Completed extends Model {
 
   @field("amount") amount!: number;
   @immutableRelation(TableName.TASKS, "task_id") task!: Relation<Task>;
-  @date("completed_on") completedOn!: Date;
+  @json("completed_at", (a) => a) completed_at!: Date[];
+  @date("completion_time") date!: Date;
 }

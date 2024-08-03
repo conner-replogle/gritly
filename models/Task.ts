@@ -51,6 +51,7 @@ export class Task extends Model {
   @date("ends_on") endsOn?: Date;
   @text("title") title!: string;
   @text("description") description!: string;
+  @text("icon") icon!: string;
   @text("color") color!: string;
   @json("repeats", (json) => json) repeats!: Repeats;
   @json("goal", (json) => json) goal!: Goal;
