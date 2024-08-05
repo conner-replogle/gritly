@@ -37,6 +37,7 @@ export const UNITS = [
 export enum TableName {
   TASKS = "tasks",
   COMPLETED = "completed",
+  COMPLETED_RESULT = "completed_result",
 }
 
 export const schema = appSchema({
@@ -56,13 +57,15 @@ export const schema = appSchema({
         { name: "goal", type: "string" },
       ],
     }),
+
     tableSchema({
-      name: TableName.COMPLETED,
+      name: TableName.COMPLETED_RESULT,
       columns: [
         { name: "task_id", type: "string" },
-        { name: "amount", type: "number" },
-        { name: "completion_time", type: "number" },
-        { name: "completed_at", type: "string" },
+        { name: "completed_at", type: "number" },
+        { name: "total", type: "number" },
+        { name: "completed_times", type: "string" },
+        { name: "goal", type: "string" },
       ],
     }),
   ],

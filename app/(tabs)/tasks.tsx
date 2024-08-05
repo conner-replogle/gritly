@@ -53,11 +53,7 @@ function TaskCardWithDropdown({ task }: { task: Task }) {
         <Pressable>
           <TaskCard
             task={task}
-            completed={{
-              total: 0,
-              isCompleted: false,
-              completed: [],
-            }}
+            completed={undefined}
             streak={0}
             completable={true}
             onCompletePress={() => {}}

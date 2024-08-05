@@ -4,13 +4,7 @@ import { Text } from "~/components/ui/text";
 import Svg, { Path } from "react-native-svg";
 import { CheckIcon, PlusIcon } from "lucide-react-native";
 import * as React from "react";
-import {
-  CompletedResult,
-  EditableTask,
-  repeatsToString,
-  Task,
-} from "~/models/Task";
-import { Completed } from "~/models/Completed";
+import { EditableTask, repeatsToString, Task } from "~/models/Task";
 import { useTheme } from "@react-navigation/native";
 import Animated, {
   useAnimatedProps,
@@ -21,6 +15,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useEffect, useRef } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { CompletedResult } from "~/models/CompletedResult";
 
 export function TaskCard({
   task,
@@ -34,17 +29,25 @@ export function TaskCard({
   onCompletePress: () => void;
   onCompleteLongPress: () => void;
   task: Task;
-  completed: CompletedResult;
+  completed?: CompletedResult;
   streak: number;
 }) {
+  let total = completed?.total ?? 0;
+  let outof = completed?.goal.amount ?? task.goal.amount;
+
   return (
-    <View className=" p-3 mb-2 flex flex-row justify-start border-secondary border-2 items-center bg-background rounded-3xl h-24 ">
+    <View
+      style={{
+        borderRadius: 24,
+      }}
+      className=" p-3 mb-2 flex flex-row justify-start border-secondary border-2 items-center bg-background  h-24 "
+    >
       <View className="aspect-square w-16 flex items-center justify-center">
         <CirclePath
           radius={18}
           color={"#3498db"}
           strokeWidth={3}
-          percent={(completed.total / task.goal.amount) * 100}
+          percent={(total / outof) * 100}
         />
         <View
           style={{
@@ -64,7 +67,7 @@ export function TaskCard({
         </Text>
 
         <CardDescription>
-          {completed.total}/{task.goal.amount} {task.goal.unit.toUpperCase()}{" "}
+          {total}/{outof} {task.goal.unit.toUpperCase()}{" "}
         </CardDescription>
       </View>
 
@@ -76,10 +79,7 @@ export function TaskCard({
               onCompletePress();
             }}
           >
-            <CompleteIcon
-              completed={completed ?? undefined}
-              goal={task.goal.amount}
-            />
+            <CompleteIcon completed={completed ?? undefined} goal={outof} />
           </Pressable>
         </View>
       )}
@@ -91,10 +91,10 @@ function CompleteIcon({
   completed,
   goal,
 }: {
-  completed: CompletedResult;
+  completed?: CompletedResult;
   goal: number;
 }) {
-  const isCompleted = completed.isCompleted;
+  const isCompleted = completed?.isCompleted ?? false;
   const color = isCompleted ? "green" : "#3498db";
   return (
     <View className=" flex-row items-center justify-center aspect-square mr-3">

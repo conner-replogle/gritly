@@ -9,13 +9,13 @@ import {
   startOfWeek,
 } from "date-fns";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import useTasks, { useCompleted } from "~/components/hooks/Tasks";
+import useTasks, { useTasksWithCompleted } from "~/components/hooks/Tasks";
 import { Task } from "~/models/Task";
 import { log } from "~/lib/config";
 import { withObservables } from "@nozbe/watermelondb/react";
 import { of as of$ } from "rxjs";
 import { TaskCard } from "~/components/Task/taskCard";
-import { Completed } from "~/models/Completed";
+import { CompletedResult } from "~/models/CompletedResult";
 
 export function CalendarSection(props: {
   date: Date;
@@ -30,7 +30,6 @@ export function CalendarSection(props: {
   const flatlistRef = useRef<VirtualizedList<Date[]>>(null);
   const [indexG, setIndexG] = useState(HALF);
   const [width, setWidth] = useState(0);
-  const tasks = useTasks();
   useEffect(() => {
     if (isSameDay(today, date)) {
       flatlistRef.current?.scrollToIndex({ index: HALF, animated: false });
@@ -87,7 +86,6 @@ export function CalendarSection(props: {
         renderItem={({ item, index }) => {
           return (
             <Week
-              tasks={tasks}
               width={width}
               dates={item}
               currentDate={date}
@@ -104,13 +102,12 @@ export function CalendarSection(props: {
 }
 
 function Week(props: {
-  tasks: Task[];
   width: number;
   dates: Date[];
   currentDate: Date;
   setDate: (date: Date) => void;
 }) {
-  const { dates, width, currentDate, tasks, setDate } = props;
+  const { dates, width, currentDate, setDate } = props;
 
   return (
     <View
@@ -122,7 +119,6 @@ function Week(props: {
       {Array.from(dates, (date, i) => (
         <Day
           key={`${date.getDay()}${i}`}
-          tasks={tasks}
           date={date}
           currentDate={currentDate}
           setDate={setDate}
@@ -133,16 +129,15 @@ function Week(props: {
 }
 
 const Day = ({
-  tasks,
   date,
   currentDate,
   setDate,
 }: {
-  tasks: Task[];
   date: Date;
   currentDate: Date;
   setDate: (date: Date) => void;
 }) => {
+  const tasks = useTasksWithCompleted(date);
   const showBar = (task: Task, date: Date) => {};
   return (
     <View className="flex flex-col justify-start">
@@ -166,38 +161,30 @@ const Day = ({
       </Pressable>
       <View className="flex flex-col mt-4 gap-1">
         {Array.from(tasks, (task, i) => {
-          return <TaskBar key={`${task.id}`} task={task} date={date} />;
+          //NEED TO CHECK IF COMPLETED CONTAINS TODAY
+
+          return (
+            <TaskBar
+              key={`${task.task.id}`}
+              task={task.task}
+              completed={task.completed?.isCompleted ?? false}
+            />
+          );
         })}
       </View>
     </View>
   );
 };
 
-const TaskBar = ({ task, date }: { task: Task; date: Date }) => {
-  const completed = useCompleted(task, date);
-  let show = false;
-  if (task.repeats.period == "Daily") {
-    show = task.showToday(date);
-  } else if (task.repeats.period == "Weekly") {
-    for (let completedDate of completed.completed) {
-      if (isSameDay(completedDate.completedOn, date)) {
-        show = true;
-        break;
-      }
-    }
-  }
-  if (show) {
-    return (
-      <View
-        style={{
-          backgroundColor: `${task.color}`,
+const TaskBar = ({ task, completed }: { task: Task; completed: boolean }) => {
+  return (
+    <View
+      style={{
+        backgroundColor: `${task.color}`,
 
-          opacity: completed?.isCompleted ? 1.0 : 0.3,
-          height: completed?.isCompleted ? 5 : 3,
-        }}
-      />
-    );
-  } else {
-    return null;
-  }
+        opacity: completed ? 1.0 : 0.3,
+        height: completed ? 5 : 3,
+      }}
+    />
+  );
 };

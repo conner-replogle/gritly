@@ -26,9 +26,9 @@ export function useAnalytics(task: Task) {
       completed.forEach((a) => {
         let key: number;
         if (task.repeats.period == "Daily") {
-          key = startOfDay(a.completedOn).getTime();
+          key = startOfDay(a.completed_at).getTime();
         } else if (task.repeats.period == "Weekly") {
-          key = startOfWeek(a.completedOn).getTime();
+          key = startOfWeek(a.completed_at).getTime();
         } else {
           log.debug("Unsupported period");
           throw new Error("Unsupported period");
@@ -36,11 +36,11 @@ export function useAnalytics(task: Task) {
         if (map.has(key)) {
           let amount = map.get(key)!;
 
-          log.debug(`Setting ${key} to ${amount} + ${a.amount}`);
-          map.set(key, amount + a.amount);
+          log.debug(`Setting ${key} to ${amount} + ${a.total}`);
+          map.set(key, amount + a.total);
         } else {
-          log.debug(`Setting ${key} to ${a.amount}`);
-          map.set(key, a.amount);
+          log.debug(`Setting ${key} to ${a.total}`);
+          map.set(key, a.total);
         }
       });
       let history: Array<{ date: Date; value: number }> = [];

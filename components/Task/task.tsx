@@ -23,11 +23,10 @@ import { EditTaskScreen } from "~/components/Task/EditTaskScreen";
 import { TaskCard } from "~/components/Task/taskCard";
 import { ExplosionContext, log } from "~/lib/config";
 import { EditableTask, Task } from "~/models/Task";
-import { useCompleted } from "~/components/hooks/Tasks";
 import { useDatabase } from "@nozbe/watermelondb/hooks";
-import { PortalHost } from "~/components/primitives/portal";
 import { AnalyticsScreen } from "~/components/Analytics/AnalyticsScreen";
 import { addDays } from "date-fns";
+import { CompletedResult } from "~/models/CompletedResult";
 
 export function EditBottomSheet(props: {
   bottomSheetRef: React.RefObject<BottomSheetModal>;
@@ -87,14 +86,14 @@ export function AnalyicsBottomSheet(props: {
 
 export default function TaskContent({
   task,
+  completed,
   date,
 }: {
   task: Task;
+  completed?: CompletedResult;
   date: Date;
 }) {
   const database = useDatabase();
-
-  const completed = useCompleted(task, date);
 
   const { colors } = useTheme();
   const editSheetRef = React.useRef<BottomSheetModal>(null);
@@ -103,7 +102,6 @@ export default function TaskContent({
   const snapPoints = React.useMemo(() => ["90%"], []);
 
   const completable = date <= new Date(Date.now());
-
   const nut = useContext(ExplosionContext);
   return (
     <DropdownMenu>
@@ -122,7 +120,7 @@ export default function TaskContent({
                 today.getSeconds(),
                 0
               );
-              if (completed.isCompleted) {
+              if (completed?.isCompleted ?? false) {
                 return;
               }
               log.debug("Completing task");
@@ -130,8 +128,8 @@ export default function TaskContent({
                 log.debug(
                   `Adding ${task.goal.steps} steps to ${completed.total}`
                 );
-                await task.createCompleted(date);
-                if (completed.total + task.goal.steps >= task.goal.amount) {
+                await completed.complete(date);
+                if (completed.isCompleted) {
                   nut();
                 }
               } else {
@@ -166,9 +164,7 @@ export default function TaskContent({
           <DropdownMenuItem
             onPress={async () => {
               await database.write(async () => {
-                for (let a of completed.completed) {
-                  await a.destroyPermanently();
-                }
+                await completed?.destroyPermanently();
               });
             }}
           >

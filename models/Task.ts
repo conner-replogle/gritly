@@ -11,7 +11,6 @@ import {
 } from "@nozbe/watermelondb/decorators";
 
 import { CALENDAR, TableName } from "./schema";
-import { Completed } from "~/models/Completed";
 import {
   differenceInCalendarMonths,
   differenceInCalendarWeeks,
@@ -28,6 +27,7 @@ import {
 } from "date-fns";
 import { SWATCHES_COLORS } from "~/components/Task/EditTaskScreen/SelectColor";
 import { log } from "~/lib/config";
+import { CompletedResult } from "~/models/CompletedResult";
 
 export interface EditableTask {
   startsOn: Date;
@@ -41,7 +41,7 @@ export interface EditableTask {
 export class Task extends Model {
   static table = TableName.TASKS;
   static associations = {
-    [TableName.COMPLETED]: {
+    [TableName.COMPLETED_RESULT]: {
       type: "has_many" as const,
       foreignKey: "task_id",
     },
@@ -57,10 +57,11 @@ export class Task extends Model {
   @json("goal", (json) => json) goal!: Goal;
 
   @lazy completed = this.collections
-    .get<Completed>(TableName.COMPLETED)
+    .get<CompletedResult>(TableName.COMPLETED_RESULT)
+
     .query(Q.where("task_id", this.id));
   @lazy sortedCompleted = this.completed.extend(
-    Q.sortBy("completed_on", Q.desc)
+    Q.sortBy("completed_at", Q.desc)
   );
   toEditableTask(): EditableTask {
     return {
@@ -112,17 +113,6 @@ export class Task extends Model {
   }
   //Starting from a valid date go to the nth next date
 
-  computeCompletedResult(completedArray: Completed[]): CompletedResult {
-    let total = 0;
-    for (let i = 0; i < completedArray.length; i++) {
-      total += completedArray[i].amount;
-    }
-    return {
-      completed: completedArray,
-      isCompleted: total >= this.goal.amount,
-      total: total,
-    };
-  }
   getStreak(date: Date): number {
     let streak = 0;
     let current = date;
@@ -137,7 +127,7 @@ export class Task extends Model {
     return 0;
   }
 
-  getCompletedQuery(date: Date): Query<Completed> {
+  getCompleted(date: Date): Query<CompletedResult> {
     let beginning: Date;
     let end: Date;
     if (this.repeats.period == "Daily") {
@@ -150,21 +140,31 @@ export class Task extends Model {
       log.debug("Unsupported period");
       throw new Error("Unsupported period");
     }
-    return this.sortedCompleted.extend(
-      Q.and(
-        Q.where("completed_on", Q.gte(beginning.getTime())),
-        Q.where("completed_on", Q.lte(end.getTime()))
+    return this.sortedCompleted
+      .extend(
+        Q.and(
+          Q.where("completed_at", Q.gte(beginning.getTime())),
+          Q.where("completed_at", Q.lte(end.getTime()))
+        )
       )
-    );
+      .extend(Q.take(1));
   }
   @writer async createCompleted(date: Date) {
-    await this.collections
-      .get<Completed>(TableName.COMPLETED)
+    let completed = await this.collections
+      .get<CompletedResult>(TableName.COMPLETED_RESULT)
       .create((completed) => {
-        completed.amount = this.goal.steps;
-        completed.completedOn = date;
+        completed.completed_at = date;
+        completed.completed_times = [
+          {
+            date: date.getTime(),
+            amount: this.goal.steps,
+          },
+        ];
         completed.task.set(this);
+        completed.goal = this.goal;
+        completed.total = 0;
       });
+    await this.callWriter(() => completed.complete(date));
   }
   @writer async endTask(date: Date) {
     await this.update(() => {
@@ -198,12 +198,6 @@ export function repeatsToString(goal: Goal, repeats: Repeats) {
 
   prefix += `for ${goal.amount} ${goal.unit}`;
   return prefix;
-}
-
-export interface CompletedResult {
-  completed: Completed[];
-  isCompleted: boolean;
-  total: number;
 }
 
 function getRandomBrightColor(): string {

@@ -56,10 +56,19 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import { useMMKV, useMMKVBoolean } from "react-native-mmkv";
 import { ExplosionContext, log } from "~/lib/config";
 import { DropdownMenuTriggerRef } from "@rn-primitives/dropdown-menu";
-import useTasks from "~/components/hooks/Tasks";
+import useTasks, { useTasksWithCompleted } from "~/components/hooks/Tasks";
 import { Task } from "~/models/Task";
 import { endOfDay, startOfDay } from "date-fns";
+import { withObservables } from "@nozbe/watermelondb/react";
+import { of as of$ } from "rxjs";
 
+const ObservableTask = withObservables(
+  ["task", "completed"],
+  ({ task, completed }) => ({
+    task: task.observe(),
+    completed: completed ? completed.observe() : of$(null),
+  })
+)(TaskContent);
 export default function Screen() {
   const [date, setInnerDate] = React.useState(startOfDay(Date.now()));
   const storage = useMMKV();
@@ -70,10 +79,6 @@ export default function Screen() {
 
   const cannonRef = useRef<ConfettiCannon>(null);
 
-  if (tasks === undefined) {
-    return <Text>Loading...</Text>;
-  }
-
   return (
     <SafeAreaView>
       <ExplosionContext.Provider
@@ -82,9 +87,11 @@ export default function Screen() {
         }}
       >
         <View className="h-[100vh] bg-secondary/50">
-          <HeaderCard date={date} setDate={setDate} todayTasks={tasks} />
+          <HeaderCard date={date} setDate={setDate} />
 
-          <View className="p-6 flex flex-col gap-4 h-full"></View>
+          <View className="p-6 flex flex-col gap-4 h-full">
+            <ListCard date={date} />
+          </View>
           <ConfettiCannon
             ref={cannonRef}
             count={200}
@@ -101,15 +108,43 @@ export default function Screen() {
 }
 
 function ListCard({ date }: { date: Date }) {
+  let [showAll, setShowAll] = useState(false);
+  const tasks = useTasksWithCompleted(date);
+  if (tasks === undefined) {
+    return <Text>Loading...</Text>;
+  }
+  console.log(tasks);
+  let completed = tasks.filter((a) => a.completed?.isCompleted);
+  let not_completed = tasks.filter((a) => !a.completed?.isCompleted);
   return (
     <>
       <View className="flex-row justify-between items-center">
         <Text className="font-semibold text-lg">Habits</Text>
-        <Text className="text-xs text-blue-700 font-bold">VIEW ALL</Text>
+        <Pressable onPress={() => setShowAll(!showAll)}>
+          {showAll && (
+            <Text className="text-xs text-blue-700 font-bold">ALL</Text>
+          )}
+          {!showAll && (
+            <Text className="text-xs text-blue-700 font-bold">ACTIVE</Text>
+          )}
+        </Pressable>
       </View>
+      {!showAll && not_completed.length == 0 && (
+        <View className="h-24 rounded-3xl bg-secondary justify-center items-center">
+          <Text className="font-semibold text-lg">
+            All your habits for today are completed.
+          </Text>
+        </View>
+      )}
       <FlatList
-        data={tasks}
-        renderItem={(item) => <TaskContent date={date} task={item.item} />}
+        data={[...not_completed, ...(showAll ? completed : [])]}
+        renderItem={({ item }) => (
+          <ObservableTask
+            date={date}
+            task={item.task}
+            completed={item.completed}
+          />
+        )}
       />
     </>
   );
@@ -118,15 +153,10 @@ function ListCard({ date }: { date: Date }) {
 function HeaderCard({
   date,
   setDate,
-  todayTasks,
 }: {
   date: Date;
   setDate: (date: Date) => void;
-  todayTasks: Task[];
 }) {
-  const daily = todayTasks.filter((a) => a.repeats.period == "Daily");
-  const weekly = todayTasks.filter((a) => a.repeats.period == "Weekly");
-
   const tiggerRef = useRef<DropdownMenuTriggerRef>(null);
   return (
     <View className="bg-background">

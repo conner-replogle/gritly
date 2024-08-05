@@ -22,6 +22,7 @@ import { Goal } from "~/components/Task/EditTaskScreen/Goal";
 import { FrequencyPeriod } from "~/components/Task/EditTaskScreen/FrequencyPeriod";
 import { PortalHost } from "~/components/primitives/portal";
 import { SelectIcon } from "~/components/Task/EditTaskScreen/SelectIcon";
+import { withObservables } from "@nozbe/watermelondb/react";
 
 function Basic({
   ntask,
@@ -182,11 +183,7 @@ export function EditTaskScreen({
             <View className={"flex-grow flex flex-col gap-3 p-2"}>
               <TaskCard
                 task={ntask as Task}
-                completed={{
-                  completed: [],
-                  isCompleted: false,
-                  total: 0,
-                }}
+                completed={undefined}
                 completable={true}
                 streak={0}
                 onCompletePress={() => {}}
