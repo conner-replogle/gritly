@@ -120,14 +120,14 @@ function ListCard({ date }: { date: Date }) {
     <>
       <View className="flex-row justify-between items-center">
         <Text className="font-semibold text-lg">Habits</Text>
-        <Pressable onPress={() => setShowAll(!showAll)}>
+        <Button size="sm" variant={"link"} onPress={() => setShowAll(!showAll)}>
           {showAll && (
             <Text className="text-xs text-blue-700 font-bold">ALL</Text>
           )}
           {!showAll && (
             <Text className="text-xs text-blue-700 font-bold">ACTIVE</Text>
           )}
-        </Pressable>
+        </Button>
       </View>
       {!showAll && not_completed.length == 0 && (
         <View className="h-24 rounded-3xl bg-secondary justify-center items-center">

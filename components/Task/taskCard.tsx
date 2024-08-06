@@ -32,6 +32,7 @@ export function TaskCard({
   completed?: CompletedResult;
   streak: number;
 }) {
+  const { colors } = useTheme();
   let total = completed?.total ?? 0;
   let outof = completed?.goal.amount ?? task.goal.amount;
 
@@ -58,7 +59,7 @@ export function TaskCard({
             alignItems: "center",
           }}
         >
-          <FontAwesome name="map" size={16} />
+          <FontAwesome color={colors.primary} name="map" size={16} />
         </View>
       </View>
       <View className="text-start border-primary flex-1 flex flex-col justify-evenly items-start">

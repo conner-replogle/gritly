@@ -160,14 +160,22 @@ const Day = ({
         </View>
       </Pressable>
       <View className="flex flex-col mt-4 gap-1">
-        {Array.from(tasks, (task, i) => {
+        {Array.from(tasks, ({ task, completed }, i) => {
           //NEED TO CHECK IF COMPLETED CONTAINS TODAY
-
+          if (task.repeats.period == "Weekly") {
+            if (
+              !completed ||
+              completed.completed_times.find((a) => isSameDay(a.date, date)) ==
+                undefined
+            ) {
+              return null;
+            }
+          }
           return (
             <TaskBar
-              key={`${task.task.id}`}
-              task={task.task}
-              completed={task.completed?.isCompleted ?? false}
+              key={`${task.id}`}
+              task={task}
+              completed={completed?.isCompleted ?? false}
             />
           );
         })}
