@@ -19,6 +19,7 @@ export class CompletedResult extends Model {
   @field("total") total!: number;
   @json("goal", (a) => a) goal!: Goal;
   @immutableRelation(TableName.TASKS, "task_id") task!: Relation<Task>;
+  @field("is_skipped") skipped!: boolean;
   @date("completed_at") completed_at!: Date;
   @json("completed_times", (a) => a) completed_times!: {
     date: number;
@@ -26,6 +27,17 @@ export class CompletedResult extends Model {
   }[];
   get isCompleted() {
     return this.total >= this.goal.amount;
+  }
+
+  @writer async skip() {
+    await this.update((task) => {
+      this.skipped = true;
+    });
+  }
+  @writer async unskip() {
+    await this.update((task) => {
+      this.skipped = false;
+    });
   }
 
   @writer async complete(date: Date) {

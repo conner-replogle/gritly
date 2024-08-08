@@ -1,6 +1,6 @@
-import { EditableTask, Task } from "~/models/Task";
+import { EditableTask, getNextDate, Task } from "~/models/Task";
 import { useTheme } from "@react-navigation/native";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Text } from "~/components/ui/text";
@@ -53,7 +53,7 @@ function Basic({
         />
         <Label nativeID="description">Description</Label>
         <Input
-          placeholder="What exactly is this task?"
+          placeholder="What exactly is this task? (Optional)"
           nativeID="description"
           value={ntask.description}
           onChangeText={(b) => {
@@ -90,6 +90,13 @@ function Repeats({
   setTask: (a: (a: EditableTask) => void) => void;
 }) {
   const colors = useTheme().colors;
+  const next_5_dates = useMemo(() => {
+    let dates: Date[] = [];
+    for (let i = 0; i < 5; i++) {
+      dates.push(getNextDate(ntask.repeats, dates.at(-1) ?? ntask.startsOn));
+    }
+    return dates;
+  }, [ntask]);
   return (
     <>
       <Text className="text-l font-semibold text-muted-foreground">
@@ -105,28 +112,28 @@ function Repeats({
         STARTING DAY
       </Text>
       <View className="bg-secondary p-3 rounded-xl">
-        <Collapsible>
-          <CollapsibleTrigger asChild>
-            <Text className="">
-              {formatDate(ntask.startsOn, "MMMM, dd, yyyy")}
-            </Text>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <DateTimePicker
-              mode="single"
-              todayTextStyle={{ color: colors.text }}
-              calendarTextStyle={{ color: colors.text }}
-              headerTextStyle={{ color: colors.text }}
-              weekDaysTextStyle={{ color: colors.text }}
-              date={ntask.startsOn}
-              onChange={({ date }) => {
-                setTask((a) => {
-                  a.startsOn = new Date(date as string);
-                });
-              }}
-            />
-          </CollapsibleContent>
-        </Collapsible>
+        <DateTimePicker
+          mode="single"
+          todayTextStyle={{ color: colors.text }}
+          calendarTextStyle={{ color: colors.text }}
+          headerTextStyle={{ color: colors.text }}
+          headerContainerStyle={{
+            backgroundColor: colors.border,
+            borderRadius: 15,
+          }}
+          highlightedDays={next_5_dates}
+          headerButtonsPosition={"right"}
+          weekDaysTextStyle={{ color: colors.text }}
+          highlightedContainerStyle={{
+            backgroundColor: colors.border,
+          }}
+          date={ntask.startsOn}
+          onChange={({ date }) => {
+            setTask((a) => {
+              a.startsOn = new Date(date as string);
+            });
+          }}
+        />
       </View>
     </>
   );

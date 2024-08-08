@@ -30,7 +30,6 @@ import { CompletedResult } from "~/models/CompletedResult";
 
 export function EditBottomSheet(props: {
   bottomSheetRef: React.RefObject<BottomSheetModal>;
-  snapPoints: string[];
 
   onDelete: () => Promise<void>;
   onSubmit: (atask: EditableTask) => Promise<void>;
@@ -40,7 +39,7 @@ export function EditBottomSheet(props: {
   return (
     <BottomSheetModal
       ref={props.bottomSheetRef}
-      snapPoints={props.snapPoints}
+      snapPoints={["90%"]}
       handleIndicatorStyle={{
         backgroundColor: colors.border,
       }}
@@ -62,14 +61,13 @@ export function EditBottomSheet(props: {
 
 export function AnalyicsBottomSheet(props: {
   bottomSheetRef: React.RefObject<BottomSheetModal>;
-  snapPoints: string[];
   task: Task;
 }) {
   const { colors } = useTheme();
   return (
     <BottomSheetModal
       ref={props.bottomSheetRef}
-      snapPoints={props.snapPoints}
+      snapPoints={["95%"]}
       handleIndicatorStyle={{
         backgroundColor: colors.border,
       }}
@@ -99,7 +97,6 @@ export default function TaskContent({
   const editSheetRef = React.useRef<BottomSheetModal>(null);
 
   const analyticalSheetRef = React.useRef<BottomSheetModal>(null);
-  const snapPoints = React.useMemo(() => ["90%"], []);
 
   const completable = date <= new Date(Date.now());
   const nut = useContext(ExplosionContext);
@@ -161,6 +158,28 @@ export default function TaskContent({
             <LineChart size={16} />
             <DropdownMenuLabel>Analytics</DropdownMenuLabel>
           </DropdownMenuItem>
+          {completed?.skipped && (
+            <DropdownMenuItem
+              onPress={async () => {
+                await database.write(async () => {
+                  await completed?.unskip();
+                });
+              }}
+            >
+              <Redo2 size={16} />
+              <DropdownMenuLabel>Unskip</DropdownMenuLabel>
+            </DropdownMenuItem>
+          )}
+          {!completed?.skipped && (
+            <DropdownMenuItem
+              onPress={async () => {
+                await task.skip(date);
+              }}
+            >
+              <LineChart size={16} />
+              <DropdownMenuLabel>Skip</DropdownMenuLabel>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onPress={async () => {
               await database.write(async () => {
@@ -193,7 +212,6 @@ export default function TaskContent({
       </DropdownMenuContent>
       <EditBottomSheet
         bottomSheetRef={editSheetRef}
-        snapPoints={snapPoints}
         onDelete={async () => {
           await database.write(async () => {
             await task.markAsDeleted();
@@ -217,11 +235,7 @@ export default function TaskContent({
         }}
         task={task.toEditableTask()}
       />
-      <AnalyicsBottomSheet
-        bottomSheetRef={analyticalSheetRef}
-        snapPoints={snapPoints}
-        task={task}
-      />
+      <AnalyicsBottomSheet bottomSheetRef={analyticalSheetRef} task={task} />
     </DropdownMenu>
   );
 }

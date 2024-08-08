@@ -65,6 +65,7 @@ export const schema = appSchema({
         { name: "completed_at", type: "number" },
         { name: "total", type: "number" },
         { name: "completed_times", type: "string" },
+        { name: "is_skipped", type: "boolean" },
         { name: "goal", type: "string" },
       ],
     }),

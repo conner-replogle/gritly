@@ -1,4 +1,4 @@
-import { EditableTask } from "~/models/Task";
+import { EditableTask, Frequency, Period } from "~/models/Task";
 import { View } from "react-native";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import * as React from "react";
@@ -10,7 +10,8 @@ export function RepeatPeriod(props: {
 }) {
   const onValueChange = (label: string) => {
     props.setTask((a) => {
-      a.repeats.period = label;
+      a.repeats.period = label as Period;
+      a.repeats.selected_frequency = Frequency.every_n;
     });
   };
 
@@ -21,9 +22,18 @@ export function RepeatPeriod(props: {
         onValueChange={onValueChange}
         className="gap-3"
       >
-        <RadioGroupItemWithLabel onLabelPress={onValueChange} value="Daily" />
-        <RadioGroupItemWithLabel onLabelPress={onValueChange} value="Weekly" />
-        <RadioGroupItemWithLabel onLabelPress={onValueChange} value="Monthly" />
+        <RadioGroupItemWithLabel
+          onLabelPress={onValueChange}
+          value={Period.Daily}
+        />
+        <RadioGroupItemWithLabel
+          onLabelPress={onValueChange}
+          value={Period.Weekly}
+        />
+        <RadioGroupItemWithLabel
+          onLabelPress={onValueChange}
+          value={Period.Monthly}
+        />
       </RadioGroup>
     </View>
   );
