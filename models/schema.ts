@@ -55,7 +55,7 @@ export const schema = appSchema({
         { name: "created_at", type: "number" },
         { name: "repeats", type: "string" },
         { name: "goal", type: "string" },
-        { name: "analytics", type: "string" },
+        // { name: "analytics", type: "string" },
       ],
     }),
 

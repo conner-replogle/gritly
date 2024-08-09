@@ -12,7 +12,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
-import { addWeeks, formatDate } from "date-fns";
+import {
+  addWeeks,
+  endOfDay,
+  endOfWeek,
+  formatDate,
+  startOfDay,
+  startOfWeek,
+} from "date-fns";
 import DateTimePicker from "react-native-ui-datepicker/src/DateTimePicker";
 import { Button } from "~/components/ui/button";
 import * as React from "react";
@@ -91,10 +98,23 @@ function Repeats({
 }) {
   const colors = useTheme().colors;
   const next_n_dates = useMemo(() => {
-    let end_day = addWeeks(new Date(Date.now()), 4);
-    let dates: Date[] = [getNextDate(ntask.repeats, ntask.startsOn)];
-    while (dates[dates.length - 1] < end_day) {
-      dates.push(getNextDate(ntask.repeats, dates.at(-1) ?? ntask.startsOn));
+    let end_day = startOfDay(
+      addWeeks(startOfWeek(ntask.startsOn, { weekStartsOn: 6 }), 3)
+    );
+    console.log(end_day);
+    let dates: Date[] = [
+      getNextDate(ntask.repeats, startOfDay(ntask.startsOn)),
+    ];
+    while (true) {
+      let next_date = getNextDate(
+        ntask.repeats,
+        startOfDay(dates.at(-1) ?? ntask.startsOn)
+      );
+      if (next_date <= end_day) {
+        dates.push(next_date);
+      } else {
+        break;
+      }
     }
     return dates;
   }, [ntask]);
