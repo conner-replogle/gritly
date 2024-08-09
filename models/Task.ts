@@ -113,7 +113,6 @@ export class Task extends Model {
         return false;
     }
   }
-  //Starting from a valid date go to the nth next date
 
   getCompleted(date: Date): Query<CompletedResult> {
     let beginning: Date;
@@ -311,6 +310,6 @@ export interface Goal {
   customName?: string;
 }
 
-interface Analytics {
+export interface Analytics {
   streaks: { dates: Date[] }[];
 }

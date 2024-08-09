@@ -1,18 +1,13 @@
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { Task } from "~/models/Task";
-import { useAnalytics } from "~/components/hooks/Analytics";
-import { log } from "~/lib/config";
-import { LineChart } from "react-native-gifted-charts";
-import { useState } from "react";
-import { useTheme } from "@react-navigation/native";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { TaskCard } from "~/components/Task/taskCard";
-import { Goal } from "~/components/Task/EditTaskScreen/Goal";
+
 import * as React from "react";
-import { addWeeks, endOfWeek, startOfWeek } from "date-fns";
+import { addWeeks, endOfWeek, startOfDay, startOfWeek } from "date-fns";
 import { Button } from "~/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react-native";
+import { useCompleted } from "~/lib/hooks/Tasks";
+import { Summary } from "~/components/Analytics/widgets/Summary";
 
 export function WeeklyHeader({
   date,
@@ -57,10 +52,12 @@ export function WeeklyHeader({
   );
 }
 
-export function WeeklyContent({ date, task }: { date: Date; task: Task }) {
+export function WeeklyContent({ date, task }: { date: Date; task?: Task }) {
+  //const completed = useCompleted(task, startOfDay(date), endOfWeek(date));
+
   return (
     <View>
-      <Text>Weekly Content</Text>
+      <Summary />
     </View>
   );
 }

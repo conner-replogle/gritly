@@ -4,6 +4,7 @@ import { Task } from "~/models/Task";
 import { useEffect, useState } from "react";
 import { CompletedResult } from "~/models/CompletedResult";
 import { log } from "~/lib/config";
+import { Q } from "@nozbe/watermelondb";
 
 export default function useTasks(date?: Date) {
   const database = useDatabase();
@@ -75,28 +76,22 @@ export function useTasksWithCompleted(date: Date) {
   return tasks;
 }
 
-export function useCompleted() {
-  const database = useDatabase();
+export function useCompleted(task: Task, startDate?: Date, endDate?: Date) {
   const [completed, setCompleted] = useState<CompletedResult[]>([]);
-  const completedCollection = database.collections
-    .get<CompletedResult>(TableName.COMPLETED_RESULT)
-    .query();
+
   useEffect(() => {
-    const subscription = completedCollection.observe().subscribe(async (a) => {
+    let query = task.sortedCompleted;
+    if (startDate) {
+      query = query.extend(Q.where("completed_at", Q.gte(startDate.getTime())));
+    }
+    if (endDate) {
+      query = query.extend(Q.where("completed_at", Q.lte(endDate.getTime())));
+    }
+    const subscription = query.observe().subscribe(async (a) => {
       setCompleted(a);
     });
+
     return () => subscription.unsubscribe();
   }, []);
   return completed;
-}
-
-export function useStreak(task: Task, date: Date) {
-  const [streak, setStreak] = useState(0);
-  useEffect(() => {
-    let subscriber = task.sortedCompleted.observe().subscribe((a) => {});
-
-    return () => subscriber.unsubscribe();
-  }, [task, date]);
-
-  return streak;
 }

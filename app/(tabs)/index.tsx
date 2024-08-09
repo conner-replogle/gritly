@@ -56,7 +56,7 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import { useMMKV, useMMKVBoolean } from "react-native-mmkv";
 import { ExplosionContext, log } from "~/lib/config";
 import { DropdownMenuTriggerRef } from "@rn-primitives/dropdown-menu";
-import useTasks, { useTasksWithCompleted } from "~/components/hooks/Tasks";
+import useTasks, { useTasksWithCompleted } from "~/lib/hooks/Tasks";
 import { Task } from "~/models/Task";
 import { endOfDay, startOfDay } from "date-fns";
 import { withObservables } from "@nozbe/watermelondb/react";
@@ -114,8 +114,12 @@ function ListCard({ date }: { date: Date }) {
     return <Text>Loading...</Text>;
   }
   console.log(tasks);
-  let completed = tasks.filter((a) => a.completed?.isCompleted);
-  let not_completed = tasks.filter((a) => !a.completed?.isCompleted);
+  let completed = tasks.filter(
+    (a) => a.completed?.isCompleted || a.completed?.skipped
+  );
+  let not_completed = tasks.filter(
+    (a) => !a.completed?.isCompleted && !a.completed?.skipped
+  );
   return (
     <>
       <View className="flex-row justify-between items-center">

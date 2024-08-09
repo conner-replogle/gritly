@@ -1,5 +1,5 @@
 import { Text } from "~/components/ui/text";
-import useTasks from "~/components/hooks/Tasks";
+import useTasks from "~/lib/hooks/Tasks";
 import { TaskCard } from "~/components/Task/taskCard";
 import { FlatList, Pressable, ScrollView, View } from "react-native";
 import {
@@ -24,6 +24,7 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { AnalyicsBottomSheet, EditBottomSheet } from "~/components/Task/task";
 import { useDatabase } from "@nozbe/watermelondb/hooks";
 import { addDays } from "date-fns";
+import { Link } from "expo-router";
 
 export default function Tasks() {
   const tasks = useTasks();
@@ -46,7 +47,6 @@ function TaskCardWithDropdown({ task }: { task: Task }) {
 
   const snapPoints = React.useMemo(() => ["90%"], []);
   const database = useDatabase();
-  const analyticalSheetRef = React.useRef<BottomSheetModal>(null);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -73,14 +73,12 @@ function TaskCardWithDropdown({ task }: { task: Task }) {
             <EditIcon size={16} />
             <DropdownMenuLabel>Edit</DropdownMenuLabel>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onPress={() => {
-              analyticalSheetRef.current?.present();
-            }}
-          >
-            <LineChart size={16} />
-            <DropdownMenuLabel>Analytics</DropdownMenuLabel>
-          </DropdownMenuItem>
+          <Link href={`/analytics?task_id=${task.id}`} asChild>
+            <DropdownMenuItem onPress={() => {}}>
+              <LineChart size={16} />
+              <DropdownMenuLabel>Analytics</DropdownMenuLabel>
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem
             onPress={async () => {
               await task.endTask(new Date(Date.now()));
@@ -103,7 +101,6 @@ function TaskCardWithDropdown({ task }: { task: Task }) {
       </DropdownMenuContent>
       <EditBottomSheet
         bottomSheetRef={editSheetRef}
-        snapPoints={snapPoints}
         onDelete={async () => {
           await database.write(async () => {
             await task.markAsDeleted();
@@ -126,11 +123,6 @@ function TaskCardWithDropdown({ task }: { task: Task }) {
           editSheetRef.current?.dismiss();
         }}
         task={task.toEditableTask()}
-      />
-      <AnalyicsBottomSheet
-        bottomSheetRef={analyticalSheetRef}
-        snapPoints={snapPoints}
-        task={task}
       />
     </DropdownMenu>
   );

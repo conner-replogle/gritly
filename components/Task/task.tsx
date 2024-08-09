@@ -27,6 +27,7 @@ import { useDatabase } from "@nozbe/watermelondb/hooks";
 import { AnalyticsScreen } from "~/components/Analytics/AnalyticsScreen";
 import { addDays } from "date-fns";
 import { CompletedResult } from "~/models/CompletedResult";
+import { Link } from "expo-router";
 
 export function EditBottomSheet(props: {
   bottomSheetRef: React.RefObject<BottomSheetModal>;
@@ -150,20 +151,16 @@ export default function TaskContent({
             <EditIcon size={16} />
             <DropdownMenuLabel>Edit</DropdownMenuLabel>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onPress={() => {
-              analyticalSheetRef.current?.present();
-            }}
-          >
-            <LineChart size={16} />
-            <DropdownMenuLabel>Analytics</DropdownMenuLabel>
-          </DropdownMenuItem>
+          <Link href={`/analytics?task_id=${task.id}`} asChild>
+            <DropdownMenuItem onPress={() => {}}>
+              <LineChart size={16} />
+              <DropdownMenuLabel>Analytics</DropdownMenuLabel>
+            </DropdownMenuItem>
+          </Link>
           {completed?.skipped && (
             <DropdownMenuItem
               onPress={async () => {
-                await database.write(async () => {
-                  await completed?.unskip();
-                });
+                await completed?.unskip();
               }}
             >
               <Redo2 size={16} />

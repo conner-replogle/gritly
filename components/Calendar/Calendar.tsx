@@ -9,7 +9,7 @@ import {
   startOfWeek,
 } from "date-fns";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import useTasks, { useTasksWithCompleted } from "~/components/hooks/Tasks";
+import useTasks, { useTasksWithCompleted } from "~/lib/hooks/Tasks";
 import { Task } from "~/models/Task";
 import { log } from "~/lib/config";
 import { withObservables } from "@nozbe/watermelondb/react";

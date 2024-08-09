@@ -2,7 +2,13 @@ import { Pressable, View } from "react-native";
 import { CardDescription, CardTitle } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
 import Svg, { Path } from "react-native-svg";
-import { CheckIcon, PlusIcon } from "lucide-react-native";
+import {
+  CheckIcon,
+  Cross,
+  Ghost,
+  PlusIcon,
+  SkipForward,
+} from "lucide-react-native";
 import * as React from "react";
 import { EditableTask, repeatsToString, Task } from "~/models/Task";
 import { useTheme } from "@react-navigation/native";
@@ -71,8 +77,13 @@ export function TaskCard({
           {total}/{outof} {task.goal.unit.toUpperCase()}{" "}
         </CardDescription>
       </View>
+      {completable && completed?.skipped && (
+        <View className="flex flex-col items-center justify-center  aspect-square mr-3">
+          <Ghost color={colors.primary} />
+        </View>
+      )}
 
-      {completable && (
+      {completable && !completed?.skipped && (
         <View className="flex flex-col items-center justify-center">
           <Pressable
             onLongPress={onCompleteLongPress}

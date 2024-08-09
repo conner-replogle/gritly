@@ -1,7 +1,9 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
 import {
+  AreaChart,
   CalendarIcon,
+  LineChart,
   ListIcon,
   PlusCircleIcon,
   Settings,
@@ -16,6 +18,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
+
         tabBarShowLabel: false,
       }}
     >
@@ -43,21 +46,24 @@ export default function TabLayout() {
         options={{
           title: "Add",
           headerShown: false,
+
           tabBarButton: (props) => (
-            <AddTasksIcon
-              color={colors.background}
-              fill={colors.primary}
-              size={55}
-            />
+            <View className="mx-3">
+              <AddTasksIcon
+                color={colors.background}
+                fill={colors.primary}
+                size={55}
+              />
+            </View>
           ),
         }}
       />
 
       <Tabs.Screen
-        name="calendar"
+        name="analytics"
         options={{
-          title: "Calendar",
-          tabBarIcon: ({ color }) => <CalendarIcon color={color} />,
+          headerShown: false,
+          tabBarIcon: ({ color }) => <LineChart color={color} />,
         }}
       />
 
