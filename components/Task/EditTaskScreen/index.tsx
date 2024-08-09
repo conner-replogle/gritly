@@ -12,7 +12,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
-import { formatDate } from "date-fns";
+import { addWeeks, formatDate } from "date-fns";
 import DateTimePicker from "react-native-ui-datepicker/src/DateTimePicker";
 import { Button } from "~/components/ui/button";
 import * as React from "react";
@@ -90,9 +90,10 @@ function Repeats({
   setTask: (a: (a: EditableTask) => void) => void;
 }) {
   const colors = useTheme().colors;
-  const next_5_dates = useMemo(() => {
-    let dates: Date[] = [];
-    for (let i = 0; i < 5; i++) {
+  const next_n_dates = useMemo(() => {
+    let end_day = addWeeks(new Date(Date.now()), 4);
+    let dates: Date[] = [getNextDate(ntask.repeats, ntask.startsOn)];
+    while (dates[dates.length - 1] < end_day) {
       dates.push(getNextDate(ntask.repeats, dates.at(-1) ?? ntask.startsOn));
     }
     return dates;
@@ -121,7 +122,7 @@ function Repeats({
             backgroundColor: colors.border,
             borderRadius: 15,
           }}
-          highlightedDays={next_5_dates}
+          highlightedDays={next_n_dates}
           headerButtonsPosition={"right"}
           weekDaysTextStyle={{ color: colors.text }}
           highlightedContainerStyle={{
