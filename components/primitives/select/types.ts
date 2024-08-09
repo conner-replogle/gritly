@@ -1,4 +1,7 @@
-import type { ForceMountable, PressableRef } from '~/components/primitives/types';
+import type {
+  ForceMountable,
+  PressableRef,
+} from '~/components/primitives/types';
 
 type Option =
   | {

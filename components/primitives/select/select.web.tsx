@@ -1,5 +1,8 @@
 import * as Select from '@radix-ui/react-select';
-import { useAugmentedRef, useControllableState } from '~/components/primitives/hooks';
+import {
+  useAugmentedRef,
+  useControllableState,
+} from '~/components/primitives/hooks';
 import * as Slot from '~/components/primitives/slot';
 import type {
   ForceMountable,
@@ -93,7 +96,9 @@ Root.displayName = 'RootWebSelect';
 function useRootContext() {
   const context = React.useContext(SelectContext);
   if (!context) {
-    throw new Error('Select compound components cannot be rendered outside the Select component');
+    throw new Error(
+      'Select compound components cannot be rendered outside the Select component'
+    );
   }
   return context;
 }
@@ -124,7 +129,12 @@ const Trigger = React.forwardRef<PressableRef, SlottablePressableProps>(
     const Component = asChild ? Slot.Pressable : Pressable;
     return (
       <Select.Trigger disabled={disabled ?? undefined} asChild>
-        <Component ref={augmentedRef} role='button' disabled={disabled} {...props} />
+        <Component
+          ref={augmentedRef}
+          role="button"
+          disabled={disabled}
+          {...props}
+        />
       </Select.Trigger>
     );
   }
@@ -148,12 +158,13 @@ function Portal({ container, children }: SelectPortalProps) {
   return <Select.Portal children={children} container={container} />;
 }
 
-const Overlay = React.forwardRef<PressableRef, SlottablePressableProps & SelectOverlayProps>(
-  ({ asChild, forceMount, ...props }, ref) => {
-    const Component = asChild ? Slot.Pressable : Pressable;
-    return <Component ref={ref} {...props} />;
-  }
-);
+const Overlay = React.forwardRef<
+  PressableRef,
+  SlottablePressableProps & SelectOverlayProps
+>(({ asChild, forceMount, ...props }, ref) => {
+  const Component = asChild ? Slot.Pressable : Pressable;
+  return <Component ref={ref} {...props} />;
+});
 
 Overlay.displayName = 'OverlayWebSelect';
 
@@ -206,96 +217,112 @@ const ItemContext = React.createContext<{
   label: string;
 } | null>(null);
 
-const Item = React.forwardRef<PressableRef, SlottablePressableProps & SelectItemProps>(
-  ({ asChild, closeOnPress = true, label, value, children, ...props }, ref) => {
-    return (
-      <ItemContext.Provider value={{ itemValue: value, label: label }}>
-        <Slot.Pressable ref={ref} {...props}>
-          <Select.Item textValue={label} value={value} disabled={props.disabled ?? undefined}>
-            <>{children}</>
-          </Select.Item>
-        </Slot.Pressable>
-      </ItemContext.Provider>
-    );
-  }
-);
+const Item = React.forwardRef<
+  PressableRef,
+  SlottablePressableProps & SelectItemProps
+>(({ asChild, closeOnPress = true, label, value, children, ...props }, ref) => {
+  return (
+    <ItemContext.Provider value={{ itemValue: value, label: label }}>
+      <Slot.Pressable ref={ref} {...props}>
+        <Select.Item
+          textValue={label}
+          value={value}
+          disabled={props.disabled ?? undefined}
+        >
+          <>{children}</>
+        </Select.Item>
+      </Slot.Pressable>
+    </ItemContext.Provider>
+  );
+});
 
 Item.displayName = 'ItemWebSelect';
 
 function useItemContext() {
   const context = React.useContext(ItemContext);
   if (!context) {
-    throw new Error('Item compound components cannot be rendered outside of an Item component');
+    throw new Error(
+      'Item compound components cannot be rendered outside of an Item component'
+    );
   }
   return context;
 }
 
-const ItemText = React.forwardRef<TextRef, Omit<SlottableTextProps, 'children'>>(
-  ({ asChild, ...props }, ref) => {
-    const { label } = useItemContext();
+const ItemText = React.forwardRef<
+  TextRef,
+  Omit<SlottableTextProps, 'children'>
+>(({ asChild, ...props }, ref) => {
+  const { label } = useItemContext();
 
-    const Component = asChild ? Slot.Text : Text;
-    return (
-      <Select.ItemText asChild>
-        <Component ref={ref} {...props}>
-          {label}
-        </Component>
-      </Select.ItemText>
-    );
-  }
-);
+  const Component = asChild ? Slot.Text : Text;
+  return (
+    <Select.ItemText asChild>
+      <Component ref={ref} {...props}>
+        {label}
+      </Component>
+    </Select.ItemText>
+  );
+});
 
 ItemText.displayName = 'ItemTextWebSelect';
 
-const ItemIndicator = React.forwardRef<ViewRef, SlottableViewProps & ForceMountable>(
-  ({ asChild, forceMount: _forceMount, ...props }, ref) => {
-    const Component = asChild ? Slot.View : View;
-    return (
-      <Select.ItemIndicator asChild>
-        <Component ref={ref} {...props} />
-      </Select.ItemIndicator>
-    );
-  }
-);
+const ItemIndicator = React.forwardRef<
+  ViewRef,
+  SlottableViewProps & ForceMountable
+>(({ asChild, forceMount: _forceMount, ...props }, ref) => {
+  const Component = asChild ? Slot.View : View;
+  return (
+    <Select.ItemIndicator asChild>
+      <Component ref={ref} {...props} />
+    </Select.ItemIndicator>
+  );
+});
 
 ItemIndicator.displayName = 'ItemIndicatorWebSelect';
 
-const Group = React.forwardRef<ViewRef, SlottableViewProps>(({ asChild, ...props }, ref) => {
-  const Component = asChild ? Slot.View : View;
-  return (
-    <Select.Group asChild>
-      <Component ref={ref} {...props} />
-    </Select.Group>
-  );
-});
-
-Group.displayName = 'GroupWebSelect';
-
-const Label = React.forwardRef<TextRef, SlottableTextProps>(({ asChild, ...props }, ref) => {
-  const Component = asChild ? Slot.Text : Text;
-  return (
-    <Select.Label asChild>
-      <Component ref={ref} {...props} />
-    </Select.Label>
-  );
-});
-
-Label.displayName = 'LabelWebSelect';
-
-const Separator = React.forwardRef<ViewRef, SlottableViewProps & SelectSeparatorProps>(
-  ({ asChild, decorative, ...props }, ref) => {
+const Group = React.forwardRef<ViewRef, SlottableViewProps>(
+  ({ asChild, ...props }, ref) => {
     const Component = asChild ? Slot.View : View;
     return (
-      <Select.Separator asChild>
+      <Select.Group asChild>
         <Component ref={ref} {...props} />
-      </Select.Separator>
+      </Select.Group>
     );
   }
 );
 
+Group.displayName = 'GroupWebSelect';
+
+const Label = React.forwardRef<TextRef, SlottableTextProps>(
+  ({ asChild, ...props }, ref) => {
+    const Component = asChild ? Slot.Text : Text;
+    return (
+      <Select.Label asChild>
+        <Component ref={ref} {...props} />
+      </Select.Label>
+    );
+  }
+);
+
+Label.displayName = 'LabelWebSelect';
+
+const Separator = React.forwardRef<
+  ViewRef,
+  SlottableViewProps & SelectSeparatorProps
+>(({ asChild, decorative, ...props }, ref) => {
+  const Component = asChild ? Slot.View : View;
+  return (
+    <Select.Separator asChild>
+      <Component ref={ref} {...props} />
+    </Select.Separator>
+  );
+});
+
 Separator.displayName = 'SeparatorWebSelect';
 
-const ScrollUpButton = (props: React.ComponentPropsWithoutRef<typeof Select.ScrollUpButton>) => {
+const ScrollUpButton = (
+  props: React.ComponentPropsWithoutRef<typeof Select.ScrollUpButton>
+) => {
   return <Select.ScrollUpButton {...props} />;
 };
 
@@ -305,7 +332,9 @@ const ScrollDownButton = (
   return <Select.ScrollDownButton {...props} />;
 };
 
-const Viewport = (props: React.ComponentPropsWithoutRef<typeof Select.Viewport>) => {
+const Viewport = (
+  props: React.ComponentPropsWithoutRef<typeof Select.Viewport>
+) => {
   return <Select.Viewport {...props} />;
 };
 

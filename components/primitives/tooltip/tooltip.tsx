@@ -53,8 +53,10 @@ const Root = React.forwardRef<ViewRef, SlottableViewProps & TooltipRootProps>(
     ref
   ) => {
     const nativeID = React.useId();
-    const [triggerPosition, setTriggerPosition] = React.useState<LayoutPosition | null>(null);
-    const [contentLayout, setContentLayout] = React.useState<LayoutRectangle | null>(null);
+    const [triggerPosition, setTriggerPosition] =
+      React.useState<LayoutPosition | null>(null);
+    const [contentLayout, setContentLayout] =
+      React.useState<LayoutRectangle | null>(null);
 
     const [open = false, onOpenChange] = useControllableState({
       prop: openProp,
@@ -86,7 +88,9 @@ Root.displayName = 'RootNativeTooltip';
 function useTooltipContext() {
   const context = React.useContext(RootContext);
   if (!context) {
-    throw new Error('Tooltip compound components cannot be rendered outside the Tooltip component');
+    throw new Error(
+      'Tooltip compound components cannot be rendered outside the Tooltip component'
+    );
   }
   return context;
 }
@@ -108,7 +112,9 @@ const Trigger = React.forwardRef<PressableRef, SlottablePressableProps>(
     );
 
     function onPress(ev: GestureResponderEvent) {
-      if (disabled) return;
+      if (disabled) {
+        return;
+      }
       triggerRef.current?.measure((_x, _y, width, height, pageX, pageY) => {
         setTriggerPosition({ width, pageX, pageY: pageY, height });
       });
@@ -122,7 +128,7 @@ const Trigger = React.forwardRef<PressableRef, SlottablePressableProps>(
       <Component
         ref={triggerRef}
         aria-disabled={disabled ?? undefined}
-        role='button'
+        role="button"
         onPress={onPress}
         disabled={disabled ?? undefined}
         {...props}
@@ -156,9 +162,22 @@ function Portal({ forceMount, hostName, children }: TooltipPortalProps) {
   );
 }
 
-const Overlay = React.forwardRef<PressableRef, SlottablePressableProps & TooltipOverlayProps>(
-  ({ asChild, forceMount, onPress: OnPressProp, closeOnPress = true, ...props }, ref) => {
-    const { open, onOpenChange, setContentLayout, setTriggerPosition } = useTooltipContext();
+const Overlay = React.forwardRef<
+  PressableRef,
+  SlottablePressableProps & TooltipOverlayProps
+>(
+  (
+    {
+      asChild,
+      forceMount,
+      onPress: OnPressProp,
+      closeOnPress = true,
+      ...props
+    },
+    ref
+  ) => {
+    const { open, onOpenChange, setContentLayout, setTriggerPosition } =
+      useTooltipContext();
 
     function onPress(ev: GestureResponderEvent) {
       if (closeOnPress) {
@@ -185,7 +204,10 @@ Overlay.displayName = 'OverlayNativeTooltip';
 /**
  * @info `position`, `top`, `left`, and `maxWidth` style properties are controlled internally. Opt out of this behavior on native by setting `disablePositioningStyle` to `true`.
  */
-const Content = React.forwardRef<ViewRef, SlottableViewProps & PositionedContentProps>(
+const Content = React.forwardRef<
+  ViewRef,
+  SlottableViewProps & PositionedContentProps
+>(
   (
     {
       asChild = false,
@@ -214,12 +236,15 @@ const Content = React.forwardRef<ViewRef, SlottableViewProps & PositionedContent
     } = useTooltipContext();
 
     React.useEffect(() => {
-      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-        setTriggerPosition(null);
-        setContentLayout(null);
-        onOpenChange(false);
-        return true;
-      });
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          setTriggerPosition(null);
+          setContentLayout(null);
+          onOpenChange(false);
+          return true;
+        }
+      );
 
       return () => {
         setContentLayout(null);
@@ -254,7 +279,7 @@ const Content = React.forwardRef<ViewRef, SlottableViewProps & PositionedContent
     return (
       <Component
         ref={ref}
-        role='tooltip'
+        role="tooltip"
         nativeID={nativeID}
         aria-modal={true}
         style={[positionStyle, style]}

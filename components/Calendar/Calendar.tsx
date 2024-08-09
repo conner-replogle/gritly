@@ -111,7 +111,7 @@ function Week(props: {
 
   return (
     <View
-      className={`flex flex-row justify-evenly items-start `}
+      className={"flex flex-row justify-evenly items-start "}
       style={{
         width: width,
       }}

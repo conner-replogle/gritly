@@ -1,5 +1,8 @@
 import * as Collapsible from '@radix-ui/react-collapsible';
-import { useAugmentedRef, useControllableState } from '~/components/primitives/hooks';
+import {
+  useAugmentedRef,
+  useControllableState,
+} from '~/components/primitives/hooks';
 import * as Slot from '~/components/primitives/slot';
 import type {
   PressableRef,
@@ -9,11 +12,18 @@ import type {
 } from '~/components/primitives/types';
 import * as React from 'react';
 import { Pressable, View, type GestureResponderEvent } from 'react-native';
-import type { CollapsibleContentProps, CollapsibleRootProps, RootContext } from './types';
+import type {
+  CollapsibleContentProps,
+  CollapsibleRootProps,
+  RootContext,
+} from './types';
 
 const CollapsibleContext = React.createContext<RootContext | null>(null);
 
-const Root = React.forwardRef<ViewRef, SlottableViewProps & CollapsibleRootProps>(
+const Root = React.forwardRef<
+  ViewRef,
+  SlottableViewProps & CollapsibleRootProps
+>(
   (
     {
       asChild,
@@ -85,7 +95,10 @@ function useCollapsibleContext() {
 }
 
 const Trigger = React.forwardRef<PressableRef, SlottablePressableProps>(
-  ({ asChild, onPress: onPressProp, disabled: disabledProp = false, ...props }, ref) => {
+  (
+    { asChild, onPress: onPressProp, disabled: disabledProp = false, ...props },
+    ref
+  ) => {
     const { disabled, open, onOpenChange } = useCollapsibleContext();
     const augmentedRef = useAugmentedRef({ ref });
 
@@ -119,7 +132,7 @@ const Trigger = React.forwardRef<PressableRef, SlottablePressableProps>(
       <Collapsible.Trigger disabled={disabled} asChild>
         <Component
           ref={augmentedRef}
-          role='button'
+          role="button"
           onPress={onPress}
           disabled={disabled}
           {...props}
@@ -131,26 +144,27 @@ const Trigger = React.forwardRef<PressableRef, SlottablePressableProps>(
 
 Trigger.displayName = 'TriggerWebCollapsible';
 
-const Content = React.forwardRef<ViewRef, SlottableViewProps & CollapsibleContentProps>(
-  ({ asChild, forceMount, ...props }, ref) => {
-    const augmentedRef = useAugmentedRef({ ref });
-    const { open } = useCollapsibleContext();
+const Content = React.forwardRef<
+  ViewRef,
+  SlottableViewProps & CollapsibleContentProps
+>(({ asChild, forceMount, ...props }, ref) => {
+  const augmentedRef = useAugmentedRef({ ref });
+  const { open } = useCollapsibleContext();
 
-    React.useLayoutEffect(() => {
-      if (augmentedRef.current) {
-        const augRef = augmentedRef.current as unknown as HTMLDivElement;
-        augRef.dataset.state = open ? 'open' : 'closed';
-      }
-    }, [open]);
+  React.useLayoutEffect(() => {
+    if (augmentedRef.current) {
+      const augRef = augmentedRef.current as unknown as HTMLDivElement;
+      augRef.dataset.state = open ? 'open' : 'closed';
+    }
+  }, [open]);
 
-    const Component = asChild ? Slot.View : View;
-    return (
-      <Collapsible.Content forceMount={forceMount} asChild>
-        <Component ref={augmentedRef} {...props} />
-      </Collapsible.Content>
-    );
-  }
-);
+  const Component = asChild ? Slot.View : View;
+  return (
+    <Collapsible.Content forceMount={forceMount} asChild>
+      <Component ref={augmentedRef} {...props} />
+    </Collapsible.Content>
+  );
+});
 
 Content.displayName = 'ContentWebCollapsible';
 

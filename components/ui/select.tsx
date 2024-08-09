@@ -29,7 +29,11 @@ const SelectTrigger = React.forwardRef<
     {...props}
   >
     <>{children}</>
-    <ChevronDown size={16} aria-hidden={true} className='text-foreground opacity-50' />
+    <ChevronDown
+      size={16}
+      aria-hidden={true}
+      className="text-foreground opacity-50"
+    />
   </SelectPrimitive.Trigger>
 ));
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
@@ -46,10 +50,13 @@ const SelectScrollUpButton = ({
   }
   return (
     <SelectPrimitive.ScrollUpButton
-      className={cn('flex web:cursor-default items-center justify-center py-1', className)}
+      className={cn(
+        'flex web:cursor-default items-center justify-center py-1',
+        className
+      )}
       {...props}
     >
-      <ChevronUp size={14} className='text-foreground' />
+      <ChevronUp size={14} className="text-foreground" />
     </SelectPrimitive.ScrollUpButton>
   );
 };
@@ -66,23 +73,30 @@ const SelectScrollDownButton = ({
   }
   return (
     <SelectPrimitive.ScrollDownButton
-      className={cn('flex web:cursor-default items-center justify-center py-1', className)}
+      className={cn(
+        'flex web:cursor-default items-center justify-center py-1',
+        className
+      )}
       {...props}
     >
-      <ChevronDown size={14} className='text-foreground' />
+      <ChevronDown size={14} className="text-foreground" />
     </SelectPrimitive.ScrollDownButton>
   );
 };
 
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> & { portalHost?: string }
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> & {
+    portalHost?: string;
+  }
 >(({ className, children, position = 'popper', portalHost, ...props }, ref) => {
   const { open } = SelectPrimitive.useRootContext();
 
   return (
     <SelectPrimitive.Portal hostName={portalHost}>
-      <SelectPrimitive.Overlay style={Platform.OS !== 'web' ? StyleSheet.absoluteFill : undefined}>
+      <SelectPrimitive.Overlay
+        style={Platform.OS !== 'web' ? StyleSheet.absoluteFill : undefined}
+      >
         <Animated.View entering={FadeIn} exiting={FadeOut}>
           <SelectPrimitive.Content
             ref={ref}
@@ -147,12 +161,12 @@ const SelectItem = React.forwardRef<
     )}
     {...props}
   >
-    <View className='absolute left-2 native:left-3.5 flex h-3.5 native:pt-px w-3.5 items-center justify-center'>
+    <View className="absolute left-2 native:left-3.5 flex h-3.5 native:pt-px w-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check size={16} strokeWidth={3} className='text-popover-foreground' />
+        <Check size={16} strokeWidth={3} className="text-popover-foreground" />
       </SelectPrimitive.ItemIndicator>
     </View>
-    <SelectPrimitive.ItemText className='text-sm native:text-lg text-popover-foreground native:text-base web:group-focus:text-accent-foreground' />
+    <SelectPrimitive.ItemText className="text-sm native:text-lg text-popover-foreground native:text-base web:group-focus:text-accent-foreground" />
   </SelectPrimitive.Item>
 ));
 SelectItem.displayName = SelectPrimitive.Item.displayName;

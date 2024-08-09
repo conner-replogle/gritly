@@ -15,7 +15,7 @@ export default function Purchase() {
   const purchase = async (product: PurchasesPackage) => {
     try {
       const { customerInfo } = await Purchases.purchasePackage(product);
-      if (typeof customerInfo.entitlements.active["pro"] !== "undefined") {
+      if (typeof customerInfo.entitlements.active.pro !== "undefined") {
         // Unlock that great "pro" content
         log.debug("Pro content unlocked");
       }

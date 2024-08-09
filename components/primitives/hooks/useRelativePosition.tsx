@@ -90,8 +90,10 @@ function getSidePosition({
 }: GetSidePositionArgs) {
   const insetTop = insets?.top ?? 0;
   const insetBottom = insets?.bottom ?? 0;
-  const positionTop = triggerPosition?.pageY - sideOffset - contentLayout.height;
-  const positionBottom = triggerPosition.pageY + triggerPosition.height + sideOffset;
+  const positionTop =
+    triggerPosition?.pageY - sideOffset - contentLayout.height;
+  const positionBottom =
+    triggerPosition.pageY + triggerPosition.height + sideOffset;
 
   if (!avoidCollisions) {
     return {
@@ -106,7 +108,10 @@ function getSidePosition({
   }
 
   return {
-    top: Math.min(dimensions.height - insetBottom - contentLayout.height, positionBottom),
+    top: Math.min(
+      dimensions.height - insetBottom - contentLayout.height,
+      positionBottom
+    ),
   };
 }
 
@@ -142,7 +147,8 @@ function getAlignPosition({
   );
 
   if (avoidCollisions) {
-    const doesCollide = left < insetLeft || left + contentWidth > dimensions.width - insetRight;
+    const doesCollide =
+      left < insetLeft || left + contentWidth > dimensions.width - insetRight;
     if (doesCollide) {
       const spaceLeft = left - insetLeft;
       const spaceRight = dimensions.width - insetRight - (left + contentWidth);
@@ -190,7 +196,9 @@ function getLeftPosition(
   );
 }
 
-type GetContentStyleArgs = GetPositionArgs & GetSidePositionArgs & GetAlignPositionArgs;
+type GetContentStyleArgs = GetPositionArgs &
+  GetSidePositionArgs &
+  GetAlignPositionArgs;
 
 function getContentStyle({
   align,

@@ -10,9 +10,14 @@ import type {
 import { ToggleGroupUtils } from '~/components/primitives/utils';
 import type { ToggleGroupItemProps, ToggleGroupRootProps } from './types';
 
-const ToggleGroupContext = React.createContext<ToggleGroupRootProps | null>(null);
+const ToggleGroupContext = React.createContext<ToggleGroupRootProps | null>(
+  null
+);
 
-const Root = React.forwardRef<ViewRef, SlottableViewProps & ToggleGroupRootProps>(
+const Root = React.forwardRef<
+  ViewRef,
+  SlottableViewProps & ToggleGroupRootProps
+>(
   (
     {
       asChild,
@@ -40,7 +45,7 @@ const Root = React.forwardRef<ViewRef, SlottableViewProps & ToggleGroupRootProps
           } as ToggleGroupRootProps
         }
       >
-        <Component ref={ref} role='group' {...viewProps} />
+        <Component ref={ref} role="group" {...viewProps} />
       </ToggleGroupContext.Provider>
     );
   }
@@ -60,16 +65,27 @@ function useRootContext() {
 
 const ItemContext = React.createContext<ToggleGroupItemProps | null>(null);
 
-const Item = React.forwardRef<PressableRef, SlottablePressableProps & ToggleGroupItemProps>(
+const Item = React.forwardRef<
+  PressableRef,
+  SlottablePressableProps & ToggleGroupItemProps
+>(
   (
-    { asChild, value: itemValue, disabled: disabledProp = false, onPress: onPressProp, ...props },
+    {
+      asChild,
+      value: itemValue,
+      disabled: disabledProp = false,
+      onPress: onPressProp,
+      ...props
+    },
     ref
   ) => {
     const id = React.useId();
     const { type, disabled, value, onValueChange } = useRootContext();
 
     function onPress(ev: GestureResponderEvent) {
-      if (disabled || disabledProp) return;
+      if (disabled || disabledProp) {
+        return;
+      }
       if (type === 'single') {
         onValueChange(ToggleGroupUtils.getNewSingleValue(value, itemValue));
       }
@@ -80,9 +96,13 @@ const Item = React.forwardRef<PressableRef, SlottablePressableProps & ToggleGrou
     }
 
     const isChecked =
-      type === 'single' ? ToggleGroupUtils.getIsSelected(value, itemValue) : undefined;
+      type === 'single'
+        ? ToggleGroupUtils.getIsSelected(value, itemValue)
+        : undefined;
     const isSelected =
-      type === 'multiple' ? ToggleGroupUtils.getIsSelected(value, itemValue) : undefined;
+      type === 'multiple'
+        ? ToggleGroupUtils.getIsSelected(value, itemValue)
+        : undefined;
 
     const Component = asChild ? Slot.Pressable : Pressable;
     return (

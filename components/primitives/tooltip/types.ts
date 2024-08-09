@@ -41,4 +41,9 @@ interface TooltipOverlayProps extends ForceMountable {
   closeOnPress?: boolean;
 }
 
-export type { RootContext, TooltipOverlayProps, TooltipPortalProps, TooltipRootProps };
+export type {
+  RootContext,
+  TooltipOverlayProps,
+  TooltipPortalProps,
+  TooltipRootProps,
+};

@@ -27,32 +27,39 @@ const toggleVariants = cva(
   }
 );
 
-const toggleTextVariants = cva('text-sm native:text-base text-foreground font-medium', {
-  variants: {
-    variant: {
-      default: '',
-      outline: 'web:group-hover:text-accent-foreground web:group-active:text-accent-foreground',
+const toggleTextVariants = cva(
+  'text-sm native:text-base text-foreground font-medium',
+  {
+    variants: {
+      variant: {
+        default: '',
+        outline:
+          'web:group-hover:text-accent-foreground web:group-active:text-accent-foreground',
+      },
+      size: {
+        default: '',
+        sm: '',
+        lg: '',
+      },
     },
-    size: {
-      default: '',
-      sm: '',
-      lg: '',
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
     },
-  },
-  defaultVariants: {
-    variant: 'default',
-    size: 'default',
-  },
-});
+  }
+);
 
 const Toggle = React.forwardRef<
   React.ElementRef<typeof TogglePrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> & VariantProps<typeof toggleVariants>
+  React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> &
+    VariantProps<typeof toggleVariants>
 >(({ className, variant, size, ...props }, ref) => (
   <TextClassContext.Provider
     value={cn(
       toggleTextVariants({ variant, size }),
-      props.pressed ? 'text-accent-foreground' : 'web:group-hover:text-muted-foreground',
+      props.pressed
+        ? 'text-accent-foreground'
+        : 'web:group-hover:text-muted-foreground',
       className
     )}
   >

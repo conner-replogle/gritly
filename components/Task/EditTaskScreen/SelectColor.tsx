@@ -64,7 +64,7 @@ export function SelectColor(props: {
                 shadowRadius: 3.84,
                 elevation: 5,
               }}
-            ></View>
+            />
           </Pressable>
         ))}
       </View>

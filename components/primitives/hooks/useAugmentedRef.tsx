@@ -6,7 +6,11 @@ interface AugmentRefProps<T> {
   deps?: any[];
 }
 
-export function useAugmentedRef<T>({ ref, methods, deps = [] }: AugmentRefProps<T>) {
+export function useAugmentedRef<T>({
+  ref,
+  methods,
+  deps = [],
+}: AugmentRefProps<T>) {
   const augmentedRef = React.useRef<T>(null);
   React.useImperativeHandle(
     ref,

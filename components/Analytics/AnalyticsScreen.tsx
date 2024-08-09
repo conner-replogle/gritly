@@ -46,7 +46,7 @@ export function AnalyticsScreen({ task }: { task?: Task }) {
           <TabsContent
             value={AnalyticsType.monthly}
             className="flex flex-col gap-2 "
-          ></TabsContent>
+          />
           <TabsContent
             value={AnalyticsType.all_time}
             className="flex flex-col gap-2 "
@@ -54,7 +54,7 @@ export function AnalyticsScreen({ task }: { task?: Task }) {
             <Text className="text-l font-semibold text-muted-foreground">
               GOAL
             </Text>
-            <View className="bg-secondary p-3 rounded-xl"></View>
+            <View className="bg-secondary p-3 rounded-xl" />
           </TabsContent>
         </View>
         <View className="bg-secondary h-full p-5">
@@ -67,7 +67,7 @@ export function AnalyticsScreen({ task }: { task?: Task }) {
           <TabsContent
             value={AnalyticsType.monthly}
             className="flex flex-col gap-2 "
-          ></TabsContent>
+          />
           <TabsContent
             value={AnalyticsType.all_time}
             className="flex flex-col gap-2 "
@@ -75,7 +75,7 @@ export function AnalyticsScreen({ task }: { task?: Task }) {
             <Text className="text-l font-semibold text-muted-foreground">
               GOAL
             </Text>
-            <View className="bg-secondary p-3 rounded-xl"></View>
+            <View className="bg-secondary p-3 rounded-xl" />
           </TabsContent>
         </View>
       </Tabs>

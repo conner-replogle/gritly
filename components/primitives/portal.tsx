@@ -41,7 +41,9 @@ export function PortalHost({ name = DEFAULT_PORTAL_HOST }: { name?: string }) {
   const portalMap =
     usePortal((state) => state.map).get(name) ??
     new Map<string, React.ReactNode>();
-  if (portalMap.size === 0) return null;
+  if (portalMap.size === 0) {
+    return null;
+  }
   return <>{Array.from(portalMap.values())}</>;
 }
 
@@ -76,7 +78,9 @@ export function useModalPortalRoot() {
   const [sideOffset, setSideOffSet] = React.useState(0);
 
   const onLayout = React.useCallback(() => {
-    if (Platform.OS === "web") return;
+    if (Platform.OS === "web") {
+      return;
+    }
     ref.current?.measure((_x, _y, _width, _height, _pageX, pageY) => {
       setSideOffSet(-pageY);
     });

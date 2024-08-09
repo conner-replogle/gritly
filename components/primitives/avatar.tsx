@@ -48,7 +48,9 @@ Root.displayName = 'RootAvatar';
 function useRootContext() {
   const context = React.useContext(RootContext);
   if (!context) {
-    throw new Error('Avatar compound components cannot be rendered outside the Avatar component');
+    throw new Error(
+      'Avatar compound components cannot be rendered outside the Avatar component'
+    );
   }
   return context;
 }
@@ -58,7 +60,13 @@ const Image = React.forwardRef<
   Omit<ComponentPropsWithAsChild<typeof RNImage>, 'alt'> & AvatarImageProps
 >(
   (
-    { asChild, onLoad: onLoadProps, onError: onErrorProps, onLoadingStatusChange, ...props },
+    {
+      asChild,
+      onLoad: onLoadProps,
+      onError: onErrorProps,
+      onLoadingStatusChange,
+      ...props
+    },
     ref
   ) => {
     const { alt, setStatus, status } = useRootContext();
@@ -86,21 +94,31 @@ const Image = React.forwardRef<
     }
 
     const Component = asChild ? Slot.Image : RNImage;
-    return <Component ref={ref} alt={alt} onLoad={onLoad} onError={onError} {...props} />;
+    return (
+      <Component
+        ref={ref}
+        alt={alt}
+        onLoad={onLoad}
+        onError={onError}
+        {...props}
+      />
+    );
   }
 );
 
 Image.displayName = 'ImageAvatar';
 
-const Fallback = React.forwardRef<ViewRef, SlottableViewProps>(({ asChild, ...props }, ref) => {
-  const { alt, status } = useRootContext();
+const Fallback = React.forwardRef<ViewRef, SlottableViewProps>(
+  ({ asChild, ...props }, ref) => {
+    const { alt, status } = useRootContext();
 
-  if (status !== 'error') {
-    return null;
+    if (status !== 'error') {
+      return null;
+    }
+    const Component = asChild ? Slot.View : View;
+    return <Component ref={ref} role={'img'} aria-label={alt} {...props} />;
   }
-  const Component = asChild ? Slot.View : View;
-  return <Component ref={ref} role={'img'} aria-label={alt} {...props} />;
-});
+);
 
 Fallback.displayName = 'FallbackAvatar';
 

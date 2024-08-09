@@ -8,11 +8,20 @@ import type {
 } from '~/components/primitives/types';
 import * as React from 'react';
 import { Pressable, View, type GestureResponderEvent } from 'react-native';
-import type { CollapsibleContentProps, CollapsibleRootProps, RootContext } from './types';
+import type {
+  CollapsibleContentProps,
+  CollapsibleRootProps,
+  RootContext,
+} from './types';
 
-const CollapsibleContext = React.createContext<(RootContext & { nativeID: string }) | null>(null);
+const CollapsibleContext = React.createContext<
+  (RootContext & { nativeID: string }) | null
+>(null);
 
-const Root = React.forwardRef<ViewRef, SlottableViewProps & CollapsibleRootProps>(
+const Root = React.forwardRef<
+  ViewRef,
+  SlottableViewProps & CollapsibleRootProps
+>(
   (
     {
       asChild,
@@ -60,11 +69,16 @@ function useCollapsibleContext() {
 }
 
 const Trigger = React.forwardRef<PressableRef, SlottablePressableProps>(
-  ({ asChild, onPress: onPressProp, disabled: disabledProp = false, ...props }, ref) => {
+  (
+    { asChild, onPress: onPressProp, disabled: disabledProp = false, ...props },
+    ref
+  ) => {
     const { disabled, open, onOpenChange, nativeID } = useCollapsibleContext();
 
     function onPress(ev: GestureResponderEvent) {
-      if (disabled || disabledProp) return;
+      if (disabled || disabledProp) {
+        return;
+      }
       onOpenChange(!open);
       onPressProp?.(ev);
     }
@@ -76,7 +90,7 @@ const Trigger = React.forwardRef<PressableRef, SlottablePressableProps>(
         ref={ref}
         nativeID={nativeID}
         aria-disabled={(disabled || disabledProp) ?? undefined}
-        role='button'
+        role="button"
         onPress={onPress}
         accessibilityState={{
           expanded: open,
@@ -91,28 +105,29 @@ const Trigger = React.forwardRef<PressableRef, SlottablePressableProps>(
 
 Trigger.displayName = 'TriggerNativeCollapsible';
 
-const Content = React.forwardRef<ViewRef, SlottableViewProps & CollapsibleContentProps>(
-  ({ asChild, forceMount, ...props }, ref) => {
-    const { nativeID, open } = useCollapsibleContext();
+const Content = React.forwardRef<
+  ViewRef,
+  SlottableViewProps & CollapsibleContentProps
+>(({ asChild, forceMount, ...props }, ref) => {
+  const { nativeID, open } = useCollapsibleContext();
 
-    if (!forceMount) {
-      if (!open) {
-        return null;
-      }
+  if (!forceMount) {
+    if (!open) {
+      return null;
     }
-
-    const Component = asChild ? Slot.View : View;
-    return (
-      <Component
-        ref={ref}
-        aria-hidden={!(forceMount || open)}
-        aria-labelledby={nativeID}
-        role={'region'}
-        {...props}
-      />
-    );
   }
-);
+
+  const Component = asChild ? Slot.View : View;
+  return (
+    <Component
+      ref={ref}
+      aria-hidden={!(forceMount || open)}
+      aria-labelledby={nativeID}
+      role={'region'}
+      {...props}
+    />
+  );
+});
 
 Content.displayName = 'ContentNativeCollapsible';
 

@@ -1,7 +1,10 @@
 import * as Tooltip from '@radix-ui/react-tooltip';
 import * as React from 'react';
 import { Pressable, View, type GestureResponderEvent } from 'react-native';
-import { useAugmentedRef, useControllableState } from '~/components/primitives/hooks';
+import {
+  useAugmentedRef,
+  useControllableState,
+} from '~/components/primitives/hooks';
 import * as Slot from '~/components/primitives/slot';
 import type {
   PositionedContentProps,
@@ -66,7 +69,9 @@ Root.displayName = 'RootWebTooltip';
 function useTooltipContext() {
   const context = React.useContext(RootContext);
   if (!context) {
-    throw new Error('Tooltip compound components cannot be rendered outside the Tooltip component');
+    throw new Error(
+      'Tooltip compound components cannot be rendered outside the Tooltip component'
+    );
   }
   return context;
 }
@@ -96,7 +101,7 @@ const Trigger = React.forwardRef<PressableRef, SlottablePressableProps>(
         <Component
           ref={augmentedRef}
           onPress={onPress}
-          role='button'
+          role="button"
           disabled={disabled}
           {...props}
         />
@@ -108,19 +113,29 @@ const Trigger = React.forwardRef<PressableRef, SlottablePressableProps>(
 Trigger.displayName = 'TriggerWebTooltip';
 
 function Portal({ forceMount, container, children }: TooltipPortalProps) {
-  return <Tooltip.Portal forceMount={forceMount} children={children} container={container} />;
+  return (
+    <Tooltip.Portal
+      forceMount={forceMount}
+      children={children}
+      container={container}
+    />
+  );
 }
 
-const Overlay = React.forwardRef<PressableRef, SlottablePressableProps & TooltipOverlayProps>(
-  ({ asChild, forceMount, ...props }, ref) => {
-    const Component = asChild ? Slot.Pressable : Pressable;
-    return <Component ref={ref} {...props} />;
-  }
-);
+const Overlay = React.forwardRef<
+  PressableRef,
+  SlottablePressableProps & TooltipOverlayProps
+>(({ asChild, forceMount, ...props }, ref) => {
+  const Component = asChild ? Slot.Pressable : Pressable;
+  return <Component ref={ref} {...props} />;
+});
 
 Overlay.displayName = 'OverlayWebTooltip';
 
-const Content = React.forwardRef<ViewRef, SlottableViewProps & PositionedContentProps>(
+const Content = React.forwardRef<
+  ViewRef,
+  SlottableViewProps & PositionedContentProps
+>(
   (
     {
       asChild = false,

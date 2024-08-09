@@ -83,7 +83,9 @@ export default function Screen() {
     <SafeAreaView>
       <ExplosionContext.Provider
         value={() => {
-          if (nuttable) cannonRef.current?.start();
+          if (nuttable) {
+            cannonRef.current?.start();
+          }
         }}
       >
         <View className="h-[100vh] bg-secondary/50">
