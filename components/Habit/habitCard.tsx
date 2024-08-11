@@ -10,7 +10,7 @@ import {
   SkipForward,
 } from "lucide-react-native";
 import * as React from "react";
-import { EditableTask, repeatsToString, Task } from "~/models/Task";
+import { EditableHabit, Habit } from "~/models/Habit";
 import { useTheme } from "@react-navigation/native";
 import Animated, {
   useAnimatedProps,
@@ -21,10 +21,10 @@ import Animated, {
 } from "react-native-reanimated";
 import { useEffect, useRef } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { CompletedResult } from "~/models/CompletedResult";
+import { Completed } from "~/models/Completed";
 
-export function TaskCard({
-  task,
+export function HabitCard({
+  habit,
   streak,
   onCompletePress,
   onCompleteLongPress,
@@ -34,13 +34,13 @@ export function TaskCard({
   completable: boolean;
   onCompletePress: () => void;
   onCompleteLongPress: () => void;
-  task: Task;
-  completed?: CompletedResult;
+  habit: Habit;
+  completed?: Completed;
   streak: number;
 }) {
   const { colors } = useTheme();
   let total = completed?.total ?? 0;
-  let outof = completed?.goal.amount ?? task.goal.amount;
+  let outof = completed?.goal.amount ?? habit.goal.amount;
 
   return (
     <View
@@ -70,11 +70,11 @@ export function TaskCard({
       </View>
       <View className="text-start border-primary flex-1 flex flex-col justify-evenly items-start">
         <Text className="text-lg font-semibold">
-          {task.title} {streak > 1 ? ` 🔥${streak}` : ""}{" "}
+          {habit.title} {streak > 1 ? ` 🔥${streak}` : ""}{" "}
         </Text>
 
         <CardDescription>
-          {total}/{outof} {task.goal.unit.toUpperCase()}{" "}
+          {total}/{outof} {habit.goal.unit.toUpperCase()}{" "}
         </CardDescription>
       </View>
       {completable && completed?.skipped && (
@@ -103,7 +103,7 @@ function CompleteIcon({
   completed,
   goal,
 }: {
-  completed?: CompletedResult;
+  completed?: Completed;
   goal: number;
 }) {
   const isCompleted = completed?.isCompleted ?? false;

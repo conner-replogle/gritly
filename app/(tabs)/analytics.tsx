@@ -6,8 +6,8 @@ import { Calendar } from "react-native-calendars";
 import { useTheme } from "@react-navigation/native";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import useTasks from "~/lib/hooks/Tasks";
-import { Task } from "~/models/Task";
+import useHabits from "~/lib/hooks/Habits";
+import { Habit } from "~/models/Habit";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -34,16 +34,16 @@ enum AnalyticsType {
 
 export default function Analytics() {
   const { colors } = useTheme();
-  const tasks = useTasks();
-  const { task_id } = useLocalSearchParams<{ task_id?: string }>();
-  const [task, setTask] = useState<Task | undefined>(undefined);
+  const habits = useHabits();
+  const { habit_id } = useLocalSearchParams<{ habit_id?: string }>();
+  const [habit, setHabit] = useState<Habit | undefined>(undefined);
 
   useEffect(() => {
-    if (task_id) {
-      let target_task = tasks.find((a) => a.id === task_id);
-      setTask(target_task);
+    if (habit_id) {
+      let target_habit = habits.find((a) => a.id === habit_id);
+      setHabit(target_habit);
     }
-  }, [task_id]);
+  }, [habit_id]);
 
   return (
     <SafeAreaView>
@@ -57,35 +57,35 @@ export default function Analytics() {
         }}
       >
         <Text className="font-bold text-3xl">Analytics</Text>
-        <SelectTask
-          tasks={tasks}
+        <SelectHabit
+          habits={habits}
           selected={
-            task
-              ? { value: task?.id, label: task?.title }
-              : { value: "all", label: "All Tasks" }
+            habit
+              ? { value: habit?.id, label: habit?.title }
+              : { value: "all", label: "All Habits" }
           }
           setSelected={(option) => {
             // @ts-ignore
             if (option?.value === "all") {
-              setTask(undefined);
+              setHabit(undefined);
               return;
             }
-            let task = tasks.find((a) => a.id === option?.value);
-            setTask(task);
+            let habit = habits.find((a) => a.id === option?.value);
+            setHabit(habit);
           }}
         />
       </View>
-      <AnalyticsScreen task={task} />
+      <AnalyticsScreen habit={habit} />
     </SafeAreaView>
   );
 }
 
-function SelectTask({
-  tasks,
+function SelectHabit({
+  habits,
   selected,
   setSelected,
 }: {
-  tasks: Task[];
+  habits: Habit[];
   selected: { value: string; label: string } | undefined;
   setSelected: (option: { value: string; label: string } | undefined) => void;
 }) {
@@ -93,23 +93,23 @@ function SelectTask({
     <Select
       value={selected}
       onValueChange={setSelected}
-      defaultValue={{ value: "all", label: "All Tasks" }}
+      defaultValue={{ value: "all", label: "All Habits" }}
     >
       <SelectTrigger className="w-[150px]">
         <SelectValue
           className="text-foreground text-sm native:text-lg"
-          placeholder="Select a task"
+          placeholder="Select a habit"
         />
       </SelectTrigger>
       <SelectContent className="w-[250px]">
         <SelectGroup>
-          <SelectLabel>Tasks</SelectLabel>
-          <SelectItem label="All Tasks" value="all">
-            All Tasks
+          <SelectLabel>Habits</SelectLabel>
+          <SelectItem label="All Habits" value="all">
+            All Habits
           </SelectItem>
-          {tasks.map((task) => (
-            <SelectItem key={task.id} value={task.id} label={task.title}>
-              {task.title}
+          {habits.map((habit) => (
+            <SelectItem key={habit.id} value={habit.id} label={habit.title}>
+              {habit.title}
             </SelectItem>
           ))}
         </SelectGroup>

@@ -2,9 +2,9 @@ import { Database } from "@nozbe/watermelondb";
 import SQLiteAdapter from "@nozbe/watermelondb/adapters/sqlite";
 import { setGenerator } from "@nozbe/watermelondb/utils/common/randomId";
 import * as Crypto from "expo-crypto";
-import { Task } from "~/models/Task";
+import { Habit } from "~/models/Habit";
 import { schema } from "~/models/schema";
-import { CompletedResult } from "~/models/CompletedResult";
+import { Completed } from "~/models/Completed";
 
 // First, create the adapter to the underlying database:
 const adapter = new SQLiteAdapter({
@@ -27,7 +27,7 @@ const adapter = new SQLiteAdapter({
 // Then, make a Watermelon database from it!
 export const database = new Database({
   adapter,
-  modelClasses: [CompletedResult, Task],
+  modelClasses: [Completed, Habit],
 });
 
 setGenerator(() => Crypto.randomUUID());

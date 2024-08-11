@@ -1,13 +1,15 @@
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
-import { Task } from "~/models/Task";
+import { Habit } from "~/models/Habit";
 
 import * as React from "react";
 import { addWeeks, endOfWeek, startOfDay, startOfWeek } from "date-fns";
 import { Button } from "~/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react-native";
-import { useCompleted } from "~/lib/hooks/Tasks";
+import { useCompleted } from "~/lib/hooks/Habits";
 import { Summary } from "~/components/Analytics/widgets/Summary";
+import { useEffect, useMemo } from "react";
+import { useAnalytics } from "~/lib/hooks/Analytics";
 
 export function WeeklyHeader({
   date,
@@ -52,12 +54,18 @@ export function WeeklyHeader({
   );
 }
 
-export function WeeklyContent({ date, task }: { date: Date; task?: Task }) {
-  //const completed = useCompleted(task, startOfDay(date), endOfWeek(date));
+export function WeeklyContent({ date, habit }: { date: Date; habit?: Habit }) {
+  console.log("Rendering WEEK");
+  const { start, end } = useMemo(() => {
+    const start = startOfWeek(date);
+    const end = endOfWeek(date);
+    return { start, end };
+  }, [date]);
+  const analytics = useAnalytics(habit, start, end);
 
   return (
     <View>
-      <Summary />
+      <Summary analytics={analytics} />
     </View>
   );
 }

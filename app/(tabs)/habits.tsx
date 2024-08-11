@@ -1,6 +1,6 @@
 import { Text } from "~/components/ui/text";
-import useTasks from "~/lib/hooks/Tasks";
-import { TaskCard } from "~/components/Task/taskCard";
+import useHabits from "~/lib/hooks/Habits";
+import { HabitCard } from "~/components/Habit/habitCard";
 import { FlatList, Pressable, ScrollView, View } from "react-native";
 import {
   DropdownMenu,
@@ -19,30 +19,30 @@ import {
   Trash,
 } from "lucide-react-native";
 import * as React from "react";
-import { Task } from "~/models/Task";
+import { Habit } from "~/models/Habit";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { AnalyicsBottomSheet, EditBottomSheet } from "~/components/Task/task";
+import { AnalyicsBottomSheet, EditBottomSheet } from "~/components/Habit/habit";
 import { useDatabase } from "@nozbe/watermelondb/hooks";
 import { addDays } from "date-fns";
 import { Link } from "expo-router";
 
-export default function Tasks() {
-  const tasks = useTasks();
+export default function Habits() {
+  const habits = useHabits();
 
   return (
     <View className="p-5 h-full">
       <FlatList
         className={"flex-1"}
-        data={tasks}
+        data={habits}
         renderItem={({ item }) => {
-          return <TaskCardWithDropdown task={item} />;
+          return <HabitCardWithDropdown habit={item} />;
         }}
       />
     </View>
   );
 }
 
-function TaskCardWithDropdown({ task }: { task: Task }) {
+function HabitCardWithDropdown({ habit }: { habit: Habit }) {
   const editSheetRef = React.useRef<BottomSheetModal>(null);
 
   const snapPoints = React.useMemo(() => ["90%"], []);
@@ -51,8 +51,8 @@ function TaskCardWithDropdown({ task }: { task: Task }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Pressable>
-          <TaskCard
-            task={task}
+          <HabitCard
+            habit={habit}
             completed={undefined}
             streak={0}
             completable={true}
@@ -62,7 +62,7 @@ function TaskCardWithDropdown({ task }: { task: Task }) {
         </Pressable>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {/* Drop Down Menu For task with edit delete reset options */}
+        {/* Drop Down Menu For habit with edit delete reset options */}
 
         <DropdownMenuGroup>
           <DropdownMenuItem
@@ -73,7 +73,7 @@ function TaskCardWithDropdown({ task }: { task: Task }) {
             <EditIcon size={16} />
             <DropdownMenuLabel>Edit</DropdownMenuLabel>
           </DropdownMenuItem>
-          <Link href={`/analytics?task_id=${task.id}`} asChild>
+          <Link href={`/analytics?habit_id=${habit.id}`} asChild>
             <DropdownMenuItem onPress={() => {}}>
               <LineChart size={16} />
               <DropdownMenuLabel>Analytics</DropdownMenuLabel>
@@ -81,21 +81,21 @@ function TaskCardWithDropdown({ task }: { task: Task }) {
           </Link>
           <DropdownMenuItem
             onPress={async () => {
-              await task.endTask(new Date(Date.now()));
+              await habit.endHabit(new Date(Date.now()));
             }}
           >
             <PauseIcon size={16} />
-            <DropdownMenuLabel>End Task</DropdownMenuLabel>
+            <DropdownMenuLabel>End Habit</DropdownMenuLabel>
           </DropdownMenuItem>
           <DropdownMenuItem
             onPress={async () => {
               await database.write(async () => {
-                await task.markAsDeleted();
+                await habit.markAsDeleted();
               });
             }}
           >
             <Trash size={16} />
-            <DropdownMenuLabel>Delete Task</DropdownMenuLabel>
+            <DropdownMenuLabel>Delete Habit</DropdownMenuLabel>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
@@ -103,26 +103,26 @@ function TaskCardWithDropdown({ task }: { task: Task }) {
         bottomSheetRef={editSheetRef}
         onDelete={async () => {
           await database.write(async () => {
-            await task.markAsDeleted();
+            await habit.markAsDeleted();
           });
           editSheetRef.current?.dismiss();
         }}
-        onSubmit={async (atask) => {
+        onSubmit={async (ahabit) => {
           // @ts-ignore
           await database.write(async () => {
-            await task.update((a) => {
-              a.title = atask.title;
-              a.goal = atask.goal;
-              a.repeats = atask.repeats;
-              a.startsOn = atask.startsOn;
-              a.description = atask.description;
-              a.color = atask.color;
+            await habit.update((a) => {
+              a.title = ahabit.title;
+              a.goal = ahabit.goal;
+              a.repeats = ahabit.repeats;
+              a.startsOn = ahabit.startsOn;
+              a.description = ahabit.description;
+              a.color = ahabit.color;
             });
           });
 
           editSheetRef.current?.dismiss();
         }}
-        task={task.toEditableTask()}
+        habit={habit.toEditableHabit()}
       />
     </DropdownMenu>
   );

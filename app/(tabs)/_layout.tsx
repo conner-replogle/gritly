@@ -11,7 +11,7 @@ import {
 import { useTheme } from "@react-navigation/native";
 import { Button, Pressable, View } from "react-native";
 import { Text } from "~/components/ui/text";
-import { AddTasksIcon } from "~/components/AddTask/AddTasks";
+import { AddHabitsIcon } from "~/components/AddHabit/AddHabits";
 export default function TabLayout() {
   const { colors } = useTheme();
   return (
@@ -34,9 +34,9 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="tasks"
+        name="habits"
         options={{
-          title: "Tasks",
+          title: "Habits",
 
           tabBarIcon: ({ color }) => <ListIcon color={color} />,
         }}
@@ -49,7 +49,7 @@ export default function TabLayout() {
 
           tabBarButton: (props) => (
             <View className="mx-3">
-              <AddTasksIcon
+              <AddHabitsIcon
                 color={colors.background}
                 fill={colors.primary}
                 size={55}

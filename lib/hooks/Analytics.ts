@@ -1,65 +1,99 @@
-import { Task } from "~/models/Task";
+import { Habit } from "~/models/Habit";
 import { useEffect, useState } from "react";
 import { log } from "~/lib/config";
-import { startOfDay, startOfWeek } from "date-fns";
+import { isSameDay, startOfDay, startOfWeek } from "date-fns";
+import { useCompleted } from "~/lib/hooks/Habits";
+import { getNextDate } from "~/lib/utils";
+import { Completed } from "~/models/Completed";
+import { TableName } from "~/models/schema";
+import { Q } from "@nozbe/watermelondb";
+import { useDatabase } from "@nozbe/watermelondb/hooks";
 export interface Analytics {
-  history: { date: Date; value: number }[];
-  min: number;
-  max: number;
+  streaks: number[];
+  streak: number;
+  completed: number;
+  uncompleted: number;
   total: number;
+  skipped: number;
 }
 
-export function useAnalytics(task: Task) {
+export function useAnalytics(habit?: Habit, start?: Date, end?: Date) {
+  const database = useDatabase();
   const [analytics, setAnalytics] = useState<Analytics>({
-    history: [],
-    max: 0,
-    min: 0,
+    streaks: [],
+    streak: 0,
+    completed: 0,
+    uncompleted: 0,
     total: 0,
+    skipped: 0,
   });
+  console.log("Rerunning analytics");
 
   useEffect(() => {
-    let fetch = async () => {
-      let completed = await task.sortedCompleted.fetch();
-
-      let map = new Map<number, number>();
-
-      completed.forEach((a) => {
-        let key: number;
-        if (task.repeats.period == "Daily") {
-          key = startOfDay(a.completed_at).getTime();
-        } else if (task.repeats.period == "Weekly") {
-          key = startOfWeek(a.completed_at).getTime();
-        } else {
-          log.debug("Unsupported period");
-          throw new Error("Unsupported period");
+    let get = async () => {
+      if (habit) {
+        console.log("Computing analytics");
+        console.log(start);
+        let start_date = new Date(start || habit.startsOn);
+        let end_date = new Date(end || Date.now());
+        let query = habit
+          ? habit.sortedCompleted
+          : database.collections.get<Completed>(TableName.COMPLETED).query();
+        if (start) {
+          query = query.extend(
+            Q.where("completed_at", Q.gte(start_date.getTime()))
+          );
         }
-        if (map.has(key)) {
-          let amount = map.get(key)!;
-
-          log.debug(`Setting ${key} to ${amount} + ${a.total}`);
-          map.set(key, amount + a.total);
-        } else {
-          log.debug(`Setting ${key} to ${a.total}`);
-          map.set(key, a.total);
+        if (end) {
+          query = query.extend(
+            Q.where("completed_at", Q.lte(end_date.getTime()))
+          );
         }
-      });
-      let history: Array<{ date: Date; value: number }> = [];
-      for (let [key, value] of map) {
-        log.debug(`Key: ${new Date(key)}, Value: ${value}`);
-        history.push({ date: new Date(key), value: value });
+        let completeds = await query.fetch();
+        let streaks = [];
+        let streak = 0;
+        let completed = 0;
+        let uncompleted = 0;
+        let total = 0;
+        let skipped = 0;
+        while (true) {
+          start_date = getNextDate(habit.repeats, start_date);
+
+          if (start_date > end_date) {
+            break;
+          }
+          let is_completed = completeds.find((a) => {
+            return isSameDay(a.completed_at, start_date);
+          });
+
+          if (is_completed && !is_completed.skipped) {
+            total += is_completed.total;
+            streak += 1;
+            completed += 1;
+          } else {
+            if (is_completed && is_completed.skipped) {
+              skipped += 1;
+            }
+            uncompleted += 1;
+            if (streak > 0) {
+              streaks.push(streak);
+            }
+            streak = 0;
+          }
+        }
+        setAnalytics({
+          streaks,
+          streak,
+          completed,
+          uncompleted,
+          total,
+          skipped,
+        });
       }
-
-      let min = Math.min(...history.map((a) => a.value));
-      let max = Math.max(...history.map((a) => a.value));
-      log.debug(`Min: ${min}, Max: ${max}`);
-      setAnalytics({
-        history: history,
-        min: min,
-        max: max,
-        total: history.length,
-      });
     };
-    fetch();
-  }, [task]);
+    get();
+  }, [habit, start, end]);
+
+  console.log(analytics);
   return analytics;
 }

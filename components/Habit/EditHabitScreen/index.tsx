@@ -1,17 +1,13 @@
-import { EditableTask, getNextDate, Task } from "~/models/Task";
+import { EditableHabit, Habit } from "~/models/Habit";
 import { useTheme } from "@react-navigation/native";
 import { useCallback, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Text } from "~/components/ui/text";
-import { TaskCard } from "~/components/Task/taskCard";
+import { HabitCard } from "~/components/Habit/habitCard";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "~/components/ui/collapsible";
+
 import {
   addWeeks,
   endOfDay,
@@ -23,20 +19,21 @@ import {
 import DateTimePicker from "react-native-ui-datepicker/src/DateTimePicker";
 import { Button } from "~/components/ui/button";
 import * as React from "react";
-import { SelectColor } from "~/components/Task/EditTaskScreen/SelectColor";
-import { RepeatPeriod } from "~/components/Task/EditTaskScreen/RepeatPeriod";
-import { Goal } from "~/components/Task/EditTaskScreen/Goal";
-import { FrequencyPeriod } from "~/components/Task/EditTaskScreen/FrequencyPeriod";
+import { SelectColor } from "~/components/Habit/EditHabitScreen/SelectColor";
+import { RepeatPeriod } from "~/components/Habit/EditHabitScreen/RepeatPeriod";
+import { Goal } from "~/components/Habit/EditHabitScreen/Goal";
+import { FrequencyPeriod } from "~/components/Habit/EditHabitScreen/FrequencyPeriod";
 import { PortalHost } from "~/components/primitives/portal";
-import { SelectIcon } from "~/components/Task/EditTaskScreen/SelectIcon";
+import { SelectIcon } from "~/components/Habit/EditHabitScreen/SelectIcon";
 import { withObservables } from "@nozbe/watermelondb/react";
+import { getNextDate } from "~/lib/utils";
 
 function Basic({
-  ntask,
-  setTask,
+  habit,
+  setHabit,
 }: {
-  ntask: EditableTask;
-  setTask: (a: (a: EditableTask) => void) => void;
+  habit: EditableHabit;
+  setHabit: (a: (a: EditableHabit) => void) => void;
 }) {
   const colors = useTheme().colors;
 
@@ -47,11 +44,11 @@ function Basic({
       <View className="bg-secondary p-3 rounded-xl">
         <Label nativeID="title">Title</Label>
         <Input
-          placeholder="Name your task"
+          placeholder="Name your habit"
           nativeID="title"
-          value={ntask.title}
+          value={habit.title}
           onChangeText={(b) => {
-            setTask((a) => {
+            setHabit((a) => {
               a.title = b;
             });
           }}
@@ -60,11 +57,11 @@ function Basic({
         />
         <Label nativeID="description">Description</Label>
         <Input
-          placeholder="What exactly is this task? (Optional)"
+          placeholder="What exactly is this habit? (Optional)"
           nativeID="description"
-          value={ntask.description}
+          value={habit.description}
           onChangeText={(b) => {
-            setTask((a) => {
+            setHabit((a) => {
               a.description = b;
             });
           }}
@@ -78,9 +75,9 @@ function Basic({
 
       <Text className="text-l font-semibold text-muted-foreground">COLOR</Text>
       <SelectColor
-        ntask={ntask}
+        habit={habit}
         onChange={(colors) => {
-          setTask((a) => {
+          setHabit((a) => {
             a.color = colors.hex;
           });
         }}
@@ -90,25 +87,24 @@ function Basic({
 }
 
 function Repeats({
-  ntask,
-  setTask,
+  habit,
+  setHabit,
 }: {
-  ntask: EditableTask;
-  setTask: (a: (a: EditableTask) => void) => void;
+  habit: EditableHabit;
+  setHabit: (a: (a: EditableHabit) => void) => void;
 }) {
   const colors = useTheme().colors;
   const next_n_dates = useMemo(() => {
+    let start = startOfDay(new Date(Date.now()));
     let end_day = startOfDay(
-      addWeeks(startOfWeek(ntask.startsOn, { weekStartsOn: 6 }), 3)
+      addWeeks(startOfWeek(start, { weekStartsOn: 6 }), 3)
     );
     console.log(end_day);
-    let dates: Date[] = [
-      getNextDate(ntask.repeats, startOfDay(ntask.startsOn)),
-    ];
+    let dates: Date[] = [getNextDate(habit.repeats, start)];
     while (true) {
       let next_date = getNextDate(
-        ntask.repeats,
-        startOfDay(dates.at(-1) ?? ntask.startsOn)
+        habit.repeats,
+        startOfDay(dates.at(-1) ?? habit.startsOn)
       );
       if (next_date <= end_day) {
         dates.push(next_date);
@@ -117,18 +113,18 @@ function Repeats({
       }
     }
     return dates;
-  }, [ntask]);
+  }, [habit]);
   return (
     <>
       <Text className="text-l font-semibold text-muted-foreground">
         REPEATS
       </Text>
-      <RepeatPeriod ntask={ntask} setTask={setTask} />
+      <RepeatPeriod habit={habit} setHabit={setHabit} />
 
       <Text className="text-l font-semibold text-muted-foreground">
         FREQUENCY
       </Text>
-      <FrequencyPeriod ntask={ntask} setTask={setTask} />
+      <FrequencyPeriod habit={habit} setHabit={setHabit} />
       <Text className="text-l font-semibold text-muted-foreground">
         STARTING DAY
       </Text>
@@ -148,9 +144,9 @@ function Repeats({
           highlightedContainerStyle={{
             backgroundColor: colors.border,
           }}
-          date={ntask.startsOn}
+          date={habit.startsOn}
           onChange={({ date }) => {
-            setTask((a) => {
+            setHabit((a) => {
               a.startsOn = new Date(date as string);
             });
           }}
@@ -160,33 +156,33 @@ function Repeats({
   );
 }
 
-export function EditTaskScreen({
+export function EditHabitScreen({
   onDelete,
   submitLabel,
-  task,
+  nhabit,
   onSubmit,
 }: {
   onDelete?: () => void;
   submitLabel: string;
-  task: EditableTask;
-  onSubmit: (task: EditableTask) => void;
+  nhabit: EditableHabit;
+  onSubmit: (habit: EditableHabit) => void;
 }) {
   const { colors } = useTheme();
-  const [ntask, setInnerTask] = useState(task);
+  const [habit, setInnerHabit] = useState(nhabit);
 
-  const setTask = useCallback((write: (a: EditableTask) => void) => {
-    write(ntask);
+  const setHabit = useCallback((write: (a: EditableHabit) => void) => {
+    write(habit);
 
-    setInnerTask({
-      ...ntask,
-    } as Task);
+    setInnerHabit({
+      ...habit,
+    } as Habit);
   }, []);
 
   function ValidateForm() {
-    return ntask.title.length > 0;
+    return habit.title.length > 0;
   }
-  const tabs = ["basic", "repeats", "goal"];
-  const [value, setValue] = useState("basic");
+  const tabs = ["info", "repeats", "goal"];
+  const [value, setValue] = useState("info");
   return (
     <View className="h-full pb-10">
       <ScrollView className="flex-grow">
@@ -197,8 +193,8 @@ export function EditTaskScreen({
             className="mx-2  flex-col gap-4"
           >
             <TabsList className="flex-row ">
-              <TabsTrigger value="basic" className="flex-1">
-                <Text>Basic</Text>
+              <TabsTrigger value="info" className="flex-1">
+                <Text>Info</Text>
               </TabsTrigger>
               <TabsTrigger value="repeats" className="flex-1">
                 <Text>Repeats</Text>
@@ -209,26 +205,26 @@ export function EditTaskScreen({
             </TabsList>
 
             <View className={"flex-grow flex flex-col gap-3 p-2"}>
-              <TaskCard
-                task={ntask as Task}
+              <HabitCard
+                habit={habit as Habit}
                 completed={undefined}
                 completable={true}
                 streak={0}
                 onCompletePress={() => {}}
                 onCompleteLongPress={() => {}}
               />
-              <TabsContent value="basic" className="flex flex-col gap-3">
-                <Basic ntask={ntask} setTask={setTask} />
+              <TabsContent value="info" className="flex flex-col gap-3">
+                <Basic habit={habit} setHabit={setHabit} />
               </TabsContent>
               <TabsContent value="repeats" className="flex flex-col gap-2 ">
-                <Repeats ntask={ntask} setTask={setTask} />
+                <Repeats habit={habit} setHabit={setHabit} />
               </TabsContent>
               <TabsContent value="goal" className="flex flex-col gap-2 ">
                 <Text className="text-l font-semibold text-muted-foreground">
                   GOAL
                 </Text>
                 <View className="bg-secondary p-3 rounded-xl">
-                  <Goal ntask={ntask} setTask={setTask} />
+                  <Goal habit={habit} setHabit={setHabit} />
                 </View>
               </TabsContent>
             </View>
@@ -245,7 +241,7 @@ export function EditTaskScreen({
             if (!ValidateForm()) {
               return;
             }
-            onSubmit(ntask);
+            onSubmit(habit);
           }}
         >
           <Text>{value == "goal" ? submitLabel : "Next"}</Text>

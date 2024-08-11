@@ -1,15 +1,16 @@
-import { EditableTask, Frequency, Period } from "~/models/Task";
 import { View } from "react-native";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import * as React from "react";
 import { Label } from "~/components/ui/label";
+import { EditableHabit } from "~/models/Habit";
+import { Frequency, Period } from "~/lib/types";
 
 export function RepeatPeriod(props: {
-  ntask: EditableTask;
-  setTask: (a: (a: EditableTask) => void) => void;
+  habit: EditableHabit;
+  setHabit: (a: (a: EditableHabit) => void) => void;
 }) {
   const onValueChange = (label: string) => {
-    props.setTask((a) => {
+    props.setHabit((a) => {
       a.repeats.period = label as Period;
       a.repeats.selected_frequency = Frequency.every_n;
     });
@@ -18,7 +19,7 @@ export function RepeatPeriod(props: {
   return (
     <View className="bg-secondary p-3 rounded-xl">
       <RadioGroup
-        value={props.ntask.repeats.period}
+        value={props.habit.repeats.period}
         onValueChange={onValueChange}
         className="gap-3"
       >

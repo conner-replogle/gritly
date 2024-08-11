@@ -1,4 +1,4 @@
-import { EditableTask } from "~/models/Task";
+import { EditableHabit } from "~/models/Habit";
 import { returnedResults } from "reanimated-color-picker";
 import { useTheme } from "@react-navigation/native";
 import { Pressable, View } from "react-native";
@@ -24,7 +24,7 @@ export const SWATCHES_COLORS = [
 ];
 
 export function SelectColor(props: {
-  ntask: EditableTask;
+  habit: EditableHabit;
   onChange: (colors: returnedResults) => void;
 }) {
   const theme = useTheme();
@@ -48,7 +48,7 @@ export function SelectColor(props: {
               style={{
                 backgroundColor: color,
                 margin: 5,
-                borderWidth: color == props.ntask.color ? 2 : 0,
+                borderWidth: color == props.habit.color ? 2 : 0,
                 borderColor: theme.colors.primary,
                 width: 30,
                 height: 30,

@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
-import { Task } from "~/models/Task";
+import { Habit } from "~/models/Habit";
 import { log } from "~/lib/config";
 import { useState } from "react";
 import { useTheme } from "@react-navigation/native";
@@ -15,9 +15,10 @@ enum AnalyticsType {
   all_time = "all_time",
 }
 
-export function AnalyticsScreen({ task }: { task?: Task }) {
+export function AnalyticsScreen({ habit }: { habit?: Habit }) {
   const [value, setValue] = useState<string>(AnalyticsType.weekly);
   const [date, setDate] = useState(new Date(Date.now()));
+  console.log("Rendering Analytics Screen");
   return (
     <View className="h-full  w-full gap-3">
       <Tabs
@@ -25,8 +26,8 @@ export function AnalyticsScreen({ task }: { task?: Task }) {
         onValueChange={setValue}
         className="mx-2  flex-col gap-4"
       >
-        <View className="px-5 h-1/6 flex-col justify-between">
-          <View className="gap-3">
+        <View className="px-5  flex-col justify-between">
+          <View className="gap-3 mb-5">
             <TabsList className="flex-row ">
               <TabsTrigger value={AnalyticsType.weekly} className="flex-1">
                 <Text>Weekly</Text>
@@ -62,7 +63,7 @@ export function AnalyticsScreen({ task }: { task?: Task }) {
             value={AnalyticsType.weekly}
             className="flex flex-col gap-3"
           >
-            <WeeklyContent date={date} task={task} />
+            <WeeklyContent date={date} habit={habit} />
           </TabsContent>
           <TabsContent
             value={AnalyticsType.monthly}

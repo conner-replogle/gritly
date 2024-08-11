@@ -35,16 +35,15 @@ export const UNITS = [
   },
 ];
 export enum TableName {
-  TASKS = "tasks",
+  HABITS = "habits",
   COMPLETED = "completed",
-  COMPLETED_RESULT = "completed_result",
 }
 
 export const schema = appSchema({
   version: 1,
   tables: [
     tableSchema({
-      name: TableName.TASKS,
+      name: TableName.HABITS,
       columns: [
         { name: "title", type: "string" },
         { name: "description", type: "string" },
@@ -60,9 +59,9 @@ export const schema = appSchema({
     }),
 
     tableSchema({
-      name: TableName.COMPLETED_RESULT,
+      name: TableName.COMPLETED,
       columns: [
-        { name: "task_id", type: "string" },
+        { name: "habit_id", type: "string" },
         { name: "completed_at", type: "number" },
         { name: "total", type: "number" },
         { name: "completed_times", type: "string" },

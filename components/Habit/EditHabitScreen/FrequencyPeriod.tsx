@@ -1,4 +1,4 @@
-import { EditableTask, Frequency, Period } from "~/models/Task";
+import { EditableHabit } from "~/models/Habit";
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
@@ -6,32 +6,33 @@ import { CALENDAR } from "~/models/schema";
 import { Input } from "~/components/ui/input";
 import * as React from "react";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { Frequency, Period } from "~/lib/types";
 
 export function FrequencyPeriod({
-  ntask,
-  setTask,
+  habit,
+  setHabit,
 }: {
-  ntask: EditableTask;
-  setTask: (a: (a: EditableTask) => void) => void;
+  habit: EditableHabit;
+  setHabit: (a: (a: EditableHabit) => void) => void;
 }) {
   return (
     <View className="bg-secondary p-3 rounded-xl">
       <RadioGroup
-        value={ntask.repeats.selected_frequency}
+        value={habit.repeats.selected_frequency}
         onValueChange={(value) => {
-          setTask((a) => {
+          setHabit((a) => {
             a.repeats.selected_frequency = value as Frequency;
           });
         }}
       >
-        {ntask.repeats.period === Period.Daily && (
+        {habit.repeats.period === Period.Daily && (
           <View className="flex-row  items-center">
             <RadioGroupItem
               aria-labelledby={Frequency.specific_weekday}
               value={Frequency.specific_weekday}
             />
 
-            <SpecificWeekDays ntask={ntask} setTask={setTask} />
+            <SpecificWeekDays habit={habit} setHabit={setHabit} />
           </View>
         )}
         <View className="flex-row items-center gap-3">
@@ -42,9 +43,9 @@ export function FrequencyPeriod({
           <View className="flex flex-row items-center gap-2">
             <Text className="">Repeats Every</Text>
             <Input
-              defaultValue={ntask.repeats.every_n?.toString() ?? "1"}
+              defaultValue={habit.repeats.every_n?.toString() ?? "1"}
               onChange={(a) => {
-                setTask((b) => {
+                setHabit((b) => {
                   let c = parseInt(a.nativeEvent.text);
                   if (!Number.isNaN(c)) {
                     b.repeats.every_n = c;
@@ -53,7 +54,7 @@ export function FrequencyPeriod({
               }}
               className="w-12 text-center"
             />
-            <Text>{ntask.repeats.period}</Text>
+            <Text>{habit.repeats.period}</Text>
           </View>
         </View>
       </RadioGroup>
@@ -62,19 +63,19 @@ export function FrequencyPeriod({
 }
 
 function SpecificWeekDays({
-  ntask,
-  setTask,
+  habit,
+  setHabit,
 }: {
-  ntask: EditableTask;
-  setTask: (a: (a: EditableTask) => void) => void;
+  habit: EditableHabit;
+  setHabit: (a: (a: EditableHabit) => void) => void;
 }) {
   return (
     <View className="flex-col gap-3 items-start pl-3 pr-3">
       <ToggleGroup
-        value={ntask.repeats.specific_weekday?.map((a) => a.toString()) ?? []}
+        value={habit.repeats.specific_weekday?.map((a) => a.toString()) ?? []}
         onValueChange={(nDays) => {
           const parsedDays = nDays.map((a) => parseInt(a));
-          setTask((a) => {
+          setHabit((a) => {
             a.repeats.specific_weekday = parsedDays;
             return a;
           });

@@ -8,21 +8,21 @@ import { Button } from "../ui/button";
 import { useContext, useMemo, useRef, useState } from "react";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { useTheme } from "@react-navigation/native";
-import { Handle } from "./customhandle";
 
-import { EditTaskScreen } from "~/components/Task/EditTaskScreen";
+import { EditHabitScreen } from "~/components/Habit/EditHabitScreen";
 import { log, SubscriptionContext } from "~/lib/config";
-import { EditableTask, GenerateTask, Task } from "~/models/Task";
+import { EditableHabit, Habit } from "~/models/Habit";
 import { useDatabase } from "@nozbe/watermelondb/hooks";
 import { TableName } from "~/models/schema";
 import { PlusCircleIcon } from "lucide-react-native";
+import { GenerateHabit } from "~/lib/utils";
 
-export function AddTasks(props: { dense?: boolean }) {
+export function AddHabits(props: { dense?: boolean }) {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const subscription = useContext(SubscriptionContext);
   return (
     <View>
-      <AddTaskSheet bottomSheetModalRef={bottomSheetModalRef} />
+      <AddHabitSheet bottomSheetModalRef={bottomSheetModalRef} />
 
       <Button
         onPress={() => {
@@ -35,7 +35,7 @@ export function AddTasks(props: { dense?: boolean }) {
   );
 }
 
-export function AddTasksIcon(props: {
+export function AddHabitsIcon(props: {
   color: string;
   fill: string;
   size: number;
@@ -43,7 +43,7 @@ export function AddTasksIcon(props: {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   return (
     <View>
-      <AddTaskSheet bottomSheetModalRef={bottomSheetModalRef} />
+      <AddHabitSheet bottomSheetModalRef={bottomSheetModalRef} />
 
       <Pressable
         onPress={() => {
@@ -56,7 +56,7 @@ export function AddTasksIcon(props: {
   );
 }
 
-function AddTaskSheet({
+function AddHabitSheet({
   bottomSheetModalRef,
 }: {
   bottomSheetModalRef: React.RefObject<BottomSheetModalMethods>;
@@ -64,7 +64,7 @@ function AddTaskSheet({
   const database = useDatabase();
 
   const { colors } = useTheme();
-  const [newTask, setNewTask] = useState<EditableTask>(GenerateTask());
+  const [newHabit, setNewHabit] = useState<EditableHabit>(GenerateHabit());
 
   // variables
   const snapPoints = ["90%"];
@@ -86,25 +86,25 @@ function AddTaskSheet({
       }}
     >
       <BottomSheetView>
-        <EditTaskScreen
+        <EditHabitScreen
           submitLabel="Create"
-          task={newTask}
-          onSubmit={async (task) => {
+          nhabit={newHabit}
+          onSubmit={async (habit) => {
             bottomSheetModalRef.current?.dismiss();
             bottomSheetModalRef.current?.forceClose();
             await database.write(async () => {
-              await database.get<Task>(TableName.TASKS).create((newTask) => {
-                newTask.title = task.title;
-                newTask.goal = task.goal;
-                newTask.color = task.color;
-                newTask.repeats = task.repeats;
-                newTask.startsOn = task.startsOn;
-                newTask.description = task.description;
+              await database.get<Habit>(TableName.HABITS).create((newHabit) => {
+                newHabit.title = habit.title;
+                newHabit.goal = habit.goal;
+                newHabit.color = habit.color;
+                newHabit.repeats = habit.repeats;
+                newHabit.startsOn = habit.startsOn;
+                newHabit.description = habit.description;
               });
             });
-            log.debug(`Created Task ${task.title}`);
+            log.debug(`Created Habit ${habit.title}`);
 
-            setNewTask(GenerateTask());
+            setNewHabit(GenerateHabit());
           }}
         />
       </BottomSheetView>

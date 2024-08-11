@@ -1,53 +1,53 @@
 import { useDatabase } from "@nozbe/watermelondb/hooks";
 import { TableName } from "~/models/schema";
-import { Task } from "~/models/Task";
+import { Habit } from "~/models/Habit";
 import { useEffect, useState } from "react";
-import { CompletedResult } from "~/models/CompletedResult";
+import { Completed } from "~/models/Completed";
 import { log } from "~/lib/config";
 import { Q } from "@nozbe/watermelondb";
 
-export default function useTasks(date?: Date) {
+export default function useHabits(date?: Date) {
   const database = useDatabase();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const tasksCollection = database.collections
-    .get<Task>(TableName.TASKS)
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const habitsCollection = database.collections
+    .get<Habit>(TableName.HABITS)
     .query();
   useEffect(() => {
-    const subscription = tasksCollection.observe().subscribe(async (a) => {
-      let b = a.filter((task) => (date ? task.showToday(date) : true));
-      setTasks(b);
+    const subscription = habitsCollection.observe().subscribe(async (a) => {
+      let b = a.filter((habit) => (date ? habit.showToday(date) : true));
+      setHabits(b);
     });
     return () => subscription.unsubscribe();
   }, [date]);
-  return tasks;
+  return habits;
 }
 
-export function useTasksWithCompleted(date: Date) {
-  const todayTasks = useTasks(date);
-  const [tasks, setTasks] = useState<
+export function useHabitsWithCompleted(date: Date) {
+  const todayHabits = useHabits(date);
+  const [habits, setHabits] = useState<
     {
-      task: Task;
-      completed?: CompletedResult;
+      habit: Habit;
+      completed?: Completed;
     }[]
   >([]);
 
   useEffect(() => {
-    setTasks(
-      todayTasks.map((task) => ({
-        task,
+    setHabits(
+      todayHabits.map((habit) => ({
+        habit,
         completed: undefined,
       }))
     );
-    let subscriber = todayTasks.map((a) => {
+    let subscriber = todayHabits.map((a) => {
       return a
         .getCompleted(date)
         .observeWithColumns(["total", "completed_times"])
         .subscribe((completeds) => {
           let completed = completeds[0];
-          setTasks((prev) => {
-            let index = prev.findIndex((b) => b.task.id === a.id);
+          setHabits((prev) => {
+            let index = prev.findIndex((b) => b.habit.id === a.id);
             if (index === -1 && completed) {
-              return [...prev, { task: a, completed }];
+              return [...prev, { habit: a, completed }];
             } else {
               if (completed) {
                 prev[index] = {
@@ -70,17 +70,20 @@ export function useTasksWithCompleted(date: Date) {
         a.unsubscribe();
       });
     };
-  }, [todayTasks]);
-  log.debug("Tasks Updated");
+  }, [todayHabits]);
+  log.debug("Habits Updated");
 
-  return tasks;
+  return habits;
 }
 
-export function useCompleted(task: Task, startDate?: Date, endDate?: Date) {
-  const [completed, setCompleted] = useState<CompletedResult[]>([]);
+export function useCompleted(habit?: Habit, startDate?: Date, endDate?: Date) {
+  const database = useDatabase();
+  const [completed, setCompleted] = useState<Completed[]>([]);
 
   useEffect(() => {
-    let query = task.sortedCompleted;
+    let query = habit
+      ? habit.sortedCompleted
+      : database.collections.get<Completed>(TableName.COMPLETED).query();
     if (startDate) {
       query = query.extend(Q.where("completed_at", Q.gte(startDate.getTime())));
     }
@@ -92,6 +95,6 @@ export function useCompleted(task: Task, startDate?: Date, endDate?: Date) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [habit]);
   return completed;
 }

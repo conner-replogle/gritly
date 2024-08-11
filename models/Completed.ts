@@ -11,14 +11,15 @@ import {
 } from "@nozbe/watermelondb/decorators";
 
 import { TableName } from "./schema";
-import { Goal, Task } from "~/models/Task";
+import { Goal } from "~/lib/types";
+import { Habit } from "~/models/Habit";
 
-export class CompletedResult extends Model {
-  static table = TableName.COMPLETED_RESULT;
+export class Completed extends Model {
+  static table = TableName.COMPLETED;
 
   @field("total") total!: number;
   @json("goal", (a) => a) goal!: Goal;
-  @immutableRelation(TableName.TASKS, "task_id") task!: Relation<Task>;
+  @immutableRelation(TableName.HABITS, "habit_id") habit!: Relation<Habit>;
   @field("is_skipped") skipped!: boolean;
   @date("completed_at") completed_at!: Date;
   @json("completed_times", (a) => a) completed_times!: {
@@ -30,18 +31,18 @@ export class CompletedResult extends Model {
   }
 
   @writer async skip() {
-    await this.update((task) => {
+    await this.update((habit) => {
       this.skipped = true;
     });
   }
   @writer async unskip() {
-    await this.update((task) => {
+    await this.update((habit) => {
       this.skipped = false;
     });
   }
 
   @writer async complete(date: Date) {
-    await this.update((task) => {
+    await this.update((habit) => {
       this.completed_times = [
         ...this.completed_times,
         { date: date.getTime(), amount: this.goal.steps },

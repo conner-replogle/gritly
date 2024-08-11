@@ -36,13 +36,13 @@ import { Text } from "~/components/ui/text";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AddTasks } from "~/components/AddTask/AddTasks";
+import { AddHabits } from "~/components/AddHabit/AddHabits";
 
 import { Button } from "~/components/ui/button";
 
 import { CalendarSection } from "~/components/Calendar/Calendar";
 
-import TaskContent from "~/components/Task/task";
+import HabitContent from "~/components/Habit/habit";
 import {
   createContext,
   RefObject,
@@ -56,19 +56,19 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import { useMMKV, useMMKVBoolean } from "react-native-mmkv";
 import { ExplosionContext, log } from "~/lib/config";
 import { DropdownMenuTriggerRef } from "@rn-primitives/dropdown-menu";
-import useTasks, { useTasksWithCompleted } from "~/lib/hooks/Tasks";
-import { Task } from "~/models/Task";
+import useHabits, { useHabitsWithCompleted } from "~/lib/hooks/Habits";
+import { Habit } from "~/models/Habit";
 import { endOfDay, startOfDay } from "date-fns";
 import { withObservables } from "@nozbe/watermelondb/react";
 import { of as of$ } from "rxjs";
 
-const ObservableTask = withObservables(
-  ["task", "completed"],
-  ({ task, completed }) => ({
-    task: task.observe(),
+const ObservableHabit = withObservables(
+  ["habit", "completed"],
+  ({ habit, completed }) => ({
+    habit: habit.observe(),
     completed: completed ? completed.observe() : of$(null),
   })
-)(TaskContent);
+)(HabitContent);
 export default function Screen() {
   const [date, setInnerDate] = React.useState(startOfDay(Date.now()));
   const storage = useMMKV();
@@ -111,15 +111,15 @@ export default function Screen() {
 
 function ListCard({ date }: { date: Date }) {
   let [showAll, setShowAll] = useState(false);
-  const tasks = useTasksWithCompleted(date);
-  if (tasks === undefined) {
+  const habits = useHabitsWithCompleted(date);
+  if (habits === undefined) {
     return <Text>Loading...</Text>;
   }
-  console.log(tasks);
-  let completed = tasks.filter(
+  console.log(habits);
+  let completed = habits.filter(
     (a) => a.completed?.isCompleted || a.completed?.skipped
   );
-  let not_completed = tasks.filter(
+  let not_completed = habits.filter(
     (a) => !a.completed?.isCompleted && !a.completed?.skipped
   );
   return (
@@ -145,9 +145,9 @@ function ListCard({ date }: { date: Date }) {
       <FlatList
         data={[...not_completed, ...(showAll ? completed : [])]}
         renderItem={({ item }) => (
-          <ObservableTask
+          <ObservableHabit
             date={date}
-            task={item.task}
+            habit={item.habit}
             completed={item.completed}
           />
         )}

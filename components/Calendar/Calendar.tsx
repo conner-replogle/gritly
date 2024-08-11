@@ -9,13 +9,13 @@ import {
   startOfWeek,
 } from "date-fns";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import useTasks, { useTasksWithCompleted } from "~/lib/hooks/Tasks";
-import { Task } from "~/models/Task";
+import useHabits, { useHabitsWithCompleted } from "~/lib/hooks/Habits";
+import { Habit } from "~/models/Habit";
 import { log } from "~/lib/config";
 import { withObservables } from "@nozbe/watermelondb/react";
 import { of as of$ } from "rxjs";
-import { TaskCard } from "~/components/Task/taskCard";
-import { CompletedResult } from "~/models/CompletedResult";
+import { HabitCard } from "~/components/Habit/habitCard";
+import { Completed } from "~/models/Completed";
 
 export function CalendarSection(props: {
   date: Date;
@@ -137,8 +137,8 @@ const Day = ({
   currentDate: Date;
   setDate: (date: Date) => void;
 }) => {
-  const tasks = useTasksWithCompleted(date);
-  const showBar = (task: Task, date: Date) => {};
+  const habits = useHabitsWithCompleted(date);
+  const showBar = (habit: Habit, date: Date) => {};
   return (
     <View className="flex flex-col justify-start">
       <Pressable
@@ -160,9 +160,9 @@ const Day = ({
         </View>
       </Pressable>
       <View className="flex flex-col mt-4 gap-1">
-        {Array.from(tasks, ({ task, completed }, i) => {
+        {Array.from(habits, ({ habit, completed }, i) => {
           //NEED TO CHECK IF COMPLETED CONTAINS TODAY
-          if (task.repeats.period == "Weekly") {
+          if (habit.repeats.period == "Weekly") {
             if (
               !completed ||
               completed.completed_times.find((a) => isSameDay(a.date, date)) ==
@@ -172,9 +172,9 @@ const Day = ({
             }
           }
           return (
-            <TaskBar
-              key={`${task.id}`}
-              task={task}
+            <HabitBar
+              key={`${habit.id}`}
+              habit={habit}
               completed={completed?.isCompleted ?? false}
             />
           );
@@ -184,11 +184,17 @@ const Day = ({
   );
 };
 
-const TaskBar = ({ task, completed }: { task: Task; completed: boolean }) => {
+const HabitBar = ({
+  habit,
+  completed,
+}: {
+  habit: Habit;
+  completed: boolean;
+}) => {
   return (
     <View
       style={{
-        backgroundColor: `${task.color}`,
+        backgroundColor: `${habit.color}`,
 
         opacity: completed ? 1.0 : 0.3,
         height: completed ? 5 : 3,
