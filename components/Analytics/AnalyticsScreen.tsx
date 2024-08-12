@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import * as React from "react";
 import { WeeklyContent, WeeklyHeader } from "~/components/Analytics/Weekly";
+import { MonthlyContent, MonthlyHeader } from "~/components/Analytics/Monthly";
+import { AllTimeContent, AllTimeHeader } from "~/components/Analytics/AllTime";
 
 enum AnalyticsType {
   weekly = "weekly",
@@ -47,15 +49,14 @@ export function AnalyticsScreen({ habit }: { habit?: Habit }) {
           <TabsContent
             value={AnalyticsType.monthly}
             className="flex flex-col gap-2 "
-          />
+          >
+            <MonthlyHeader setDate={setDate} date={date} />
+          </TabsContent>
           <TabsContent
             value={AnalyticsType.all_time}
             className="flex flex-col gap-2 "
           >
-            <Text className="text-l font-semibold text-muted-foreground">
-              GOAL
-            </Text>
-            <View className="bg-secondary p-3 rounded-xl" />
+            <AllTimeHeader setDate={setDate} date={date} />
           </TabsContent>
         </View>
         <View className="bg-secondary h-full p-5">
@@ -68,15 +69,14 @@ export function AnalyticsScreen({ habit }: { habit?: Habit }) {
           <TabsContent
             value={AnalyticsType.monthly}
             className="flex flex-col gap-2 "
-          />
+          >
+            <MonthlyContent date={date} habit={habit} />
+          </TabsContent>
           <TabsContent
             value={AnalyticsType.all_time}
             className="flex flex-col gap-2 "
           >
-            <Text className="text-l font-semibold text-muted-foreground">
-              GOAL
-            </Text>
-            <View className="bg-secondary p-3 rounded-xl" />
+            <AllTimeContent date={date} habit={habit} />
           </TabsContent>
         </View>
       </Tabs>

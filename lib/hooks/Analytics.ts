@@ -1,7 +1,7 @@
 import { Habit } from "~/models/Habit";
 import { useEffect, useState } from "react";
 import { log } from "~/lib/config";
-import { isSameDay, startOfDay, startOfWeek } from "date-fns";
+import { endOfDay, isSameDay, startOfDay, startOfWeek } from "date-fns";
 import { useCompleted } from "~/lib/hooks/Habits";
 import { getNextDate } from "~/lib/utils";
 import { Completed } from "~/models/Completed";
@@ -41,12 +41,12 @@ export function useAnalytics(habit?: Habit, start?: Date, end?: Date) {
           : database.collections.get<Completed>(TableName.COMPLETED).query();
         if (start) {
           query = query.extend(
-            Q.where("completed_at", Q.gte(start_date.getTime()))
+            Q.where("completed_at", Q.gte(startOfDay(start_date).getTime()))
           );
         }
         if (end) {
           query = query.extend(
-            Q.where("completed_at", Q.lte(end_date.getTime()))
+            Q.where("completed_at", Q.lte(endOfDay(end_date).getTime()))
           );
         }
         let completeds = await query.fetch();
@@ -57,8 +57,6 @@ export function useAnalytics(habit?: Habit, start?: Date, end?: Date) {
         let total = 0;
         let skipped = 0;
         while (true) {
-          start_date = getNextDate(habit.repeats, start_date);
-
           if (start_date > end_date) {
             break;
           }
@@ -80,6 +78,7 @@ export function useAnalytics(habit?: Habit, start?: Date, end?: Date) {
             }
             streak = 0;
           }
+          start_date = getNextDate(habit.repeats, start_date);
         }
         setAnalytics({
           streaks,
