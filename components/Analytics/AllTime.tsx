@@ -3,13 +3,11 @@ import { Text } from "~/components/ui/text";
 import { Habit } from "~/models/Habit";
 
 import * as React from "react";
-import { addWeeks, endOfWeek, startOfDay, startOfWeek } from "date-fns";
-import { Button } from "~/components/ui/button";
-import { ArrowLeft, ArrowRight } from "lucide-react-native";
-import { useCompleted } from "~/lib/hooks/Habits";
+
 import { Summary } from "~/components/Analytics/widgets/Summary";
-import { useEffect, useMemo } from "react";
 import { useAnalytics } from "~/lib/hooks/Analytics";
+import { WeeklyContent } from "~/components/Analytics/Weekly";
+import { ActiveWeekdays } from "~/components/Analytics/widgets/ActiveWeekdays";
 
 export function AllTimeHeader({
   date,
@@ -30,8 +28,9 @@ export function AllTimeContent({ date, habit }: { date: Date; habit?: Habit }) {
   const analytics = useAnalytics(habit);
 
   return (
-    <View>
+    <>
+      <ActiveWeekdays analytics={analytics} habit={habit} />
       <Summary analytics={analytics} />
-    </View>
+    </>
   );
 }

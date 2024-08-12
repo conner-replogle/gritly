@@ -10,6 +10,7 @@ import { useCompleted } from "~/lib/hooks/Habits";
 import { Summary } from "~/components/Analytics/widgets/Summary";
 import { useEffect, useMemo } from "react";
 import { useAnalytics } from "~/lib/hooks/Analytics";
+import { ActiveWeekdays } from "~/components/Analytics/widgets/ActiveWeekdays";
 
 export function WeeklyHeader({
   date,
@@ -64,8 +65,9 @@ export function WeeklyContent({ date, habit }: { date: Date; habit?: Habit }) {
   const analytics = useAnalytics(habit, start, end);
 
   return (
-    <View>
-      <Summary analytics={analytics} />
-    </View>
+    <>
+      <ActiveWeekdays analytics={analytics} habit={habit} />
+      <Summary habit={habit} analytics={analytics} />
+    </>
   );
 }

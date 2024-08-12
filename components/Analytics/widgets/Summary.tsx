@@ -6,7 +6,13 @@ import { Clipboard } from "lucide-react-native";
 import { useTheme } from "@react-navigation/native";
 import { Analytics } from "~/lib/hooks/Analytics";
 
-export function Summary({ analytics }: { analytics: Analytics }) {
+export function Summary({
+  analytics,
+  habit,
+}: {
+  analytics: Analytics;
+  habit?: Habit;
+}) {
   const { colors } = useTheme();
   return (
     <View className="bg-background w-full p-5 rounded-xl">
@@ -18,7 +24,10 @@ export function Summary({ analytics }: { analytics: Analytics }) {
           }}
           className="flex-col "
         >
-          <Text className="font-semibold">All Habits</Text>
+          <Text className="font-semibold">
+            {habit ? habit.title : "All Habits"}
+          </Text>
+
           <Text className="text-sm">Summary</Text>
         </View>
       </View>
@@ -36,17 +45,17 @@ export function Summary({ analytics }: { analytics: Analytics }) {
             SUCCESS RATE
           </Text>
           <Text className="text-green-500 ">
-            {(
-              (analytics.completed /
-                (analytics.completed + analytics.uncompleted)) *
-              100
-            ).toPrecision(4)}
+            {((analytics.total / analytics.therotical_total) * 100).toPrecision(
+              4
+            )}
             %
           </Text>
           <Text className="font-semibold text-sm text-muted-foreground">
             TOTAL
           </Text>
-          <Text className=" ">{analytics.total}</Text>
+          <Text className=" ">
+            {analytics.total}/{analytics.therotical_total} {habit?.goal.unit}
+          </Text>
           <Text className="font-semibold text-sm text-muted-foreground">
             SKIPPED
           </Text>

@@ -1,9 +1,7 @@
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { Habit } from "~/models/Habit";
-import { log } from "~/lib/config";
 import { useState } from "react";
-import { useTheme } from "@react-navigation/native";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import * as React from "react";
@@ -12,8 +10,8 @@ import { MonthlyContent, MonthlyHeader } from "~/components/Analytics/Monthly";
 import { AllTimeContent, AllTimeHeader } from "~/components/Analytics/AllTime";
 
 enum AnalyticsType {
-  weekly = "weekly",
-  monthly = "monthly",
+  weekly = 'weekly',
+  monthly = 'monthly',
   all_time = "all_time",
 }
 

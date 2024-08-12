@@ -191,7 +191,7 @@ function HeaderCard({
           </Button>
         </View>
       </CardHeader>
-      <CardContent className="h-28">
+      <CardContent className="min-h-24">
         <CalendarSection date={date} setDate={setDate} />
       </CardContent>
     </View>

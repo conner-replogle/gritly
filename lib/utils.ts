@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { addDays, addMonths, startOfDay } from "date-fns";
+import {addDays, addMonths, addWeeks, startOfDay} from "date-fns";
 import { CALENDAR } from "~/models/schema";
 import { SWATCHES_COLORS } from "~/components/Habit/EditHabitScreen/SelectColor";
 import { EditableHabit } from "~/models/Habit";
@@ -31,7 +31,8 @@ export function getPrevDate(repeats: Repeats, currentDate: Date): Date {
 
     case Period.Weekly:
       if (repeats.selected_frequency == Frequency.every_n) {
-        nextDate = addDays(nextDate, -(repeats.every_n * 7));
+        nextDate = addWeeks(nextDate, -(repeats.every_n * 7));
+
       } else {
         throw new Error("Invalid frequency");
       }
@@ -51,7 +52,7 @@ export function getPrevDate(repeats: Repeats, currentDate: Date): Date {
           nextDate.setDate(repeats.specific_days[0]);
         }
       } else if (repeats.selected_frequency == Frequency.every_n) {
-        nextDate = addMonths(nextDate, repeats.every_n);
+        nextDate = addMonths(nextDate, -repeats.every_n);
       } else {
         throw new Error("Invalid frequency");
       }
