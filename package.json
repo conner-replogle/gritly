@@ -29,6 +29,7 @@
     "@radix-ui/react-toggle-group": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-community/blur": "^4.4.0",
     "@react-navigation/native": "^6.0.2",
     "@realm/react": "^0.7.0",
     "@rn-primitives/dropdown-menu": "^1.0.3",

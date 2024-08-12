@@ -1,17 +1,18 @@
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { Habit } from "~/models/Habit";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import * as React from "react";
 import { WeeklyContent, WeeklyHeader } from "~/components/Analytics/Weekly";
 import { MonthlyContent, MonthlyHeader } from "~/components/Analytics/Monthly";
 import { AllTimeContent, AllTimeHeader } from "~/components/Analytics/AllTime";
+import { SubscriptionContext } from "~/lib/config";
 
 enum AnalyticsType {
-  weekly = 'weekly',
-  monthly = 'monthly',
+  weekly = "weekly",
+  monthly = "monthly",
   all_time = "all_time",
 }
 

@@ -5,7 +5,7 @@ import { View } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { useTheme } from "@react-navigation/native";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import useHabits from "~/lib/hooks/Habits";
 import { Habit } from "~/models/Habit";
 import {
@@ -25,6 +25,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { WeeklyContent, WeeklyHeader } from "~/components/Analytics/Weekly";
 import * as React from "react";
 import { AnalyticsScreen } from "~/components/Analytics/AnalyticsScreen";
+import { SubscriptionContext } from "~/lib/config";
+import { BlurView } from "@react-native-community/blur";
 
 enum AnalyticsType {
   weekly = "weekly",
@@ -34,6 +36,9 @@ enum AnalyticsType {
 
 export default function Analytics() {
   const { colors } = useTheme();
+
+  const subscription = useContext(SubscriptionContext);
+  console.log(subscription);
   const habits = useHabits();
   const { habit_id } = useLocalSearchParams<{ habit_id?: string }>();
   const [habit, setHabit] = useState<Habit | undefined>(undefined);
@@ -75,7 +80,27 @@ export default function Analytics() {
           }}
         />
       </View>
-      <AnalyticsScreen habit={habit} />
+      <View>
+        <AnalyticsScreen habit={habit} />
+        {!subscription?.active && (
+          <>
+            <BlurView
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+              }}
+              blurAmount={5}
+              blurType="light"
+            />
+            <View className="absolute top-0 w-full h-full flex-col items-center justify-center">
+              <Text>Upgrade to premium for analytics</Text>
+            </View>
+          </>
+        )}
+      </View>
     </SafeAreaView>
   );
 }

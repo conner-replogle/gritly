@@ -75,23 +75,14 @@ export default function RootLayout() {
     });
   }, []);
   useEffect(() => {
-    const CheckSubscription = async () => {
-      try {
-        const customerInfo = await Purchases.getCustomerInfo();
-        // access latest customerInfo
-        log.debug(customerInfo.activeSubscriptions);
-        if (customerInfo.activeSubscriptions.includes("pro")) {
-          setSubscription({
-            active: true,
-            sku: "pro",
-          });
-        }
-      } catch (e) {
-        // Error fetching customer info
-        log.error(e);
+    Purchases.addCustomerInfoUpdateListener((info) => {
+      if (info.activeSubscriptions.includes("pro")) {
+        setSubscription({
+          active: true,
+          sku: "pro",
+        });
       }
-    };
-    CheckSubscription();
+    });
   }, []);
 
   if (!isColorSchemeLoaded) {
