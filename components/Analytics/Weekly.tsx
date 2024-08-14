@@ -47,6 +47,7 @@ export function WeeklyHeader({
           onPress={() => {
             setDate(addWeeks(date, 1));
           }}
+          disabled={endOfWeek(date) > startOfDay(new Date())}
         >
           <ArrowRight />
         </Button>

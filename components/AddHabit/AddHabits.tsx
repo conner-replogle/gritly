@@ -96,6 +96,8 @@ function AddHabitSheet({
               await database.get<Habit>(TableName.HABITS).create((newHabit) => {
                 newHabit.title = habit.title;
                 newHabit.goal = habit.goal;
+                newHabit.icon = habit.icon;
+
                 newHabit.color = habit.color;
                 newHabit.repeats = habit.repeats;
                 newHabit.startsOn = habit.startsOn;

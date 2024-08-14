@@ -29,12 +29,14 @@ import {
 } from "date-fns";
 import { log } from "~/lib/config";
 import { Completed } from "~/models/Completed";
-import { Frequency, Goal, Period, Repeats } from "~/lib/types";
+import { Frequency, Goal, IconProp, Period, Repeats } from "~/lib/types";
+import { Group } from "~/models/Group";
 
 export interface EditableHabit {
   startsOn: Date;
   title: string;
   description: string;
+  icon?: IconProp;
   color: string;
   repeats: Repeats;
   goal: Goal;
@@ -53,9 +55,9 @@ export class Habit extends Model {
   @date("ends_on") endsOn?: Date;
   @text("title") title!: string;
   @text("description") description!: string;
-  @text("icon") icon!: string;
+  @json("icon", (json) => json) icon?: IconProp;
   @text("color") color!: string;
-
+  @immutableRelation(TableName.GROUP, "group_id") group!: Relation<Group>;
   @json("repeats", (json) => json) repeats!: Repeats;
   @json("goal", (json) => json) goal!: Goal;
 
@@ -66,16 +68,19 @@ export class Habit extends Model {
   @lazy sortedCompleted = this.completed.extend(
     Q.sortBy("completed_at", Q.desc)
   );
+
   toEditableHabit(): EditableHabit {
     return {
       startsOn: this.startsOn,
       title: this.title,
       description: this.description,
+      icon: this.icon,
       color: this.color,
       repeats: this.repeats,
       goal: this.goal,
     };
   }
+
   showToday(date: Date): boolean {
     if (date < this.startsOn || (this.endsOn && date > this.endsOn)) {
       return false;
@@ -137,7 +142,9 @@ export class Habit extends Model {
       )
       .extend(Q.take(1));
   }
-  @writer async skip(date: Date) {
+
+  @writer
+  async skip(date: Date) {
     let completed = await this.getCompleted(date).fetch();
     if (completed.length == 0) {
       await this.collections
@@ -154,17 +161,14 @@ export class Habit extends Model {
       await this.callWriter(() => completed[0].skip());
     }
   }
-  @writer async createCompleted(date: Date) {
+
+  @writer
+  async createCompleted(date: Date) {
     let completed = await this.collections
       .get<Completed>(TableName.COMPLETED)
       .create((completed) => {
         completed.completed_at = date;
-        completed.completed_times = [
-          {
-            date: date.getTime(),
-            amount: this.goal.steps,
-          },
-        ];
+        completed.completed_times = [];
         completed.habit.set(this);
         completed.goal = this.goal;
         completed.total = 0;
@@ -172,7 +176,8 @@ export class Habit extends Model {
     await this.callWriter(() => completed.complete(date));
   }
 
-  @writer async endHabit(date: Date) {
+  @writer
+  async endHabit(date: Date) {
     await this.update(() => {
       this.endsOn = date;
     });

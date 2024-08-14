@@ -25,6 +25,11 @@ export interface Goal {
   customName?: string;
 }
 
+export type IconProp = {
+  family: string;
+  name: string;
+};
+
 export interface Analytics {
   streaks: { dates: Date[] }[];
 }

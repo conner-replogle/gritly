@@ -11,17 +11,10 @@ import {
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import useHabits, { useHabitsWithCompleted } from "~/lib/hooks/Habits";
 import { Habit } from "~/models/Habit";
-import { log } from "~/lib/config";
-import { withObservables } from "@nozbe/watermelondb/react";
-import { of as of$ } from "rxjs";
-import { HabitCard } from "~/components/Habit/habitCard";
-import { Completed } from "~/models/Completed";
+import { DateContext } from "~/lib/config";
 
-export function CalendarSection(props: {
-  date: Date;
-  setDate: (date: Date) => void;
-}) {
-  const { date, setDate } = props;
+export function CalendarSection() {
+  const { date, setDate } = useContext(DateContext);
   const today = new Date(Date.now());
   const LENGTH = 24;
   const HALF = 12;

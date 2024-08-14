@@ -8,4 +8,11 @@ export const SubscriptionContext = createContext({
   active: false,
   sku: "",
 });
+
+export const DateContext = createContext({
+  date: new Date(Date.now()),
+  setDate: (date: Date) => {
+    log.debug(`Setting date to ${date}`);
+  },
+});
 export const log = logger.createLogger();

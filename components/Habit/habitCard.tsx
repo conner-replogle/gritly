@@ -22,6 +22,7 @@ import Animated, {
 import { useEffect, useRef } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Completed } from "~/models/Completed";
+import { RenderIcon } from "~/components/IconPicker/IconSelector";
 
 export function HabitCard({
   habit,
@@ -49,25 +50,7 @@ export function HabitCard({
       }}
       className=" p-3 mb-2 flex flex-row justify-start border-secondary border-2 items-center bg-background  h-24 "
     >
-      <View className="aspect-square w-16 flex items-center justify-center">
-        <CirclePath
-          radius={18}
-          color={"#3498db"}
-          strokeWidth={3}
-          percent={(total / outof) * 100}
-        />
-        <View
-          style={{
-            width: "100%",
-            height: "100%",
-            position: "absolute",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <FontAwesome color={colors.primary} name="map" size={16} />
-        </View>
-      </View>
+      <ProgressMeterWithIcon habit={habit} completed={completed} radius={18} />
       <View className="text-start border-primary flex-1 flex flex-col justify-evenly items-start">
         <Text className="text-lg font-semibold">
           {habit.title} {streak > 1 ? ` 🔥${streak}` : ""}{" "}
@@ -115,9 +98,55 @@ function CompleteIcon({
     </View>
   );
 }
+
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-const CirclePath = ({
+export function ProgressMeterWithIcon({
+  habit,
+  completed,
+
+  radius,
+}: {
+  habit: Habit;
+  completed?: Completed;
+
+  radius: number;
+}) {
+  let total = completed?.total ?? 0;
+  let outof = completed?.goal.amount ?? habit.goal.amount;
+  return (
+    <View
+      style={{
+        width: radius * 2 + 5,
+        height: radius * 2 + 5,
+        borderRadius: 24,
+      }}
+      className="aspect-square flex items-center justify-center"
+    >
+      <CirclePath
+        radius={radius}
+        color={"#3498db"}
+        strokeWidth={3}
+        percent={(total / outof) * 100}
+      />
+      <View
+        style={{
+          width: "100%",
+          height: "100%",
+          position: "absolute",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        {habit.icon && (
+          <RenderIcon icon={habit.icon} color={habit.color} size={radius} />
+        )}
+      </View>
+    </View>
+  );
+}
+
+export const CirclePath = ({
   radius,
   strokeWidth,
   color,

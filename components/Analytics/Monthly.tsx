@@ -47,6 +47,7 @@ export function MonthlyHeader({
           onPress={() => {
             setDate(addMonths(date, 1));
           }}
+          disabled={endOfMonth(date) > startOfDay(new Date())}
         >
           <ArrowRight />
         </Button>

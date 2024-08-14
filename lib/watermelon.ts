@@ -5,12 +5,14 @@ import * as Crypto from "expo-crypto";
 import { Habit } from "~/models/Habit";
 import { schema } from "~/models/schema";
 import { Completed } from "~/models/Completed";
+import { Group } from "~/models/Group";
+import { migrations } from "~/lib/migrations";
 
 // First, create the adapter to the underlying database:
 const adapter = new SQLiteAdapter({
   schema,
   // (You might want to comment it out for development purposes -- see Migrations documentation)
-
+  migrations,
   // (optional database name or file system path)
   dbName: "gritly",
   // (recommended option, should work flawlessly out of the box on iOS. On Android,
@@ -27,7 +29,7 @@ const adapter = new SQLiteAdapter({
 // Then, make a Watermelon database from it!
 export const database = new Database({
   adapter,
-  modelClasses: [Completed, Habit],
+  modelClasses: [Completed, Habit, Group],
 });
 
 setGenerator(() => Crypto.randomUUID());

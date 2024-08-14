@@ -13,6 +13,7 @@ import {
 import { TableName } from "./schema";
 import { Goal } from "~/lib/types";
 import { Habit } from "~/models/Habit";
+import { log } from "~/lib/config";
 
 export class Completed extends Model {
   static table = TableName.COMPLETED;
@@ -26,22 +27,27 @@ export class Completed extends Model {
     date: number;
     amount: number;
   }[];
+
   get isCompleted() {
     return this.total >= this.goal.amount;
   }
 
-  @writer async skip() {
+  @writer
+  async skip() {
     await this.update((habit) => {
       this.skipped = true;
     });
   }
-  @writer async unskip() {
+
+  @writer
+  async unskip() {
     await this.update((habit) => {
       this.skipped = false;
     });
   }
 
-  @writer async complete(date: Date) {
+  @writer
+  async complete(date: Date) {
     await this.update((habit) => {
       this.completed_times = [
         ...this.completed_times,
@@ -55,12 +61,18 @@ export class Completed extends Model {
     });
   }
 
-  @writer async uncomplete() {
-    let last_time = this.completed_times.pop();
-    if (last_time) {
-      this.total -= last_time.amount;
-    } else {
-      await this.destroyPermanently();
-    }
+  @writer
+  async uncomplete() {
+    await this.update((habit) => {
+      let last_time = this.completed_times.pop();
+      this.completed_times = this.completed_times.slice(0, -1);
+      if (this.completed_times.length != 0 && last_time) {
+        log.debug("Removing last completion");
+        this.total -= last_time.amount;
+      } else {
+        log.debug("Deleting completed");
+        this.callWriter(() => this.destroyPermanently());
+      }
+    });
   }
 }

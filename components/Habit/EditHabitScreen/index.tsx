@@ -7,6 +7,7 @@ import { Text } from "~/components/ui/text";
 import { HabitCard } from "~/components/Habit/habitCard";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
+import { fuzzySearch } from "~/components/IconPicker/IconSelector";
 
 import {
   addWeeks,
@@ -24,9 +25,9 @@ import { RepeatPeriod } from "~/components/Habit/EditHabitScreen/RepeatPeriod";
 import { Goal } from "~/components/Habit/EditHabitScreen/Goal";
 import { FrequencyPeriod } from "~/components/Habit/EditHabitScreen/FrequencyPeriod";
 import { PortalHost } from "~/components/primitives/portal";
-import { SelectIcon } from "~/components/Habit/EditHabitScreen/SelectIcon";
 import { withObservables } from "@nozbe/watermelondb/react";
 import { getNextDate } from "~/lib/utils";
+import IconSelector from "~/components/IconPicker/IconSelector";
 
 function Basic({
   habit,
@@ -52,6 +53,17 @@ function Basic({
               a.title = b;
             });
           }}
+          selectTextOnFocus
+          onEndEditing={(b) => {
+            if (habit.icon == undefined) {
+              let suggested_icon = fuzzySearch(b.nativeEvent.text).at(0)?.item;
+              if (suggested_icon != undefined) {
+                setHabit((a) => {
+                  a.icon = suggested_icon!;
+                });
+              }
+            }
+          }}
           aria-labelledbyledBy="inputLabel"
           aria-errormessage="inputError"
         />
@@ -70,7 +82,14 @@ function Basic({
         />
 
         <Label nativeID="select-icon">Select Icon</Label>
-        <SelectIcon />
+        <IconSelector
+          icon={habit.icon}
+          setIcon={(icon) => {
+            setHabit((a) => {
+              a.icon = icon;
+            });
+          }}
+        />
       </View>
 
       <Text className="text-l font-semibold text-muted-foreground">COLOR</Text>
@@ -181,6 +200,7 @@ export function EditHabitScreen({
   function ValidateForm() {
     return habit.title.length > 0;
   }
+
   const tabs = ["info", "repeats", "goal"];
   const [value, setValue] = useState("info");
   return (

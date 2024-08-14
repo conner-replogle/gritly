@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import {addDays, addMonths, addWeeks, startOfDay} from "date-fns";
+import { addDays, addMonths, addWeeks, startOfDay } from "date-fns";
 import { CALENDAR } from "~/models/schema";
 import { SWATCHES_COLORS } from "~/components/Habit/EditHabitScreen/SelectColor";
 import { EditableHabit } from "~/models/Habit";
@@ -32,7 +32,6 @@ export function getPrevDate(repeats: Repeats, currentDate: Date): Date {
     case Period.Weekly:
       if (repeats.selected_frequency == Frequency.every_n) {
         nextDate = addWeeks(nextDate, -(repeats.every_n * 7));
-
       } else {
         throw new Error("Invalid frequency");
       }
@@ -144,10 +143,12 @@ export function repeatsToString(goal: Goal, repeats: Repeats) {
 function getRandomBrightColor(): string {
   return SWATCHES_COLORS[Math.floor(Math.random() * SWATCHES_COLORS.length)];
 }
+
 export function GenerateHabit(): EditableHabit {
   return {
     title: "New Habit",
     description: "",
+    icon: undefined,
     createdAt: new Date(Date.now()),
     startsOn: startOfDay(new Date(Date.now())),
     color: getRandomBrightColor(),

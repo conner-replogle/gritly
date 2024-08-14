@@ -34,27 +34,36 @@ export const UNITS = [
     type: "count",
   },
 ];
+
 export enum TableName {
   HABITS = "habits",
   COMPLETED = "completed",
+  GROUP = "group",
 }
 
 export const schema = appSchema({
-  version: 1,
+  version: 2,
   tables: [
     tableSchema({
       name: TableName.HABITS,
       columns: [
         { name: "title", type: "string" },
         { name: "description", type: "string" },
-        { name: "icon", type: "string" },
+        { name: "icon", type: "string", isOptional: true },
         { name: "color", type: "string" },
         { name: "starts_on", type: "number" },
         { name: "ends_on", type: "number", isOptional: true },
         { name: "created_at", type: "number" },
         { name: "repeats", type: "string" },
         { name: "goal", type: "string" },
-        // { name: "analytics", type: "string" },
+        { name: "group_id", type: "string", isOptional: true },
+      ],
+    }),
+    tableSchema({
+      name: TableName.GROUP,
+      columns: [
+        { name: "title", type: "string" },
+        { name: "created_at", type: "number" },
       ],
     }),
 

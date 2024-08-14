@@ -54,7 +54,7 @@ import {
 
 import ConfettiCannon from "react-native-confetti-cannon";
 import { useMMKV, useMMKVBoolean } from "react-native-mmkv";
-import { ExplosionContext, log } from "~/lib/config";
+import { DateContext, ExplosionContext, log } from "~/lib/config";
 import { DropdownMenuTriggerRef } from "@rn-primitives/dropdown-menu";
 import useHabits, { useHabitsWithCompleted } from "~/lib/hooks/Habits";
 import { Habit } from "~/models/Habit";
@@ -81,30 +81,37 @@ export default function Screen() {
 
   return (
     <SafeAreaView>
-      <ExplosionContext.Provider
-        value={() => {
-          if (nuttable) {
-            cannonRef.current?.start();
-          }
+      <DateContext.Provider
+        value={{
+          date,
+          setDate,
         }}
       >
-        <View className="h-[100vh] bg-secondary/50">
-          <HeaderCard date={date} setDate={setDate} />
+        <ExplosionContext.Provider
+          value={() => {
+            if (nuttable) {
+              cannonRef.current?.start();
+            }
+          }}
+        >
+          <View className="h-[100vh] bg-secondary/50">
+            <HeaderCard date={date} setDate={setDate} />
 
-          <View className="p-6 flex flex-col gap-4 h-full">
-            <ListCard date={date} />
+            <View className="p-6 flex flex-col gap-4 h-full">
+              <ListCard date={date} />
+            </View>
+            <ConfettiCannon
+              ref={cannonRef}
+              count={200}
+              explosionSpeed={400}
+              fallSpeed={3500}
+              autoStart={false}
+              fadeOut={true}
+              origin={{ x: 10, y: 0 }}
+            />
           </View>
-          <ConfettiCannon
-            ref={cannonRef}
-            count={200}
-            explosionSpeed={400}
-            fallSpeed={3500}
-            autoStart={false}
-            fadeOut={true}
-            origin={{ x: 10, y: 0 }}
-          />
-        </View>
-      </ExplosionContext.Provider>
+        </ExplosionContext.Provider>
+      </DateContext.Provider>
     </SafeAreaView>
   );
 }
@@ -192,7 +199,7 @@ function HeaderCard({
         </View>
       </CardHeader>
       <CardContent className="min-h-24">
-        <CalendarSection date={date} setDate={setDate} />
+        <CalendarSection />
       </CardContent>
     </View>
   );

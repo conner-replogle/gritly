@@ -71,7 +71,6 @@ export function useHabitsWithCompleted(date: Date) {
       });
     };
   }, [todayHabits]);
-  log.debug("Habits Updated");
 
   return habits;
 }

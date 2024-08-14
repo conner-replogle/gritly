@@ -28,15 +28,7 @@ import { AnalyticsScreen } from "~/components/Analytics/AnalyticsScreen";
 import { SubscriptionContext } from "~/lib/config";
 import { BlurView } from "@react-native-community/blur";
 
-enum AnalyticsType {
-  weekly = "weekly",
-  monthly = "monthly",
-  all_time = "all_time",
-}
-
 export default function Analytics() {
-  const { colors } = useTheme();
-
   const subscription = useContext(SubscriptionContext);
   console.log(subscription);
   const habits = useHabits();
@@ -82,7 +74,7 @@ export default function Analytics() {
       </View>
       <View>
         <AnalyticsScreen habit={habit} />
-        {!subscription?.active && (
+        {!subscription?.active && false && (
           <>
             <BlurView
               style={{
