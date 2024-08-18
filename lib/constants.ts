@@ -105,6 +105,39 @@ export const Themes = {
       "--ring": "29 87% 53%",
     }),
   },
+  orange: {
+    dark: true,
+    colors: {
+      background: "hsl(30 63.7% 4.24%)", // background
+      border: "hsl(30 49% 15.9%)", // border
+      card: "hsl(30 45.4% 6.89%)", // card
+      notification: "hsl(0 62.8% 30.6%)", // destructive
+      primary: "hsl(30 98% 53%)", // primary
+      text: "hsl(30 9.8% 97.65%)", // foreground
+    },
+    style: vars({
+      "--background": "30 63.7% 4.24%",
+      "--foreground": "30 9.8% 97.65%",
+      "--card": "30 45.4% 6.89%",
+      "--card-foreground": "30 9.8% 97.65%",
+      "--popover": "30 45.4% 6.89%",
+      "--popover-foreground": "30 9.8% 97.65%",
+      "--primary": "30 98% 53%",
+      "--primary-foreground": "30 9.8% 5.3%",
+      "--secondary": "30 49% 15.9%",
+      "--secondary-foreground": "30 9.8% 97.65%",
+      "--muted": "30 49% 15.9%",
+      "--muted-foreground": "30 9.8% 55.3%",
+      "--accent": "30 49% 15.9%",
+      "--accent-foreground": "30 9.8% 97.65%",
+      "--destructive": "0 62.8% 30.6%",
+      "--destructive-foreground": "30 9.8% 97.65%",
+      "--border": "30 49% 15.9%",
+      "--input": "30 49% 15.9%",
+      "--ring": "30 98% 53%",
+    }),
+  },
+
   pink: {
     dark: false,
     colors: {
@@ -137,36 +170,68 @@ export const Themes = {
       "--ring": "340 85% 65%",
     }),
   },
-  christmas: {
-    dark: false,
+  teal: {
+    dark: true,
     colors: {
-      primary: "#FF0000", // Christmas Red
-      border: "#FFD700", // Gold
-      background: "hsl(140, 56%, 53%)", // Christmas Green
-      notification: "#FF0000", // Christmas Red
-      text: "#FFFFFF", // White
-      card: "#FF0000", // Christmas Red
+      background: "hsl(169 65% 3.84%)", // background
+      border: "hsl(169 50% 14.4%)", // border
+      card: "hsl(169 45% 6.24%)", // card
+      notification: "hsl(0 62.8% 30.6%)", // destructive
+      primary: "hsl(169 100% 48%)", // primary
+      text: "hsl(169 10% 97.4%)", // foreground
     },
     style: vars({
-      "--background": "140 56% 53%" /* Christmas Green */,
-      "--foreground": "0 0% 100%" /* White */,
-      "--card": "0 72% 51%" /* Christmas Red */,
-      "--card-foreground": "0 0% 100%" /* White */,
-      "--popover": "140 56% 53%" /* Christmas Green */,
-      "--popover-foreground": "0 0% 100%" /* White */,
-      "--primary": "0 72% 51%" /* Christmas Red */,
-      "--primary-foreground": "0 0% 100%" /* White */,
-      "--secondary": "60 70% 80%" /* Gold */,
-      "--secondary-foreground": "0 72% 51%" /* Christmas Red */,
-      "--muted": "0 72% 51%" /* Christmas Red */,
-      "--muted-foreground": "60 70% 80%" /* Gold */,
-      "--accent": "0 72% 51%" /* Christmas Red */,
-      "--accent-foreground": "0 0% 100%" /* White */,
-      "--destructive": "0 72% 51%" /* Christmas Red */,
-      "--destructive-foreground": "0 0% 100%" /* White */,
-      "--border": "60 70% 80%" /* Gold */,
-      "--input": "0 72% 51%" /* Christmas Red */,
-      "--ring": "60 70% 80%" /* Gold */,
+      "--background": "169 65% 3.84%",
+      "--foreground": "169 10% 97.4%",
+      "--card": "169 45% 6.24%",
+      "--card-foreground": "169 10% 97.4%",
+      "--popover": "169 45% 6.24%",
+      "--popover-foreground": "169 10% 97.4%",
+      "--primary": "169 100% 48%",
+      "--primary-foreground": "169 10% 4.8%",
+      "--secondary": "169 50% 14.4%",
+      "--secondary-foreground": "169 10% 97.4%",
+      "--muted": "169 50% 14.4%",
+      "--muted-foreground": "169 10% 54.8%",
+      "--accent": "169 50% 14.4%",
+      "--accent-foreground": "169 10% 97.4%",
+      "--destructive": "0 62.8% 30.6%",
+      "--destructive-foreground": "169 10% 97.4%",
+      "--border": "169 50% 14.4%",
+      "--input": "169 50% 14.4%",
+      "--ring": "169 100% 48%",
+    }),
+  },
+  neon_pink: {
+    dark: true,
+    colors: {
+      background: "hsl(300 65% 3.36%)", // background
+      border: "hsl(300 50% 12.6%)", // border
+      card: "hsl(300 45% 5.46%)", // card
+      notification: "hsl(0 62.8% 30.6%)", // destructive
+      primary: "hsl(300 100% 42%)", // primary
+      text: "hsl(300 10% 97.1%)", // foreground
+    },
+    style: vars({
+      "--background": "300 65% 3.36%",
+      "--foreground": "300 10% 97.1%",
+      "--card": "300 45% 5.46%",
+      "--card-foreground": "300 10% 97.1%",
+      "--popover": "300 45% 5.46%",
+      "--popover-foreground": "300 10% 97.1%",
+      "--primary": "300 100% 42%",
+      "--primary-foreground": "300 10% 97.1%",
+      "--secondary": "300 50% 12.6%",
+      "--secondary-foreground": "300 10% 97.1%",
+      "--muted": "300 50% 12.6%",
+      "--muted-foreground": "300 10% 54.2%",
+      "--accent": "300 50% 12.6%",
+      "--accent-foreground": "300 10% 97.1%",
+      "--destructive": "0 62.8% 30.6%",
+      "--destructive-foreground": "300 10% 97.1%",
+      "--border": "300 50% 12.6%",
+      "--input": "300 50% 12.6%",
+      "--ring": "300 100% 42%",
     }),
   },
 };

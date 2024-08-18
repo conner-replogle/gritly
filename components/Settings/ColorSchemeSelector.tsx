@@ -29,10 +29,10 @@ export default function ColorSchemeSelector() {
           <Pressable
             key={theme}
             onPress={() => {
-              // if (theme != "light" && theme != "dark" && !subscription.active) {
-              //   log.debug("Subscription required for custom themes");
-              //   return;
-              // }
+              if (theme != "light" && theme != "dark" && !subscription.active) {
+                log.debug("Subscription required for custom themes");
+                return;
+              }
               setColorTheme(theme as keyof typeof Themes);
             }}
             style={{}}

@@ -74,7 +74,7 @@ export default function Analytics() {
       </View>
       <View>
         <AnalyticsScreen habit={habit} />
-        {!subscription?.active && false && (
+        {!subscription?.active && (
           <>
             <BlurView
               style={{

@@ -16,6 +16,7 @@ import { PortalHost } from "@rn-primitives/portal";
 import { database } from "~/lib/watermelon";
 import { DatabaseProvider } from "@nozbe/watermelondb/react";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
+import DeviceInfo from "react-native-device-info";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -45,12 +46,14 @@ export default function RootLayout() {
 
   React.useEffect(() => {
     (async () => {
-      const theme = await AsyncStorage.getItem("theme");
+      const theme = (await AsyncStorage.getItem(
+        "theme"
+      )) as keyof typeof Themes;
       if (Platform.OS === "web") {
         // Adds the background color to the html element to prevent white background on overscroll.
         document.documentElement.classList.add("bg-background");
       }
-      if (!theme) {
+      if (!theme || !Themes[theme]) {
         AsyncStorage.setItem("theme", colorScheme);
         setIsColorSchemeLoaded(true);
         return;
@@ -69,6 +72,14 @@ export default function RootLayout() {
     });
   }, []);
   useEffect(() => {
+    if (DeviceInfo.isEmulatorSync()) {
+      log.debug("Emulator detected, disabling purchases");
+      setSubscription({
+        active: true,
+        sku: "pro",
+      });
+      return;
+    }
     Purchases.addCustomerInfoUpdateListener((info) => {
       if (info.activeSubscriptions.includes("pro")) {
         setSubscription({
