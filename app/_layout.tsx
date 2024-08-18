@@ -1,11 +1,11 @@
 import "../global.css";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Theme, ThemeProvider } from "@react-navigation/native";
+import { ThemeProvider } from "@react-navigation/native";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
 import { Platform, View } from "react-native";
-import { NAV_THEME, ThemeData, Themes } from "~/lib/constants";
+import { Themes } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
@@ -16,7 +16,6 @@ import { PortalHost } from "@rn-primitives/portal";
 import { database } from "~/lib/watermelon";
 import { DatabaseProvider } from "@nozbe/watermelondb/react";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
-import { vars } from "nativewind";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -88,10 +87,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView>
       <ThemeProvider value={Themes[theme]}>
-        {Object.keys(Themes).map((theme) => (
-          <View className={theme} />
-        ))}
-        <View className={theme} style={{ flex: 1 }}>
+        <Theme theme={theme as keyof typeof Themes}>
           <ColorThemeContext.Provider
             value={{
               colorTheme: theme,
@@ -123,8 +119,19 @@ export default function RootLayout() {
               </SubscriptionContext.Provider>
             </DatabaseProvider>
           </ColorThemeContext.Provider>
-        </View>
+        </Theme>
       </ThemeProvider>
     </GestureHandlerRootView>
+  );
+}
+
+function Theme(props: {
+  theme: keyof typeof Themes;
+  children: React.ReactNode;
+}) {
+  return (
+    <View className="flex-1" style={Themes[props.theme].style}>
+      {props.children}
+    </View>
   );
 }

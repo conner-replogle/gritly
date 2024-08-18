@@ -27,7 +27,14 @@ export default function ColorSchemeSelector() {
       <View className={"flex-row gap-3"}>
         {Object.keys(Themes).map((theme) => (
           <Pressable
-            onPress={() => setColorTheme(theme as keyof typeof Themes)}
+            key={theme}
+            onPress={() => {
+              // if (theme != "light" && theme != "dark" && !subscription.active) {
+              //   log.debug("Subscription required for custom themes");
+              //   return;
+              // }
+              setColorTheme(theme as keyof typeof Themes);
+            }}
             style={{}}
           >
             <DiagonalCircleSVG

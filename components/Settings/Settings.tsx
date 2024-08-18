@@ -19,7 +19,7 @@ export function SettingsSheet() {
     <View className="flex flex-col p-5 gap-4">
       <View className="flex flex-row justify-between">
         <Text className={"text-2xl"}>Settings</Text>
-        <ThemeToggle />
+        {/*<ThemeToggle />*/}
       </View>
 
       <Text className="text-l font-semibold text-muted-foreground">
