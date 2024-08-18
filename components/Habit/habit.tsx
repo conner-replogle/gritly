@@ -64,28 +64,34 @@ export default function HabitContent({
   habit,
   completed,
   date,
+  interactive = true,
 }: {
   habit: Habit;
   completed?: Completed;
   date: Date;
+  interactive: boolean;
 }) {
-  const { colors } = useTheme();
   const menuBottomRef = React.useRef<BottomSheetModal>(null);
 
-  const completable = date <= new Date(Date.now());
   const nut = useContext(ExplosionContext);
   return (
     <Pressable
       onPress={() => {
+        if (!interactive) {
+          return;
+        }
         menuBottomRef.current?.present();
       }}
     >
       <HabitCard
         habit={habit}
         streak={0}
-        completable={completable}
+        completable={interactive}
         completed={completed}
         onCompletePress={async () => {
+          if (!interactive) {
+            return;
+          }
           if (completed?.isCompleted ?? false) {
             return;
           }

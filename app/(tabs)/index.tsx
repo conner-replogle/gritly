@@ -61,6 +61,7 @@ import { Habit } from "~/models/Habit";
 import { endOfDay, startOfDay } from "date-fns";
 import { withObservables } from "@nozbe/watermelondb/react";
 import { of as of$ } from "rxjs";
+import { useTheme } from "@react-navigation/native";
 
 const ObservableHabit = withObservables(
   ["habit", "completed"],
@@ -156,6 +157,7 @@ function ListCard({ date }: { date: Date }) {
             date={date}
             habit={item.habit}
             completed={item.completed}
+            interactive={date <= endOfDay(Date.now())}
           />
         )}
       />
@@ -170,6 +172,7 @@ function HeaderCard({
   date: Date;
   setDate: (date: Date) => void;
 }) {
+  const { colors } = useTheme();
   const tiggerRef = useRef<DropdownMenuTriggerRef>(null);
   return (
     <View className="bg-background">

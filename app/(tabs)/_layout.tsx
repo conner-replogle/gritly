@@ -12,13 +12,16 @@ import { useTheme } from "@react-navigation/native";
 import { Button, Pressable, View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { AddHabitsIcon } from "~/components/AddHabit/AddHabits";
+
 export default function TabLayout() {
   const { colors } = useTheme();
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
-
+        tabBarStyle: {
+          backgroundColor: colors.background,
+        },
         tabBarShowLabel: false,
       }}
     >

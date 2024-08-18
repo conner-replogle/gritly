@@ -24,6 +24,7 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useDatabase } from "@nozbe/watermelondb/hooks";
 import { addDays } from "date-fns";
 import { Link } from "expo-router";
+import HabitContent from "~/components/Habit/habit";
 
 export default function Habits() {
   const habits = useHabits();
@@ -34,17 +35,15 @@ export default function Habits() {
         className={"flex-1"}
         data={habits}
         renderItem={({ item }) => {
-          return <HabitCardWithDropdown habit={item} />;
+          return (
+            <HabitContent
+              habit={item}
+              date={new Date(Date.now())}
+              interactive={false}
+            />
+          );
         }}
       />
     </View>
   );
-}
-
-function HabitCardWithDropdown({ habit }: { habit: Habit }) {
-  const editSheetRef = React.useRef<BottomSheetModal>(null);
-
-  const snapPoints = React.useMemo(() => ["90%"], []);
-  const database = useDatabase();
-  return <h1>tTODo</h1>;
 }

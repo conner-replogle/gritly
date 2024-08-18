@@ -1,0 +1,1 @@
+import { vars } from "nativewind";

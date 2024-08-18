@@ -1,30 +1,22 @@
-import "~/global.css";
-
+import "../global.css";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Theme, ThemeProvider } from "@react-navigation/native";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
-import { Platform } from "react-native";
-import { NAV_THEME } from "~/lib/constants";
+import { Platform, View } from "react-native";
+import { NAV_THEME, ThemeData, Themes } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import Purchases, { LOG_LEVEL } from "react-native-purchases";
-import { log, SubscriptionContext } from "~/lib/config";
+import { ColorThemeContext, log, SubscriptionContext } from "~/lib/config";
 import { useEffect } from "react";
 import { PortalHost } from "@rn-primitives/portal";
 import { database } from "~/lib/watermelon";
 import { DatabaseProvider } from "@nozbe/watermelondb/react";
-
-const LIGHT_THEME: Theme = {
-  dark: false,
-  colors: NAV_THEME.light,
-};
-const DARK_THEME: Theme = {
-  dark: true,
-  colors: NAV_THEME.dark,
-};
+import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
+import { vars } from "nativewind";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -36,6 +28,8 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
+
+  const [theme, setTheme] = React.useState<keyof typeof Themes>("light");
   const [subscription, setSubscription] = React.useState({
     active: false,
     sku: "",
@@ -62,13 +56,14 @@ export default function RootLayout() {
         setIsColorSchemeLoaded(true);
         return;
       }
-      const colorTheme = theme === "dark" ? "dark" : "light";
+      // @ts-ignore
+      let colorTheme: "light" | "dark" = Themes[theme].dark ? "dark" : "light";
       if (colorTheme !== colorScheme) {
         setColorScheme(colorTheme);
-
-        setIsColorSchemeLoaded(true);
-        return;
       }
+      // @ts-ignore
+      setTheme(theme);
+
       setIsColorSchemeLoaded(true);
     })().finally(() => {
       SplashScreen.hideAsync();
@@ -88,22 +83,47 @@ export default function RootLayout() {
   if (!isColorSchemeLoaded) {
     return null;
   }
+  console.log(theme);
 
   return (
     <GestureHandlerRootView>
-      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-        <DatabaseProvider database={database}>
-          <SubscriptionContext.Provider value={subscription}>
-            <BottomSheetModalProvider>
-              <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-              <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              </Stack>
-            </BottomSheetModalProvider>
+      <ThemeProvider value={Themes[theme]}>
+        {Object.keys(Themes).map((theme) => (
+          <View className={theme} />
+        ))}
+        <View className={theme} style={{ flex: 1 }}>
+          <ColorThemeContext.Provider
+            value={{
+              colorTheme: theme,
+              setColorTheme: (newTheme) => {
+                log.debug(`Setting color theme to ${newTheme}`);
+                let raw: "light" | "dark" = Themes[newTheme].dark
+                  ? "dark"
+                  : "light";
+                setTheme(newTheme);
+                setColorScheme(raw);
+                setAndroidNavigationBar(raw);
+                AsyncStorage.setItem("theme", newTheme);
+              },
+            }}
+          >
+            <DatabaseProvider database={database}>
+              <SubscriptionContext.Provider value={subscription}>
+                <BottomSheetModalProvider>
+                  <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+                  <Stack>
+                    <Stack.Screen
+                      name="(tabs)"
+                      options={{ headerShown: false }}
+                    />
+                  </Stack>
+                </BottomSheetModalProvider>
 
-            <PortalHost />
-          </SubscriptionContext.Provider>
-        </DatabaseProvider>
+                <PortalHost />
+              </SubscriptionContext.Provider>
+            </DatabaseProvider>
+          </ColorThemeContext.Provider>
+        </View>
       </ThemeProvider>
     </GestureHandlerRootView>
   );
