@@ -24,6 +24,7 @@ export const NAV_THEME = {
 export const Themes = {
   light: {
     dark: false,
+    pro: false,
     colors: NAV_THEME.light,
     style: vars({
       "--background": "0 0% 100%",
@@ -49,6 +50,8 @@ export const Themes = {
   },
   dark: {
     dark: true,
+
+    pro: false,
     colors: NAV_THEME.dark,
     style: vars({
       "--background": "240 10% 3.9%",
@@ -75,6 +78,7 @@ export const Themes = {
 
   autumn: {
     dark: true,
+    pro: true,
     colors: {
       primary: "#A52A2A", // Brown
       border: "#FF8C00", // Dark Orange
@@ -107,6 +111,7 @@ export const Themes = {
   },
   orange: {
     dark: true,
+    pro: true,
     colors: {
       background: "hsl(30 63.7% 4.24%)", // background
       border: "hsl(30 49% 15.9%)", // border
@@ -140,6 +145,7 @@ export const Themes = {
 
   pink: {
     dark: false,
+    pro: true,
     colors: {
       primary: "#FF69B4", // Hot Pink
       border: "#FFB6C1", // Light Pink
@@ -172,6 +178,7 @@ export const Themes = {
   },
   teal: {
     dark: true,
+    pro: true,
     colors: {
       background: "hsl(169 65% 3.84%)", // background
       border: "hsl(169 50% 14.4%)", // border
@@ -204,6 +211,7 @@ export const Themes = {
   },
   neon_pink: {
     dark: true,
+    pro: true,
     colors: {
       background: "hsl(300 65% 3.36%)", // background
       border: "hsl(300 50% 12.6%)", // border

@@ -13,6 +13,40 @@ import Svg, {
   LinearGradient,
   Stop,
 } from "react-native-svg";
+import { useTheme } from "@react-navigation/native";
+import { useColorScheme } from "nativewind";
+
+function ThemeItem(props: {
+  onPress: () => void;
+  theme: string;
+  selected: boolean;
+  pro: boolean;
+}) {
+  return (
+    <Pressable
+      className={"h-20 w-20 items-center"}
+      onPress={props.onPress}
+      style={{}}
+    >
+      <DiagonalCircleSVG
+        primaryColor={Themes[props.theme as keyof typeof Themes].colors.primary}
+        secondaryColor={
+          Themes[props.theme as keyof typeof Themes].colors.background
+        }
+        size={props.selected ? 30 : 25}
+        thickness={5}
+      />
+      <View className="flex-col mt-auto gap-0 flex-1 justify-start items-center">
+        {props.pro && (
+          <Text className={props.selected ? "font-semibold" : ""}>Pro</Text>
+        )}
+        <Text className={props.selected ? "font-semibold" : ""}>
+          {props.theme}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
 
 export default function ColorSchemeSelector() {
   const { colorTheme, setColorTheme } = useContext(ColorThemeContext);
@@ -24,28 +58,17 @@ export default function ColorSchemeSelector() {
         COLOR SCHEME
       </Text>
 
-      <View className={"flex-row gap-3"}>
+      <View className={"flex-row gap-3 items-center justify-start flex-wrap"}>
         {Object.keys(Themes).map((theme) => (
-          <Pressable
+          <ThemeItem
             key={theme}
+            pro={Themes[theme as keyof typeof Themes].pro}
             onPress={() => {
-              if (theme != "light" && theme != "dark" && !subscription.active) {
-                log.debug("Subscription required for custom themes");
-                return;
-              }
               setColorTheme(theme as keyof typeof Themes);
             }}
-            style={{}}
-          >
-            <DiagonalCircleSVG
-              primaryColor={Themes[theme as keyof typeof Themes].colors.primary}
-              secondaryColor={
-                Themes[theme as keyof typeof Themes].colors.background
-              }
-              size={25}
-            />
-            <Text>{theme}</Text>
-          </Pressable>
+            theme={theme}
+            selected={colorTheme === theme}
+          />
         ))}
       </View>
     </View>
@@ -56,10 +79,12 @@ const DiagonalCircleSVG = ({
   primaryColor = "red",
   secondaryColor = "blue",
   size = 200,
+  thickness = 5,
 }) => {
-  const strokeWidth = size * 0.05; // 5% of the size for the stroke width
+  const { colorScheme } = useColorScheme();
+  const strokeColor = colorScheme === "dark" ? "white" : "black";
+  const strokeWidth = size * thickness * 0.01; // 5% of the size for the stroke width
   const radius = size / 2 - strokeWidth; // Radius to fit within the viewBox considering the stroke
-
   return (
     <View style={{ alignItems: "center", justifyContent: "center" }}>
       <Svg height={size} width={size} viewBox={`0 0 ${size} ${size}`}>
@@ -75,7 +100,7 @@ const DiagonalCircleSVG = ({
           cy={size / 2}
           r={radius}
           fill="url(#grad)"
-          stroke="black"
+          stroke={strokeColor}
           strokeWidth={strokeWidth}
         />
         <Line
@@ -83,7 +108,7 @@ const DiagonalCircleSVG = ({
           y1={size / 2 + Math.cos(Math.PI / 4) * radius}
           x2={size / 2 + Math.cos(Math.PI / 4) * radius}
           y2={size / 2 - Math.cos(Math.PI / 4) * radius}
-          stroke="black"
+          stroke={strokeColor}
           strokeWidth={strokeWidth}
         />
       </Svg>
