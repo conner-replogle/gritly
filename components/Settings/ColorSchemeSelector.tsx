@@ -1,9 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Button } from "~/components/ui/button";
+import React, { useContext } from "react";
 
 import { Text } from "~/components/ui/text";
 import { Pressable, View, StyleSheet } from "react-native";
-import Purchases, { PurchasesPackage } from "react-native-purchases";
 import { ColorThemeContext, log, SubscriptionContext } from "~/lib/config";
 import { Themes } from "~/lib/constants";
 import Svg, {
@@ -15,18 +13,33 @@ import Svg, {
 } from "react-native-svg";
 import { useTheme } from "@react-navigation/native";
 import { useColorScheme } from "nativewind";
+import { Crown, XCircleIcon } from "lucide-react-native";
 
 function ThemeItem(props: {
   onPress: () => void;
   theme: string;
   selected: boolean;
   pro: boolean;
+  userPro: boolean;
 }) {
+  const { colors } = useTheme();
+  function getBackgroundColor() {
+    if ((props.pro && !props.userPro) || props.selected) {
+      return colors.border;
+    }
+
+    return colors.background;
+  }
   return (
     <Pressable
-      className={"h-20 w-20 items-center"}
+      className={
+        "aspect-square w-16 p-3  rounded-xl flex-col justify-center items-center"
+      }
+      disabled={props.pro && !props.userPro}
       onPress={props.onPress}
-      style={{}}
+      style={{
+        backgroundColor: getBackgroundColor(),
+      }}
     >
       <DiagonalCircleSVG
         primaryColor={Themes[props.theme as keyof typeof Themes].colors.primary}
@@ -36,14 +49,11 @@ function ThemeItem(props: {
         size={props.selected ? 30 : 25}
         thickness={5}
       />
-      <View className="flex-col mt-auto gap-0 flex-1 justify-start items-center">
-        {props.pro && (
-          <Text className={props.selected ? "font-semibold" : ""}>Pro</Text>
-        )}
-        <Text className={props.selected ? "font-semibold" : ""}>
-          {props.theme}
-        </Text>
-      </View>
+      {props.pro && !props.userPro && (
+        <View className={"absolute w-full h-full justify-center items-center"}>
+          <Crown size={32} color="yellow" />
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -63,6 +73,7 @@ export default function ColorSchemeSelector() {
           <ThemeItem
             key={theme}
             pro={Themes[theme as keyof typeof Themes].pro}
+            userPro={subscription?.active}
             onPress={() => {
               setColorTheme(theme as keyof typeof Themes);
             }}
