@@ -4,14 +4,16 @@ Keep track of daily, weekly or monthly goals. Provide Insights into how consiste
 
 ## Project Outline
 
+### Weekly Habits
 
-### Weekly Habits 
-Habit you want to complete x amount of times a week. Or tasks that need to be completed by a date and time. 
+Habit you want to complete x amount of times a week. Or tasks that need to be completed by a date and time.
 
-### Daily Habits 
-Habit to be completed every day for X days. 
+### Daily Habits
+
+Habit to be completed every day for X days.
 
 ## Todo
+
 - [X] Setup Project and get RNR added.
 - [X] Get basic layout done.
 - [X] Setup Daily Habits
@@ -28,8 +30,8 @@ Habit to be completed every day for X days.
 - [ ] Don't lose all progress on update
 - [X] Repeat N times Weekly
 - [X] Migrate to watermelon DB
-- [ ] Specific Days of month 
-- [ ] Every N Days
+- [ ] Specific Days of month
+- [X] Every N Days
 - [ ] Groups
 - [ ] Notifications
 - [ ] End Date

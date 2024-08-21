@@ -51,7 +51,7 @@ export function HabitCard({
       className=" p-3 mb-2 flex flex-row justify-start border-secondary border-2 items-center bg-background  h-24 "
     >
       <ProgressMeterWithIcon habit={habit} completed={completed} radius={18} />
-      <View className="text-start border-primary flex-1 flex flex-col justify-evenly items-start">
+      <View className="ml-2 text-start border-primary flex-1 flex flex-col justify-evenly items-start">
         <Text className="text-lg font-semibold">
           {habit.title} {streak > 1 ? ` 🔥${streak}` : ""}{" "}
         </Text>
@@ -104,11 +104,13 @@ const AnimatedPath = Animated.createAnimatedComponent(Path);
 export function ProgressMeterWithIcon({
   habit,
   completed,
+  strokeWidth = 3,
 
   radius,
 }: {
   habit: Habit;
   completed?: Completed;
+  strokeWidth?: number;
 
   radius: number;
 }) {
@@ -126,7 +128,7 @@ export function ProgressMeterWithIcon({
       <CirclePath
         radius={radius}
         color={"#3498db"}
-        strokeWidth={3}
+        strokeWidth={strokeWidth}
         percent={(total / outof) * 100}
       />
       <View

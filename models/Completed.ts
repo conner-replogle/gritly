@@ -63,6 +63,7 @@ export class Completed extends Model {
 
   @writer
   async uncomplete() {
+    let del = false;
     await this.update((habit) => {
       let last_time = this.completed_times.pop();
       this.completed_times = this.completed_times.slice(0, -1);
@@ -71,8 +72,11 @@ export class Completed extends Model {
         this.total -= last_time.amount;
       } else {
         log.debug("Deleting completed");
-        this.callWriter(() => this.destroyPermanently());
+        del = true;
       }
     });
+    if (del) {
+      await this.destroyPermanently();
+    }
   }
 }

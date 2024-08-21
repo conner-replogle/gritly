@@ -15,7 +15,6 @@ import {
   Trash,
 } from "lucide-react-native";
 import { Link } from "expo-router";
-import { addDays } from "date-fns";
 import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
 import { EditableHabit, Habit } from "~/models/Habit";
 import { useTheme } from "@react-navigation/native";
@@ -23,7 +22,6 @@ import { EditHabitScreen } from "~/components/Habit/EditHabitScreen";
 import { Pressable, View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { useDatabase } from "@nozbe/watermelondb/hooks";
-import { Button } from "~/components/ui/button";
 import { ProgressMeterWithIcon } from "~/components/Habit/habitCard";
 import { Completed } from "~/models/Completed";
 import { useContext } from "react";
@@ -63,10 +61,12 @@ export function EditBottomSheet(props: {
 export function HabitQuickMenu({
   habit,
   completed,
+  interactive,
   close,
 }: {
   habit: Habit;
   completed?: Completed;
+  interactive: boolean;
   close: () => void;
 }) {
   const { colors } = useTheme();
@@ -84,21 +84,24 @@ export function HabitQuickMenu({
       </View>
       <View className="flex-row w-full justify-center items-center">
         <Pressable
+          disabled={!interactive}
           onPress={async () => {
             if (completed) {
               await completed.uncomplete();
             }
           }}
         >
-          <ChevronLeft size={64} />
+          <ChevronLeft color={interactive ? habit.color : "gray"} size={64} />
         </Pressable>
         <ProgressMeterWithIcon
           completed={completed}
           habit={habit}
+          strokeWidth={6}
           radius={64}
         />
 
         <Pressable
+          disabled={!interactive}
           onPress={async () => {
             if (completed?.isCompleted ?? false) {
               return;
@@ -118,7 +121,7 @@ export function HabitQuickMenu({
             }
           }}
         >
-          <ChevronRight size={64} />
+          <ChevronRight color={interactive ? habit.color : "gray"} size={64} />
         </Pressable>
       </View>
 

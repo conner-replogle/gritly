@@ -34,6 +34,7 @@ export function QuickMenuBottomSheet(props: {
   bottomSheetRef: React.RefObject<BottomSheetModal>;
   completed?: Completed;
   habit: Habit;
+  interactive: boolean;
 }) {
   const { colors } = useTheme();
   return (
@@ -49,6 +50,7 @@ export function QuickMenuBottomSheet(props: {
     >
       <BottomSheetView>
         <HabitQuickMenu
+          interactive={props.interactive}
           completed={props.completed}
           habit={props.habit}
           close={() => {
@@ -77,9 +79,6 @@ export default function HabitContent({
   return (
     <Pressable
       onPress={() => {
-        if (!interactive) {
-          return;
-        }
         menuBottomRef.current?.present();
       }}
     >
@@ -110,6 +109,7 @@ export default function HabitContent({
         onCompleteLongPress={() => {}}
       />
       <QuickMenuBottomSheet
+        interactive={interactive}
         completed={completed}
         bottomSheetRef={menuBottomRef}
         habit={habit}
