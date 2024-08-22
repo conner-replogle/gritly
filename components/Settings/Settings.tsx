@@ -1,7 +1,7 @@
 import { Text } from "~/components/ui/text";
 import * as React from "react";
 
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { Label } from "../ui/label";
 import { Switch } from "~/components/ui/switch";
@@ -11,12 +11,13 @@ import { ThemeToggle } from "~/components/ThemeToggle";
 import { useMMKVBoolean, useMMKVString } from "react-native-mmkv";
 import Purchase from "~/components/Settings/Purchase";
 import ColorSchemeSelector from "~/components/Settings/ColorSchemeSelector";
+import Contact from "~/components/Settings/Contact";
 
 export function SettingsSheet() {
   const [nuttable, setNuttable] = useMMKVBoolean("settings.nuttable");
 
   return (
-    <View className="flex flex-col p-5 gap-4">
+    <ScrollView className="flex flex-col p-5 gap-4">
       <View className="flex flex-row justify-between">
         <Text className={"text-2xl"}>Settings</Text>
         {/*<ThemeToggle />*/}
@@ -49,6 +50,7 @@ export function SettingsSheet() {
       <ColorSchemeSelector />
 
       <Purchase />
-    </View>
+      <Contact />
+    </ScrollView>
   );
 }

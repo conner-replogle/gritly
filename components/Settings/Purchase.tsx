@@ -48,6 +48,15 @@ export default function Purchase() {
       <Text className="text-l font-semibold text-muted-foreground">
         SUBSCRIPTION
       </Text>
+      <Text className="text-lg">
+        With Pro you get access to the following features.
+      </Text>
+
+      <Text> - Analytics</Text>
+
+      <Text> - Themes</Text>
+
+      <Text> - Supporting The Developer</Text>
 
       <View className="flex flex-row gap-5 ">
         {packages.map((product) => (
